@@ -12,24 +12,39 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false)
   const navigate = useNavigate()
 
-  const handleLogin = async (e: React.FormEvent) => {
+const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true)
 
-    const { error } = await supabase.auth.signInWithPassword({
+    const { data, error } = await supabase.auth.signInWithPassword({
       email,
       password,
     })
 
-    setLoading(false)
-
     if (error) {
       alert("Błąd logowania: " + error.message)
+      setLoading(false)
     } else {
-      // Po udanym logowaniu idziemy do panelu
-      navigate("/admin")
+      if (data.user) {
+        // Sprawdzamy rolę w tabeli profiles
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('role')
+          .eq('id', data.user.id)
+          .single()
+
+        setLoading(false)
+        
+        if (profile?.role === 'admin') {
+          navigate("/admin")
+        } else {
+          navigate("/dashboard") // Zwykły user idzie tutaj
+        }
+      }
     }
   }
+
+  
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-background">

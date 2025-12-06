@@ -3,6 +3,8 @@ import { ThemeProvider } from "@/components/theme-provider"
 import { ModeToggle } from "@/components/mode-toggle"
 import LoginPage from "@/pages/Login"
 import AdminDashboard from "@/pages/AdminDashboard"
+import UserDashboard from "@/pages/UserDashboard"
+
 
 // Prosty komponent strony głównej (to co mieliśmy wcześniej, ale uproszczone)
 function Home() {
@@ -26,6 +28,7 @@ function App() {
           <Route path="/" element={<Home />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/admin" element={<AdminDashboard />} />
+          <Route path="/dashboard" element={<UserDashboard />} />
           {/* Przekierowanie nieznanych adresów na stronę główną */}
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
