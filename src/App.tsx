@@ -1,12 +1,16 @@
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom"
 import { ThemeProvider } from "@/components/theme-provider"
 import { ModeToggle } from "@/components/mode-toggle"
+
+// Importy stron
 import LoginPage from "@/pages/Login"
-import AdminDashboard from "@/pages/AdminDashboard"
 import UserDashboard from "@/pages/UserDashboard"
 
+// Importy Admina
+import AdminLayout from "@/layouts/AdminLayout"
+import AdminMembers from "@/pages/admin/AdminMembers"
+import AdminSettings from "@/pages/admin/AdminSettings"
 
-// Prosty komponent strony głównej (to co mieliśmy wcześniej, ale uproszczone)
 function Home() {
   return (
     <div className="flex flex-col items-center justify-center min-h-screen gap-4">
@@ -19,6 +23,7 @@ function Home() {
 function App() {
   return (
     <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
+      {/* Przycisk motywu widoczny globalnie (można go ukryć w adminie jeśli chcesz) */}
       <div className="absolute top-4 right-4 z-50">
         <ModeToggle />
       </div>
@@ -27,9 +32,19 @@ function App() {
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/login" element={<LoginPage />} />
-          <Route path="/admin" element={<AdminDashboard />} />
+          
+          {/* Panel Użytkownika */}
           <Route path="/dashboard" element={<UserDashboard />} />
-          {/* Przekierowanie nieznanych adresów na stronę główną */}
+
+          {/* Panel Administratora (Zagnieżdżony) */}
+          <Route path="/admin" element={<AdminLayout />}>
+            {/* Przekierowanie z samego /admin na /admin/members */}
+            <Route index element={<Navigate to="members" replace />} />
+            
+            <Route path="members" element={<AdminMembers />} />
+            <Route path="settings" element={<AdminSettings />} />
+          </Route>
+
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </BrowserRouter>
