@@ -3,20 +3,27 @@ import { supabase } from "@/lib/supabase"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card } from "@/components/ui/card"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetFooter } from "@/components/ui/sheet"
 import { Badge } from "@/components/ui/badge"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
-import { Plus, Search, MoreHorizontal, Trash2, Save, User, Calendar, Shield } from "lucide-react"
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
+import { Plus, Search, MoreHorizontal, Trash2, Save, Calendar, Shield } from "lucide-react"
 
-// --- TYPY ---
+// --- TYPY DANYCH ---
 interface Group { id: number; name: string }
+
 interface Member {
-  id: string; full_name: string; role: string; groups: { id: number, name: string } | null; email?: string; created_at: string;
+  id: string
+  full_name: string
+  role: string
+  rose_pos: number | null
+  created_at: string
+  groups: { id: number, name: string } | null
   acknowledgments: { created_at: string; mystery_id: number }[]
+  // Pole obliczane na froncie:
+  current_mystery_id: number | null
 }
 
 export default function AdminMembers() {
@@ -33,163 +40,251 @@ export default function AdminMembers() {
   const [selectedMember, setSelectedMember] = useState<Member | null>(null)
   const [editGroupId, setEditGroupId] = useState<string>("")
 
+  // --- INICJALIZACJA ---
   useEffect(() => {
     fetchData()
   }, [])
 
   const fetchData = async () => {
-    const { data: g } = await supabase.from('groups').select('*'); if(g) setGroups(g)
+    // 1. Pobierz Grupy
+    const { data: g } = await supabase.from('groups').select('*'); 
+    if(g) setGroups(g)
     
-    // Pobieramy userów (musimy pobrać też email z auth.users, ale Supabase API publiczne tego nie zwraca wprost w joinie, 
-    // więc emaila tu nie wyświetlimy łatwo bez funkcji admina, ale to nie szkodzi na ten moment)
-    const currentMysteryId = 1
-    const { data, error } = await supabase
+    // 2. Pobierz Członków (wraz z pozycją, grupą i potwierdzeniami)
+    const { data: allMembers, error } = await supabase
       .from('profiles')
-      .select(`*, groups(id, name), acknowledgments(created_at, mystery_id)`)
+      .select(`
+        id, full_name, role, rose_pos, created_at,
+        groups(id, name), 
+        acknowledgments(created_at, mystery_id)
+      `)
       .order('created_at', { ascending: false })
 
-    if (data) {
-      const processed = data.map((m: any) => ({
-        ...m,
-        acknowledgments: m.acknowledgments.filter((a: any) => a.mystery_id === currentMysteryId)
-      }))
+    if (error) {
+      console.error(error); return;
+    }
+
+    if (allMembers) {
+      // 3. Przetwarzanie danych (Obliczanie tajemnicy dla każdego usera)
+      const processed = await Promise.all(allMembers.map(async (m: any) => {
+        // ZMIANA: Domyślnie null (zakładamy że nie ma tajemnicy)
+        let currentMysteryId: number | null = null
+        
+        // Wywołujemy funkcję SQL (logika Żywego Różańca - indywidualna dla usera)
+        const { data: calcId } = await supabase.rpc('get_mystery_id_for_user', { p_user_id: m.id })
+        
+        // Jeśli funkcja zwróciła ID (czyli user jest w róży), przypisujemy je
+        if (calcId) currentMysteryId = calcId
+
+        // Filtrujemy potwierdzenia tylko dla TEJ tajemnicy (jeśli user ją posiada)
+        const relevantAcks = currentMysteryId 
+            ? m.acknowledgments.filter((a: any) => a.mystery_id === currentMysteryId)
+            : []
+        
+        return {
+          ...m,
+          current_mystery_id: currentMysteryId,
+          acknowledgments: relevantAcks
+        }
+      })) as Member[]
+      
+      // Sortowanie: Najpierw ci co zrobili (zieloni), potem reszta
+      processed.sort((a, b) => {
+         const aAck = a.acknowledgments.length > 0
+         const bAck = b.acknowledgments.length > 0
+         if (aAck === bAck) return 0
+         return aAck ? -1 : 1
+      })
+
       setMembers(processed)
     }
   }
 
-  // --- LOGIKA DODAWANIA ---
+  // --- DODAWANIE UŻYTKOWNIKA ---
   const handleCreateUser = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true)
     try {
+      // Wywołanie Edge Function (ona dba o to, by nie przekroczyć 20 osób w róży)
       const { data, error } = await supabase.functions.invoke('create-user', {
         body: { ...formData, groupId: formData.groupId ? parseInt(formData.groupId) : null }
       })
-      if (error || data?.error) throw new Error(error?.message || data?.error)
       
-      alert("Dodano użytkownika!")
+      if (error) throw error
+      if (data?.error) throw new Error(data.error)
+      
+      alert(`Dodano użytkownika! Przypisana pozycja w róży: ${data.position ? "#"+data.position : "Brak"}`)
       setIsAddOpen(false)
       setFormData({ email: "", password: "", fullName: "", groupId: "" })
       fetchData()
-    } catch (err: any) { alert("Błąd: " + err.message) } finally { setLoading(false) }
-  }
-
-  // --- LOGIKA EDYCJI (ZMIANA GRUPY) ---
-  const handleUpdateGroup = async () => {
-    if (!selectedMember) return
-    setLoading(true)
-    const { error } = await supabase.from('profiles').update({ group_id: parseInt(editGroupId) }).eq('id', selectedMember.id)
-    
-    setLoading(false)
-    if (error) alert("Błąd: " + error.message)
-    else {
-      alert("Grupa zmieniona")
-      fetchData()
-      setSelectedMember(null) // Zamykamy sheet
+    } catch (err: any) { 
+      alert("Błąd: " + err.message) 
+    } finally { 
+      setLoading(false) 
     }
   }
 
-  // --- LOGIKA USUWANIA ---
+  // --- ZMIANA GRUPY + RESET POTWIERDZEŃ ---
+  const handleUpdateGroup = async () => {
+    if (!selectedMember) return
+    setLoading(true)
+
+    // 1. Aktualizacja Profilu (Zmiana grupy i reset pozycji w róży)
+    // Ustawiamy rose_pos na null, bo w nowej grupie user musi dostać nowe miejsce
+    const { error: updateError } = await supabase
+      .from('profiles')
+      .update({ group_id: editGroupId ? parseInt(editGroupId) : null, rose_pos: null })
+      .eq('id', selectedMember.id)
+    
+    if (updateError) {
+      alert("Błąd aktualizacji profilu: " + updateError.message)
+      setLoading(false)
+      return
+    }
+
+    // 2. USUNIĘCIE STARYCH POTWIERDZEŃ
+    const { error: deleteAckError } = await supabase
+      .from('acknowledgments')
+      .delete()
+      .eq('user_id', selectedMember.id)
+
+    if (deleteAckError) {
+      console.error("Nie udało się wyczyścić potwierdzeń", deleteAckError)
+    }
+
+    setLoading(false)
+    alert("Zaktualizowano przypisanie (status modlitwy zresetowany).")
+    fetchData()
+    setSelectedMember(null)
+  }
+
+  // --- USUWANIE UŻYTKOWNIKA ---
   const handleDeleteUser = async () => {
-    if (!selectedMember || !confirm("Czy na pewno chcesz usunąć tego użytkownika? To nieodwracalne.")) return
+    if (!selectedMember || !confirm("Czy na pewno chcesz usunąć tego użytkownika?")) return
     setLoading(true)
     try {
       const { data, error } = await supabase.functions.invoke('delete-user', { body: { user_id: selectedMember.id } })
       if (error || data?.error) throw new Error(error?.message || data?.error)
-      
       alert("Użytkownik usunięty")
       setSelectedMember(null)
       fetchData()
     } catch (err: any) { alert("Błąd: " + err.message) } finally { setLoading(false) }
   }
 
-  // Filtrowanie listy
   const filteredMembers = members.filter(m => m.full_name.toLowerCase().includes(search.toLowerCase()))
 
   return (
     <div className="space-y-6">
-      {/* --- NAGŁÓWEK --- */}
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 pr-16">
-
+      {/* NAGŁÓWEK */}
+      {/* Na mobile (flex-col) układ pionowy, na desktopie (sm:flex-row) poziomy */}
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 pr-0 sm:pr-16">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Użytkownicy</h1>
-          <p className="text-muted-foreground">Baza wszystkich członków Żywego Różańca.</p>
+          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">Użytkownicy</h1>
+          <p className="text-sm text-muted-foreground">Baza wszystkich członków Żywego Różańca.</p>
         </div>
-        <Button onClick={() => setIsAddOpen(true)} className="gap-2">
+        {/* Przycisk na pełną szerokość na mobile */}
+        <Button onClick={() => setIsAddOpen(true)} className="gap-2 w-full sm:w-auto">
           <Plus className="h-4 w-4" /> Dodaj nowego
         </Button>
       </div>
 
-      {/* --- FILTRY I WYSZUKIWANIE --- */}
-      <div className="flex items-center gap-2 max-w-sm">
+      {/* WYSZUKIWARKA */}
+      <div className="flex items-center gap-2 w-full sm:max-w-sm">
         <div className="relative w-full">
           <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
           <Input 
             placeholder="Szukaj po nazwisku..." 
-            className="pl-9" 
+            className="pl-9 w-full" 
             value={search}
             onChange={e => setSearch(e.target.value)}
           />
         </div>
       </div>
 
-      {/* --- TABELA --- */}
-      <Card>
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Członek</TableHead>
-              <TableHead>Róża (Grupa)</TableHead>
-              <TableHead>Status (Tajemnica #1)</TableHead>
-              <TableHead className="text-right">Akcje</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {filteredMembers.map((member) => {
-              const hasAck = member.acknowledgments.length > 0
-              return (
-                <TableRow 
-                  key={member.id} 
-                  className="cursor-pointer hover:bg-muted/50"
-                  onClick={() => {
-                    setSelectedMember(member)
-                    setEditGroupId(member.groups?.id.toString() || "")
-                  }}
-                >
-                  <TableCell className="flex items-center gap-3">
-                    <Avatar className="h-9 w-9">
-                      <AvatarFallback>{member.full_name.substring(0,2).toUpperCase()}</AvatarFallback>
-                    </Avatar>
-                    <div>
-                      <div className="font-medium">{member.full_name}</div>
-                      <div className="text-xs text-muted-foreground flex items-center gap-1">
-                        {member.role === 'admin' && <Badge variant="outline" className="text-[10px] px-1 py-0 h-4">Admin</Badge>}
-                        <span>Dołączył: {new Date(member.created_at).toLocaleDateString()}</span>
+      {/* TABELA Z SCROLLEM POZIOMYM */}
+      <Card className="overflow-hidden">
+        {/* To jest kluczowe dla responsywności tabeli: */}
+        <div className="overflow-x-auto">
+          <Table className="min-w-[600px]"> {/* Wymuszamy minimalną szerokość, żeby się nie ściskało */}
+            <TableHeader>
+              <TableRow>
+                <TableHead>Członek</TableHead>
+                <TableHead>Róża (Grupa)</TableHead>
+                <TableHead>Tajemnica i Status</TableHead>
+                <TableHead className="text-right">Akcje</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {filteredMembers.map((member) => {
+                const hasAck = member.acknowledgments.length > 0
+                return (
+                  <TableRow 
+                    key={member.id} 
+                    className="cursor-pointer hover:bg-muted/50"
+                    onClick={() => {
+                      setSelectedMember(member)
+                      setEditGroupId(member.groups?.id.toString() || "")
+                    }}
+                  >
+                    <TableCell className="flex items-center gap-3">
+                      <Avatar className="h-9 w-9">
+                        <AvatarFallback>{member.full_name.substring(0,2).toUpperCase()}</AvatarFallback>
+                      </Avatar>
+                      <div>
+                        <div className="font-medium text-sm sm:text-base">{member.full_name}</div>
+                        <div className="text-xs text-muted-foreground flex items-center gap-1">
+                          {member.role === 'admin' && <Badge variant="outline" className="text-[10px] px-1 py-0 h-4">Admin</Badge>}
+                        </div>
                       </div>
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    {member.groups ? <Badge variant="secondary">{member.groups.name}</Badge> : <span className="text-muted-foreground text-sm">-</span>}
-                  </TableCell>
-                  <TableCell>
-                    {hasAck ? <Badge className="bg-green-600 hover:bg-green-700">Odhaczone</Badge> : <Badge variant="outline" className="text-muted-foreground">Oczekuje</Badge>}
-                  </TableCell>
-                  <TableCell className="text-right">
-                    <Button variant="ghost" size="icon"><MoreHorizontal className="h-4 w-4" /></Button>
-                  </TableCell>
-                </TableRow>
-              )
-            })}
-          </TableBody>
-        </Table>
+                    </TableCell>
+                    <TableCell>
+                      {member.groups ? (
+                        <div className="flex flex-col items-start gap-1">
+                          <Badge variant="secondary" className="whitespace-nowrap">{member.groups.name}</Badge>
+                          <span className="text-[10px] text-muted-foreground ml-1">
+                             Pozycja: {member.rose_pos ? <b>#{member.rose_pos}</b> : "Brak"}
+                          </span>
+                        </div>
+                      ) : <span className="text-muted-foreground text-sm">-</span>}
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex flex-col gap-1 items-start">
+                        {member.current_mystery_id ? (
+                          <>
+                            <span className="text-xs text-muted-foreground whitespace-nowrap">Tajemnica #{member.current_mystery_id}</span>
+                            {hasAck ? (
+                              <Badge className="bg-green-600 hover:bg-green-700 text-white cursor-default w-fit whitespace-nowrap">
+                                Zrobione
+                              </Badge>
+                            ) : (
+                              <Badge variant="outline" className="w-fit text-muted-foreground whitespace-nowrap">
+                                Oczekuje
+                              </Badge>
+                            )}
+                          </>
+                        ) : (
+                          <span className="text-xs text-muted-foreground italic whitespace-nowrap">Brak przydziału</span>
+                        )}
+                      </div>
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <Button variant="ghost" size="icon"><MoreHorizontal className="h-4 w-4" /></Button>
+                    </TableCell>
+                  </TableRow>
+                )
+              })}
+            </TableBody>
+          </Table>
+        </div>
       </Card>
-
-      {/* --- MODAL DODAWANIA (DIALOG) --- */}
+    
+    {/* ... reszta kodu (Dialog, Sheet) bez zmian ... */}
       <Dialog open={isAddOpen} onOpenChange={setIsAddOpen}>
-        <DialogContent>
+         {/* ... treść dialogu (jest responsywna domyślnie) ... */}
+         <DialogContent>
           <DialogHeader>
             <DialogTitle>Dodaj nowego członka</DialogTitle>
-            <DialogDescription>Utwórz konto i przypisz do grupy.</DialogDescription>
+            <DialogDescription>System automatycznie przypisze pierwsze wolne miejsce w Róży (1-20).</DialogDescription>
           </DialogHeader>
           <form onSubmit={handleCreateUser} className="space-y-4 py-2">
             <div className="space-y-2"><Label>Imię i Nazwisko</Label><Input required value={formData.fullName} onChange={e => setFormData({...formData, fullName: e.target.value})} /></div>
@@ -208,17 +303,16 @@ export default function AdminMembers() {
         </DialogContent>
       </Dialog>
 
-      {/* --- PANEL BOCZNY SZCZEGÓŁÓW (SHEET) --- */}
       <Sheet open={!!selectedMember} onOpenChange={(open) => !open && setSelectedMember(null)}>
-        <SheetContent>
-          <SheetHeader>
+        <SheetContent className="w-[90%] sm:w-[540px]"> {/* ZMIANA: Sheet na mobile ma 90% szerokości */}
+           {/* ... treść sheeta (skopiuj z poprzedniego pliku) ... */}
+           <SheetHeader>
             <SheetTitle>Szczegóły użytkownika</SheetTitle>
             <SheetDescription>Edytuj dane lub usuń konto.</SheetDescription>
           </SheetHeader>
           
           {selectedMember && (
             <div className="space-y-6 py-6">
-              {/* Info Karta */}
               <div className="flex items-center gap-4 p-4 border rounded-lg bg-muted/20">
                 <Avatar className="h-12 w-12">
                    <AvatarFallback className="text-lg">{selectedMember.full_name.substring(0,2).toUpperCase()}</AvatarFallback>
@@ -231,15 +325,16 @@ export default function AdminMembers() {
 
               <div className="space-y-4">
                 <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                   <Calendar className="h-4 w-4" /> Utworzono: {new Date(selectedMember.created_at).toLocaleString()}
+                   <Calendar className="h-4 w-4" /> Dołączył: {new Date(selectedMember.created_at).toLocaleDateString()}
                 </div>
                 <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                   <Shield className="h-4 w-4" /> ID: <span className="font-mono text-xs">{selectedMember.id.substring(0,8)}...</span>
+                   <Shield className="h-4 w-4" /> Miejsce w róży: 
+                   <Badge variant="outline">{selectedMember.rose_pos ? `#${selectedMember.rose_pos}` : "Brak"}</Badge>
                 </div>
               </div>
 
               <div className="space-y-2 pt-4 border-t">
-                <Label>Zmień Grupę</Label>
+                <Label>Zmień Grupę (Resetuje status!)</Label>
                 <div className="flex gap-2">
                   <select 
                     className="flex h-10 w-full rounded-md border bg-background px-3 text-sm"
@@ -251,6 +346,9 @@ export default function AdminMembers() {
                   </select>
                   <Button size="icon" onClick={handleUpdateGroup} disabled={loading}><Save className="h-4 w-4" /></Button>
                 </div>
+                <p className="text-xs text-muted-foreground mt-1">
+                  Zmiana grupy spowoduje usunięcie dotychczasowych potwierdzeń modlitwy.
+                </p>
               </div>
             </div>
           )}
