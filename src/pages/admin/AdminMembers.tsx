@@ -8,11 +8,13 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetFooter } from "@/components/ui/sheet"
 import { Badge } from "@/components/ui/badge"
-import { Avatar, AvatarFallback } from "@/components/ui/avatar"
-import { Plus, Search, MoreHorizontal, Trash2, Save, Calendar, Shield } from "lucide-react"
+// UWAGA: Upewnij się, że wykonałeś: npx shadcn@latest add alert
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
+import { Plus, Search, MoreHorizontal, Trash2, AlertTriangle, Users, RefreshCcw, ScrollText, Shield } from "lucide-react"
 
 // --- TYPY DANYCH ---
 interface Group { id: number; name: string }
+interface Mystery { id: number; name: string }
 
 interface Member {
   id: string
@@ -22,13 +24,13 @@ interface Member {
   created_at: string
   groups: { id: number, name: string } | null
   acknowledgments: { created_at: string; mystery_id: number }[]
-  // Pole obliczane na froncie:
   current_mystery_id: number | null
 }
 
 export default function AdminMembers() {
   const [loading, setLoading] = useState(false)
   const [groups, setGroups] = useState<Group[]>([])
+  const [mysteries, setMysteries] = useState<Mystery[]>([])
   const [members, setMembers] = useState<Member[]>([])
   const [search, setSearch] = useState("")
 
@@ -46,11 +48,15 @@ export default function AdminMembers() {
   }, [])
 
   const fetchData = async () => {
-    // 1. Pobierz Grupy
+    // 1. Grupy
     const { data: g } = await supabase.from('groups').select('*'); 
     if(g) setGroups(g)
+
+    // 2. Tajemnice (do nazw)
+    const { data: m } = await supabase.from('mysteries').select('id, name');
+    if(m) setMysteries(m)
     
-    // 2. Pobierz Członków (wraz z pozycją, grupą i potwierdzeniami)
+    // 3. Członkowie
     const { data: allMembers, error } = await supabase
       .from('profiles')
       .select(`
@@ -60,106 +66,71 @@ export default function AdminMembers() {
       `)
       .order('created_at', { ascending: false })
 
-    if (error) {
-      console.error(error); return;
-    }
+    if (error) { console.error(error); return; }
 
     if (allMembers) {
-      // 3. Przetwarzanie danych (Obliczanie tajemnicy dla każdego usera)
       const processed = await Promise.all(allMembers.map(async (m: any) => {
-        // Domyślnie null (zakładamy że nie ma tajemnicy)
         let currentMysteryId: number | null = null
-        
-        // Wywołujemy funkcję SQL (logika Żywego Różańca - indywidualna dla usera)
         const { data: calcId } = await supabase.rpc('get_mystery_id_for_user', { p_user_id: m.id })
-        
-        // Jeśli funkcja zwróciła ID (czyli user jest w róży), przypisujemy je
         if (calcId) currentMysteryId = calcId
 
-        // Filtrujemy potwierdzenia tylko dla TEJ tajemnicy (jeśli user ją posiada)
         const relevantAcks = currentMysteryId 
             ? m.acknowledgments.filter((a: any) => a.mystery_id === currentMysteryId)
             : []
         
-        return {
-          ...m,
-          current_mystery_id: currentMysteryId,
-          acknowledgments: relevantAcks
-        }
+        return { ...m, current_mystery_id: currentMysteryId, acknowledgments: relevantAcks }
       })) as Member[]
       
-      // Sortowanie: Najpierw ci co zrobili (zieloni), potem reszta
       processed.sort((a, b) => {
          const aAck = a.acknowledgments.length > 0
          const bAck = b.acknowledgments.length > 0
          if (aAck === bAck) return 0
          return aAck ? -1 : 1
       })
-
       setMembers(processed)
     }
   }
 
-  // --- DODAWANIE UŻYTKOWNIKA ---
+  const getMysteryName = (id: number | null) => {
+    if (!id) return "Brak przydziału"
+    const found = mysteries.find(m => m.id === id)
+    return found ? found.name : `Tajemnica #${id}`
+  }
+
+  // --- LOGIKA ---
   const handleCreateUser = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true)
     try {
-      // Wywołanie Edge Function (ona dba o to, by nie przekroczyć 20 osób w róży)
       const { data, error } = await supabase.functions.invoke('create-user', {
         body: { ...formData, groupId: formData.groupId ? parseInt(formData.groupId) : null }
       })
-      
       if (error) throw error
       if (data?.error) throw new Error(data.error)
       
-      alert(`Dodano użytkownika! Przypisana pozycja w róży: ${data.position ? "#"+data.position : "Brak"}`)
+      alert(`Dodano użytkownika!`)
       setIsAddOpen(false)
       setFormData({ email: "", password: "", fullName: "", groupId: "" })
       fetchData()
-    } catch (err: any) { 
-      alert("Błąd: " + err.message) 
-    } finally { 
-      setLoading(false) 
-    }
+    } catch (err: any) { alert("Błąd: " + err.message) } finally { setLoading(false) }
   }
 
-  // --- ZMIANA GRUPY (OPTIMIZED RPC) ---
   const handleUpdateGroup = async () => {
     if (!selectedMember) return
     setLoading(true)
-
     try {
-      // Parsujemy ID grupy (lub null jeśli wybrano "Brak grupy")
       const targetGroupId = editGroupId ? parseInt(editGroupId) : null
-
-      // Wywołujemy funkcję SQL 'move_user_to_group', która:
-      // 1. Znajduje wolne miejsce
-      // 2. Przenosi usera
-      // 3. Czyści stare potwierdzenia
       const { data: newPos, error } = await supabase.rpc('move_user_to_group', {
         p_user_id: selectedMember.id,
         p_group_id: targetGroupId
       })
-
       if (error) throw error
-
-      alert(targetGroupId 
-        ? `Zaktualizowano! Nowa pozycja w róży: #${newPos}`
-        : "Usunięto z grupy (status zresetowany)."
-      )
-      
+      alert(targetGroupId ? `Zaktualizowano! Nowa pozycja: #${newPos}` : "Usunięto z grupy.")
       fetchData()
       setSelectedMember(null)
-
-    } catch (err: any) {
-      alert("Błąd: " + err.message)
-    } finally {
-      setLoading(false)
-    }
+    } catch (err: any) { alert("Błąd: " + err.message) } finally { setLoading(false) }
   }
 
-  // --- USUWANIE UŻYTKOWNIKA ---
   const handleDeleteUser = async () => {
     if (!selectedMember || !confirm("Czy na pewno chcesz usunąć tego użytkownika?")) return
     setLoading(true)
@@ -172,12 +143,11 @@ export default function AdminMembers() {
     } catch (err: any) { alert("Błąd: " + err.message) } finally { setLoading(false) }
   }
 
-  // Filtrowanie listy
   const filteredMembers = members.filter(m => m.full_name.toLowerCase().includes(search.toLowerCase()))
 
   return (
     <div className="space-y-6">
-      {/* NAGŁÓWEK (RESPONSYWNY) */}
+      {/* HEADER */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 pr-0 sm:pr-16">
         <div>
           <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">Użytkownicy</h1>
@@ -188,7 +158,7 @@ export default function AdminMembers() {
         </Button>
       </div>
 
-      {/* WYSZUKIWARKA */}
+      {/* FILTRY */}
       <div className="flex items-center gap-2 w-full sm:max-w-sm">
         <div className="relative w-full">
           <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
@@ -201,10 +171,10 @@ export default function AdminMembers() {
         </div>
       </div>
 
-      {/* TABELA (RESPONSYWNA Z SCROLLEM) */}
+      {/* TABELA */}
       <Card className="overflow-hidden">
         <div className="overflow-x-auto">
-          <Table className="min-w-[600px]"> {/* Minimalna szerokość zapobiega zgniataniu kolumn */}
+          <Table className="min-w-[600px]">
             <TableHeader>
               <TableRow>
                 <TableHead>Członek</TableHead>
@@ -225,10 +195,7 @@ export default function AdminMembers() {
                       setEditGroupId(member.groups?.id.toString() || "")
                     }}
                   >
-                    <TableCell className="flex items-center gap-3">
-                      <Avatar className="h-9 w-9">
-                        <AvatarFallback>{member.full_name.substring(0,2).toUpperCase()}</AvatarFallback>
-                      </Avatar>
+                    <TableCell>
                       <div>
                         <div className="font-medium text-sm sm:text-base">{member.full_name}</div>
                         <div className="text-xs text-muted-foreground flex items-center gap-1">
@@ -240,9 +207,6 @@ export default function AdminMembers() {
                       {member.groups ? (
                         <div className="flex flex-col items-start gap-1">
                           <Badge variant="secondary" className="whitespace-nowrap">{member.groups.name}</Badge>
-                          <span className="text-[10px] text-muted-foreground ml-1">
-                             Pozycja: {member.rose_pos ? <b>#{member.rose_pos}</b> : "Brak"}
-                          </span>
                         </div>
                       ) : <span className="text-muted-foreground text-sm">-</span>}
                     </TableCell>
@@ -250,9 +214,10 @@ export default function AdminMembers() {
                       <div className="flex flex-col gap-1 items-start">
                         {member.current_mystery_id ? (
                           <>
-                            <span className="text-xs text-muted-foreground whitespace-nowrap">Tajemnica #{member.current_mystery_id}</span>
+                            <span className="text-xs text-muted-foreground whitespace-nowrap font-medium">
+                              {getMysteryName(member.current_mystery_id)}
+                            </span>
                             {hasAck ? (
-                              /* POPRAWIONY BADGE: Zielony, bez efektu hover zmieniającego kolor */
                               <Badge className="bg-green-600 hover:bg-green-700 text-white cursor-default w-fit whitespace-nowrap">
                                 Zrobione
                               </Badge>
@@ -263,7 +228,6 @@ export default function AdminMembers() {
                             )}
                           </>
                         ) : (
-                          /* JEŚLI BRAK GRUPY/TAJEMNICY */
                           <span className="text-xs text-muted-foreground italic whitespace-nowrap">Brak przydziału</span>
                         )}
                       </div>
@@ -303,60 +267,91 @@ export default function AdminMembers() {
         </DialogContent>
       </Dialog>
 
-      {/* SHEET SZCZEGÓŁÓW (EDYCJA - RESPONSYWNY) */}
+      {/* SHEET SZCZEGÓŁÓW */}
       <Sheet open={!!selectedMember} onOpenChange={(open) => !open && setSelectedMember(null)}>
-        <SheetContent className="w-[90%] sm:w-[540px]"> {/* ZMIANA: Na mobile zajmuje 90% */}
-           <SheetHeader>
-            <SheetTitle>Szczegóły użytkownika</SheetTitle>
-            <SheetDescription>Edytuj dane lub usuń konto.</SheetDescription>
+        <SheetContent className="w-[90%] sm:w-[540px] flex flex-col h-full"> 
+           <SheetHeader className="mb-4">
+            <SheetTitle>Profil Użytkownika</SheetTitle>
+            <SheetDescription>Zarządzaj danymi i przypisaniem do Róży.</SheetDescription>
           </SheetHeader>
           
           {selectedMember && (
-            <div className="space-y-6 py-6">
-              <div className="flex items-center gap-4 p-4 border rounded-lg bg-muted/20">
-                <Avatar className="h-12 w-12">
-                   <AvatarFallback className="text-lg">{selectedMember.full_name.substring(0,2).toUpperCase()}</AvatarFallback>
-                </Avatar>
-                <div>
-                  <h3 className="font-bold text-lg">{selectedMember.full_name}</h3>
-                  <p className="text-sm text-muted-foreground">{selectedMember.role}</p>
+            <div className="flex-1 overflow-y-auto space-y-6 pr-1">
+              
+              {/* WIZYTÓWKA */}
+              <div className="flex flex-col items-center justify-center p-6 bg-muted/30 border-2 border-dashed rounded-xl gap-3">
+                <div className="text-center">
+                  <h3 className="font-bold text-2xl">{selectedMember.full_name}</h3>
+                  <div className="flex items-center justify-center gap-2 mt-2">
+                     <Badge variant="outline" className="capitalize">{selectedMember.role}</Badge>
+                  </div>
                 </div>
               </div>
 
-              <div className="space-y-4">
-                <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                   <Calendar className="h-4 w-4" /> Dołączył: {new Date(selectedMember.created_at).toLocaleDateString()}
+              {/* INFO SIATKA */}
+              <div className="grid grid-cols-2 gap-4">
+                <div className="p-4 border rounded-lg bg-card space-y-1">
+                   <div className="flex items-center gap-2 text-muted-foreground text-xs uppercase font-bold tracking-wider">
+                      <Shield className="h-3 w-3" /> Pozycja
+                   </div>
+                   <div className="font-medium text-sm">
+                      {selectedMember.rose_pos ? `#${selectedMember.rose_pos} w Róży` : "Brak miejsca"}
+                   </div>
                 </div>
-                <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                   <Shield className="h-4 w-4" /> Miejsce w róży: 
-                   <Badge variant="outline">{selectedMember.rose_pos ? `#${selectedMember.rose_pos}` : "Brak"}</Badge>
+                <div className="p-4 border rounded-lg bg-card space-y-1">
+                   <div className="flex items-center gap-2 text-muted-foreground text-xs uppercase font-bold tracking-wider">
+                      <ScrollText className="h-3 w-3" /> Tajemnica
+                   </div>
+                   <div className="font-medium text-sm text-primary">
+                      {getMysteryName(selectedMember.current_mystery_id)}
+                   </div>
                 </div>
               </div>
 
-              <div className="space-y-2 pt-4 border-t">
-                <Label>Zmień Grupę (Resetuje status!)</Label>
-                <div className="flex gap-2">
-                  <select 
-                    className="flex h-10 w-full rounded-md border bg-background px-3 text-sm"
-                    value={editGroupId}
-                    onChange={(e) => setEditGroupId(e.target.value)}
-                  >
-                    <option value="">-- Brak grupy --</option>
-                    {groups.map(g => <option key={g.id} value={g.id}>{g.name}</option>)}
-                  </select>
-                  <Button size="icon" onClick={handleUpdateGroup} disabled={loading}><Save className="h-4 w-4" /></Button>
+              {/* ZARZĄDZANIE */}
+              <div className="space-y-4 pt-4 border-t">
+                <div className="flex items-center gap-2">
+                   <Users className="h-5 w-5 text-primary" />
+                   <h4 className="font-semibold">Zarządzanie Różą</h4>
                 </div>
-                <p className="text-xs text-muted-foreground mt-1">
-                  System automatycznie znajdzie pierwsze wolne miejsce (1-20) w nowej grupie. Stare potwierdzenia zostaną usunięte.
-                </p>
+                
+                <div className="space-y-3">
+                   <Label className="text-xs text-muted-foreground">PRZYPISZ DO GRUPY</Label>
+                   <div className="flex gap-2">
+                      <select 
+                        className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+                        value={editGroupId}
+                        onChange={(e) => setEditGroupId(e.target.value)}
+                      >
+                        <option value="">-- Brak grupy (Usuń z Róży) --</option>
+                        {groups.map(g => <option key={g.id} value={g.id}>{g.name}</option>)}
+                      </select>
+                   </div>
+                   
+                   <Alert variant="default" className="bg-amber-500/10 text-amber-600 border-amber-500/20">
+                      <AlertTriangle className="h-4 w-4" />
+                      <AlertTitle>Uwaga!</AlertTitle>
+                      <AlertDescription className="text-xs">
+                        Zmiana grupy spowoduje reset potwierdzeń. System automatycznie znajdzie nowe wolne miejsce.
+                      </AlertDescription>
+                   </Alert>
+
+                   <Button className="w-full gap-2" onClick={handleUpdateGroup} disabled={loading}>
+                      <RefreshCcw className="h-4 w-4" /> 
+                      {editGroupId ? "Zapisz i Przenieś" : "Zapisz i Usuń z grupy"}
+                   </Button>
+                </div>
               </div>
             </div>
           )}
 
-          <SheetFooter className="mt-8">
-             <Button variant="destructive" className="w-full gap-2" onClick={handleDeleteUser} disabled={loading}>
-               <Trash2 className="h-4 w-4" /> Usuń trwale użytkownika
-             </Button>
+          <SheetFooter className="mt-auto pt-6 border-t">
+             <div className="w-full space-y-2">
+               <Label className="text-xs text-muted-foreground uppercase font-bold">Strefa niebezpieczna</Label>
+               <Button variant="destructive" className="w-full gap-2" onClick={handleDeleteUser} disabled={loading}>
+                 <Trash2 className="h-4 w-4" /> Usuń trwale konto
+               </Button>
+             </div>
           </SheetFooter>
         </SheetContent>
       </Sheet>
