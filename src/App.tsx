@@ -11,40 +11,33 @@ import AdminLayout from "@/layouts/AdminLayout"
 import AdminMembers from "@/pages/admin/AdminMembers"
 import AdminSettings from "@/pages/admin/AdminSettings"
 
-function Home() {
-  return (
-    <div className="flex flex-col items-center justify-center min-h-screen gap-4">
-      <h1 className="text-4xl font-bold text-primary">Róża Różańcowa</h1>
-      <a href="/login" className="text-blue-500 hover:underline">Przejdź do logowania</a>
-    </div>
-  )
-}
-
 function App() {
   return (
     <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
-      {/* Przycisk motywu widoczny globalnie (można go ukryć w adminie jeśli chcesz) */}
-      <div className="absolute top-4 right-4 z-50">
+      {/* Przycisk motywu na dole po prawej */}
+      <div className="fixed top-4 right-4 z-50">
         <ModeToggle />
       </div>
       
       <BrowserRouter>
         <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/login" element={<LoginPage />} />
+          {/* GŁÓWNA STRONA TO TERAZ LOGOWANIE */}
+          <Route path="/" element={<LoginPage />} />
+          
+          {/* Zachowujemy /login jako alias do strony głównej (dla wstecznej kompatybilności) */}
+          <Route path="/login" element={<Navigate to="/" replace />} />
           
           {/* Panel Użytkownika */}
           <Route path="/dashboard" element={<UserDashboard />} />
 
-          {/* Panel Administratora (Zagnieżdżony) */}
+          {/* Panel Administratora */}
           <Route path="/admin" element={<AdminLayout />}>
-            {/* Przekierowanie z samego /admin na /admin/members */}
             <Route index element={<Navigate to="members" replace />} />
-            
             <Route path="members" element={<AdminMembers />} />
             <Route path="settings" element={<AdminSettings />} />
           </Route>
 
+          {/* Wszystkie inne adresy kierują do logowania */}
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </BrowserRouter>
