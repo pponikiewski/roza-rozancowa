@@ -67,7 +67,7 @@ export default function AdminMembers() {
     if (allMembers) {
       // 3. Przetwarzanie danych (Obliczanie tajemnicy dla każdego usera)
       const processed = await Promise.all(allMembers.map(async (m: any) => {
-        // ZMIANA: Domyślnie null (zakładamy że nie ma tajemnicy)
+        // Domyślnie null (zakładamy że nie ma tajemnicy)
         let currentMysteryId: number | null = null
         
         // Wywołujemy funkcję SQL (logika Żywego Różańca - indywidualna dla usera)
@@ -124,38 +124,39 @@ export default function AdminMembers() {
     }
   }
 
-  // --- ZMIANA GRUPY + RESET POTWIERDZEŃ ---
+  // --- ZMIANA GRUPY (OPTIMIZED RPC) ---
   const handleUpdateGroup = async () => {
     if (!selectedMember) return
     setLoading(true)
 
-    // 1. Aktualizacja Profilu (Zmiana grupy i reset pozycji w róży)
-    // Ustawiamy rose_pos na null, bo w nowej grupie user musi dostać nowe miejsce
-    const { error: updateError } = await supabase
-      .from('profiles')
-      .update({ group_id: editGroupId ? parseInt(editGroupId) : null, rose_pos: null })
-      .eq('id', selectedMember.id)
-    
-    if (updateError) {
-      alert("Błąd aktualizacji profilu: " + updateError.message)
+    try {
+      // Parsujemy ID grupy (lub null jeśli wybrano "Brak grupy")
+      const targetGroupId = editGroupId ? parseInt(editGroupId) : null
+
+      // Wywołujemy funkcję SQL 'move_user_to_group', która:
+      // 1. Znajduje wolne miejsce
+      // 2. Przenosi usera
+      // 3. Czyści stare potwierdzenia
+      const { data: newPos, error } = await supabase.rpc('move_user_to_group', {
+        p_user_id: selectedMember.id,
+        p_group_id: targetGroupId
+      })
+
+      if (error) throw error
+
+      alert(targetGroupId 
+        ? `Zaktualizowano! Nowa pozycja w róży: #${newPos}`
+        : "Usunięto z grupy (status zresetowany)."
+      )
+      
+      fetchData()
+      setSelectedMember(null)
+
+    } catch (err: any) {
+      alert("Błąd: " + err.message)
+    } finally {
       setLoading(false)
-      return
     }
-
-    // 2. USUNIĘCIE STARYCH POTWIERDZEŃ
-    const { error: deleteAckError } = await supabase
-      .from('acknowledgments')
-      .delete()
-      .eq('user_id', selectedMember.id)
-
-    if (deleteAckError) {
-      console.error("Nie udało się wyczyścić potwierdzeń", deleteAckError)
-    }
-
-    setLoading(false)
-    alert("Zaktualizowano przypisanie (status modlitwy zresetowany).")
-    fetchData()
-    setSelectedMember(null)
   }
 
   // --- USUWANIE UŻYTKOWNIKA ---
@@ -171,18 +172,17 @@ export default function AdminMembers() {
     } catch (err: any) { alert("Błąd: " + err.message) } finally { setLoading(false) }
   }
 
+  // Filtrowanie listy
   const filteredMembers = members.filter(m => m.full_name.toLowerCase().includes(search.toLowerCase()))
 
   return (
     <div className="space-y-6">
-      {/* NAGŁÓWEK */}
-      {/* Na mobile (flex-col) układ pionowy, na desktopie (sm:flex-row) poziomy */}
+      {/* NAGŁÓWEK (RESPONSYWNY) */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 pr-0 sm:pr-16">
         <div>
           <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">Użytkownicy</h1>
           <p className="text-sm text-muted-foreground">Baza wszystkich członków Żywego Różańca.</p>
         </div>
-        {/* Przycisk na pełną szerokość na mobile */}
         <Button onClick={() => setIsAddOpen(true)} className="gap-2 w-full sm:w-auto">
           <Plus className="h-4 w-4" /> Dodaj nowego
         </Button>
@@ -201,11 +201,10 @@ export default function AdminMembers() {
         </div>
       </div>
 
-      {/* TABELA Z SCROLLEM POZIOMYM */}
+      {/* TABELA (RESPONSYWNA Z SCROLLEM) */}
       <Card className="overflow-hidden">
-        {/* To jest kluczowe dla responsywności tabeli: */}
         <div className="overflow-x-auto">
-          <Table className="min-w-[600px]"> {/* Wymuszamy minimalną szerokość, żeby się nie ściskało */}
+          <Table className="min-w-[600px]"> {/* Minimalna szerokość zapobiega zgniataniu kolumn */}
             <TableHeader>
               <TableRow>
                 <TableHead>Członek</TableHead>
@@ -253,6 +252,7 @@ export default function AdminMembers() {
                           <>
                             <span className="text-xs text-muted-foreground whitespace-nowrap">Tajemnica #{member.current_mystery_id}</span>
                             {hasAck ? (
+                              /* POPRAWIONY BADGE: Zielony, bez efektu hover zmieniającego kolor */
                               <Badge className="bg-green-600 hover:bg-green-700 text-white cursor-default w-fit whitespace-nowrap">
                                 Zrobione
                               </Badge>
@@ -263,6 +263,7 @@ export default function AdminMembers() {
                             )}
                           </>
                         ) : (
+                          /* JEŚLI BRAK GRUPY/TAJEMNICY */
                           <span className="text-xs text-muted-foreground italic whitespace-nowrap">Brak przydziału</span>
                         )}
                       </div>
@@ -278,9 +279,8 @@ export default function AdminMembers() {
         </div>
       </Card>
     
-    {/* ... reszta kodu (Dialog, Sheet) bez zmian ... */}
+      {/* DIALOG DODAWANIA */}
       <Dialog open={isAddOpen} onOpenChange={setIsAddOpen}>
-         {/* ... treść dialogu (jest responsywna domyślnie) ... */}
          <DialogContent>
           <DialogHeader>
             <DialogTitle>Dodaj nowego członka</DialogTitle>
@@ -303,9 +303,9 @@ export default function AdminMembers() {
         </DialogContent>
       </Dialog>
 
+      {/* SHEET SZCZEGÓŁÓW (EDYCJA - RESPONSYWNY) */}
       <Sheet open={!!selectedMember} onOpenChange={(open) => !open && setSelectedMember(null)}>
-        <SheetContent className="w-[90%] sm:w-[540px]"> {/* ZMIANA: Sheet na mobile ma 90% szerokości */}
-           {/* ... treść sheeta (skopiuj z poprzedniego pliku) ... */}
+        <SheetContent className="w-[90%] sm:w-[540px]"> {/* ZMIANA: Na mobile zajmuje 90% */}
            <SheetHeader>
             <SheetTitle>Szczegóły użytkownika</SheetTitle>
             <SheetDescription>Edytuj dane lub usuń konto.</SheetDescription>
@@ -347,7 +347,7 @@ export default function AdminMembers() {
                   <Button size="icon" onClick={handleUpdateGroup} disabled={loading}><Save className="h-4 w-4" /></Button>
                 </div>
                 <p className="text-xs text-muted-foreground mt-1">
-                  Zmiana grupy spowoduje usunięcie dotychczasowych potwierdzeń modlitwy.
+                  System automatycznie znajdzie pierwsze wolne miejsce (1-20) w nowej grupie. Stare potwierdzenia zostaną usunięte.
                 </p>
               </div>
             </div>
