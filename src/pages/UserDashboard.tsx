@@ -5,7 +5,9 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Separator } from "@/components/ui/separator"
-import { CheckCircle2, AlertCircle, LogOut, Timer, ChevronRight, Loader2 } from "lucide-react"
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog"
+import { ScrollArea } from "@/components/ui/scroll-area"
+import { CheckCircle2, AlertCircle, LogOut, Timer, ChevronRight, Loader2, Users, Flower2, ScrollText } from "lucide-react"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 
 // --- TYPY ---
@@ -13,15 +15,25 @@ interface Mystery {
   id: number; part: string; name: string; meditation: string; image_url: string;
 }
 interface Profile {
-  id: string; full_name: string; rose_pos: number | null; groups: { name: string } | null;
+  // Zmiana: groups musi zawierać id, abyśmy mogli pobrać innych członków tej grupy
+  id: string; full_name: string; rose_pos: number | null; groups: { id: number, name: string } | null;
 }
 interface Intention {
   title: string;
   content: string;
 }
+// Nowy typ dla członka listy
+interface RoseMember {
+  id: string
+  full_name: string
+  rose_pos: number | null
+  current_mystery_name: string
+}
 
 export default function UserDashboard() {
   const navigate = useNavigate()
+  
+  // Stany główne
   const [loading, setLoading] = useState(true)
   const [actionLoading, setActionLoading] = useState(false)
   const [profile, setProfile] = useState<Profile | null>(null)
@@ -30,14 +42,23 @@ export default function UserDashboard() {
   const [isAcknowledged, setIsAcknowledged] = useState(false)
   const [timeLeft, setTimeLeft] = useState({ days: 0, hours: 0, minutes: 0, seconds: 0 })
 
+  // Stany dla Modala "Moja Róża"
+  const [isRoseOpen, setIsRoseOpen] = useState(false)
+  const [roseMembers, setRoseMembers] = useState<RoseMember[]>([])
+  const [roseLoading, setRoseLoading] = useState(false)
+
   useEffect(() => {
     const fetchData = async () => {
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) { navigate("/login"); return }
 
-      // 1. Profil
+      // 1. Profil (Pobieramy teraz ID grupy oraz nazwę)
       const { data: profileData } = await supabase
-        .from('profiles').select('id, full_name, rose_pos, groups(name)').eq('id', user.id).single()
+        .from('profiles')
+        .select('id, full_name, rose_pos, groups(id, name)')
+        .eq('id', user.id)
+        .single()
+      
       if (profileData) setProfile(profileData as any)
 
       // 2. Intencja
@@ -75,6 +96,7 @@ export default function UserDashboard() {
     fetchData()
   }, [navigate])
 
+  // Timer odliczający do końca miesiąca
   useEffect(() => {
     const calculateTimeLeft = () => {
       const now = new Date()
@@ -98,13 +120,52 @@ export default function UserDashboard() {
     return () => clearInterval(timer)
   }, [])
 
+  // --- FUNKCJA: Pobieranie członków róży (Lazy Load) ---
+  const handleOpenRose = async () => {
+    setIsRoseOpen(true)
+    // Jeśli nie mamy grupy lub dane są już pobrane, nie robimy zapytania
+    if (!profile?.groups?.id || roseMembers.length > 0) return
+
+    setRoseLoading(true)
+    try {
+        // 1. Pobierz wszystkich z tej samej grupy (SQL Policy musi na to pozwalać)
+        const { data: members, error } = await supabase
+            .from('profiles')
+            .select('id, full_name, rose_pos')
+            .eq('group_id', profile.groups.id) // Zakładam, że w bazie kolumna klucza obcego to group_id
+            .order('rose_pos', { ascending: true })
+
+        if (error) throw error
+
+        // 2. Pobierz słownik tajemnic (id -> nazwa)
+        const { data: allMysteries } = await supabase.from('mysteries').select('id, name')
+
+        if (members && allMysteries) {
+            // 3. Dla każdego członka wylicz jego aktualną tajemnicę
+            const processed = await Promise.all(members.map(async (m) => {
+                const { data: mysteryId } = await supabase.rpc('get_mystery_id_for_user', { p_user_id: m.id })
+                const mysteryName = allMysteries.find(mys => mys.id === mysteryId)?.name || "Brak przydziału"
+                
+                return {
+                    id: m.id,
+                    full_name: m.full_name,
+                    rose_pos: m.rose_pos,
+                    current_mystery_name: mysteryName
+                }
+            }))
+            setRoseMembers(processed)
+        }
+    } catch (err) {
+        console.error("Błąd pobierania róży:", err)
+    } finally {
+        setRoseLoading(false)
+    }
+  }
+
   const handleAcknowledge = async () => {
     if (!profile || !mystery) return
     setActionLoading(true)
-    
-    // Symulacja feedbacku
     await new Promise(resolve => setTimeout(resolve, 300))
-
     const { error } = await supabase.from('acknowledgments').insert({ user_id: profile.id, mystery_id: mystery.id })
     if (error) {
         alert("Błąd: " + error.message)
@@ -160,17 +221,31 @@ export default function UserDashboard() {
       
       {/* HEADER */}
       <header className="sticky top-0 z-10 bg-background/80 backdrop-blur-md border-b px-6 py-3 flex justify-between items-center shadow-sm">
-        <div className="flex items-center gap-3">
-          <Avatar className="h-9 w-9 border-2 border-primary/10">
+        
+        {/* KLIKALNA SEKCJA PROFILU (OTWIERA MODAL) */}
+        <div 
+            className="flex items-center gap-3 cursor-pointer p-1.5 -ml-1.5 rounded-lg hover:bg-muted/60 transition-colors group select-none"
+            onClick={handleOpenRose}
+            title="Kliknij, aby zobaczyć swoją Różę"
+        >
+          <Avatar className="h-9 w-9 border-2 border-primary/10 group-hover:border-primary/40 transition-colors">
             <AvatarFallback className="bg-primary/5 text-primary text-sm font-semibold">
                 {profile?.full_name.substring(0,1).toUpperCase()}
             </AvatarFallback>
           </Avatar>
           <div className="flex flex-col">
-            <span className="text-sm font-semibold leading-none">{profile?.full_name}</span>
-            <span className="text-[11px] text-muted-foreground mt-0.5 font-medium">{profile?.groups?.name || "Brak grupy"}</span>
+            <span className="text-sm font-semibold leading-none flex items-center gap-1.5">
+                {profile?.full_name}
+                {/* Ikona sugerująca, że można kliknąć */}
+                <Users className="h-3 w-3 text-muted-foreground/50 group-hover:text-primary transition-colors" />
+            </span>
+            <span className="text-[11px] text-muted-foreground mt-0.5 font-medium group-hover:text-foreground transition-colors">
+                {profile?.groups?.name || "Brak grupy"}
+            </span>
           </div>
         </div>
+
+        {/* Przycisk Wyloguj - oddzielny od sekcji profilu */}
         <Button variant="ghost" size="icon" onClick={handleLogout} className="text-muted-foreground hover:text-destructive hover:bg-destructive/10">
              <LogOut className="h-5 w-5" />
         </Button>
@@ -179,7 +254,7 @@ export default function UserDashboard() {
       {/* SCROLLABLE CONTENT */}
       <main className="flex-1 w-full max-w-lg mx-auto p-4 flex flex-col gap-5">
         
-        {/* SEKCJA INTENCJI (BEZ IKONKI W TLE) */}
+        {/* SEKCJA INTENCJI */}
         {intention && (
           <div className="bg-gradient-to-br from-rose-50 to-white dark:from-rose-950/30 dark:to-background border border-rose-100 dark:border-rose-900/50 rounded-xl p-5 shadow-sm">
              <div>
@@ -201,15 +276,11 @@ export default function UserDashboard() {
         {/* KARTA TAJEMNICY */}
         <Card className="overflow-hidden shadow-lg border-border/60">
           
-          {/* Sekcja Obrazka - PEŁNA WIDOCZNOŚĆ */}
-          {/* Używamy p-4 i bg-black/5, żeby obrazek miał "ramkę" i był wycentrowany, ale nie ucięty */}
           <div className="w-full bg-black/5 dark:bg-black/20 flex items-center justify-center p-4">
              {mystery.image_url ? (
                 <img 
                  src={mystery.image_url} 
                  alt={mystery.name} 
-                 // max-h-[50vh] zapewnia, że na wysokich telefonach nie zajmie całego ekranu, 
-                 // ale object-contain gwarantuje brak ucięcia
                  className="w-auto h-auto max-h-[50vh] object-contain shadow-sm rounded-md" 
                />
              ) : (
@@ -260,7 +331,6 @@ export default function UserDashboard() {
                 </Button>
             )}
             
-            {/* Czasomierz */}
             <div className="flex items-center justify-center gap-2 text-xs text-muted-foreground/60">
                  <Timer className="h-3 w-3" />
                  <span>Do zmiany tajemnic:</span>
@@ -270,8 +340,69 @@ export default function UserDashboard() {
             </div>
           </CardFooter>
         </Card>
-
       </main>
+
+      {/* --- MODAL MOJA RÓŻA --- */}
+      <Dialog open={isRoseOpen} onOpenChange={setIsRoseOpen}>
+        <DialogContent className="max-w-md max-h-[90vh] flex flex-col p-0 gap-0 overflow-hidden">
+            <div className="p-6 pb-4 border-b bg-muted/20">
+                <DialogHeader>
+                    <DialogTitle className="flex items-center gap-2">
+                        <Flower2 className="h-5 w-5 text-rose-500" />
+                        {profile?.groups?.name || "Moja Róża"}
+                    </DialogTitle>
+                    <DialogDescription>
+                        Skład Twojej róży i aktualne tajemnice.
+                    </DialogDescription>
+                </DialogHeader>
+            </div>
+
+            <ScrollArea className="flex-1 p-0">
+                {roseLoading ? (
+                    <div className="flex flex-col items-center justify-center p-12 gap-3 text-muted-foreground">
+                        <Loader2 className="h-6 w-6 animate-spin text-primary" /> 
+                        <span className="text-sm">Pobieranie danych róży...</span>
+                    </div>
+                ) : (
+                    <div className="flex flex-col divide-y">
+                        {roseMembers.length === 0 ? (
+                            <div className="p-8 text-center text-sm text-muted-foreground">
+                                Brak danych. Upewnij się, że jesteś przypisany do grupy.
+                            </div>
+                        ) : (
+                            roseMembers.map((member) => (
+                                <div 
+                                    key={member.id} 
+                                    className={`flex items-center p-4 gap-3 transition-colors ${member.id === profile?.id ? "bg-primary/5" : "hover:bg-muted/50"}`}
+                                >
+                                    {/* Pozycja */}
+                                    <div className="flex flex-col items-center justify-center h-8 w-8 min-w-[2rem] rounded-full bg-background border text-xs font-semibold text-muted-foreground shadow-sm">
+                                        {member.rose_pos || "-"}
+                                    </div>
+                                    
+                                    {/* Dane */}
+                                    <div className="flex flex-col min-w-0">
+                                        <div className="flex items-center gap-2">
+                                            <span className={`text-sm font-medium truncate ${member.id === profile?.id ? "text-primary" : "text-foreground"}`}>
+                                                {member.full_name}
+                                            </span>
+                                            {member.id === profile?.id && (
+                                                <Badge variant="secondary" className="text-[10px] px-1 h-4">Ty</Badge>
+                                            )}
+                                        </div>
+                                        <span className="text-xs text-muted-foreground truncate flex items-center gap-1 mt-0.5">
+                                            <ScrollText className="h-3 w-3" />
+                                            {member.current_mystery_name}
+                                        </span>
+                                    </div>
+                                </div>
+                            ))
+                        )}
+                    </div>
+                )}
+            </ScrollArea>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }
