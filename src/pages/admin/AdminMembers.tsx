@@ -4,12 +4,12 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog"
 import { Badge } from "@/components/ui/badge"
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
 import { 
-  Plus, Search, Trash2, Users, RefreshCcw, ScrollText, 
-  Shield, User, CheckCircle2, Circle, AlertCircle, CalendarClock, ArrowRightLeft 
+  UserPlus, Search, Trash2, Users, RefreshCcw, ScrollText, 
+  Shield, User, CheckCircle2, Circle, AlertCircle, CalendarClock, ArrowRightLeft, Mail, Lock, KeyRound 
 } from "lucide-react"
 
 // --- TYPY DANYCH ---
@@ -80,14 +80,9 @@ export default function AdminMembers() {
     return found ? found.name : `Tajemnica #${id}`
   }
 
-  // FORMATOWANIE DATY (Pełna data i godzina)
   const formatFullDate = (dateString: string) => {
     return new Date(dateString).toLocaleString('pl-PL', {
-      day: 'numeric',
-      month: 'long',
-      year: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
+      day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit'
     })
   }
 
@@ -100,10 +95,11 @@ export default function AdminMembers() {
         body: { ...formData, groupId: formData.groupId ? parseInt(formData.groupId) : null }
       })
       if (error || data?.error) throw new Error(error?.message || data?.error)
-      alert(`Dodano użytkownika!`)
+      
       setIsAddOpen(false)
       setFormData({ email: "", password: "", fullName: "", groupId: "" })
       fetchData()
+      alert(`Pomyślnie dodano użytkownika!`)
     } catch (err: any) { alert("Błąd: " + err.message) } finally { setLoading(false) }
   }
 
@@ -117,19 +113,17 @@ export default function AdminMembers() {
         p_group_id: targetGroupId
       })
       if (error) throw error
-      alert("Zaktualizowano pomyślnie.")
       fetchData()
       setSelectedMember(null)
     } catch (err: any) { alert("Błąd: " + err.message) } finally { setLoading(false) }
   }
 
   const handleDeleteUser = async () => {
-    if (!selectedMember || !confirm("Usunąć trwale?")) return
+    if (!selectedMember || !confirm("Czy na pewno chcesz trwale usunąć tego użytkownika? Tej operacji nie można cofnąć.")) return
     setLoading(true)
     try {
       const { data, error } = await supabase.functions.invoke('delete-user', { body: { user_id: selectedMember.id } })
       if (error || data?.error) throw new Error(error?.message || data?.error)
-      alert("Usunięto")
       setSelectedMember(null)
       fetchData()
     } catch (err: any) { alert("Błąd: " + err.message) } finally { setLoading(false) }
@@ -156,48 +150,57 @@ export default function AdminMembers() {
 
   // --- KOMPONENT LISTY ---
   const MembersList = ({ list }: { list: Member[] }) => {
-    if (list.length === 0) return <div className="p-4 text-center text-sm text-muted-foreground">Brak członków w tej grupie.</div>
+    if (list.length === 0) return <div className="p-8 text-center text-sm text-muted-foreground bg-muted/10 rounded-lg border border-dashed">Brak członków w tej grupie.</div>
 
     return (
       <div className="w-full">
-        {/* MOBILE */}
-        <div className="grid grid-cols-1 gap-2 sm:hidden">
+        {/* MOBILE VIEW */}
+        <div className="grid grid-cols-1 gap-3 sm:hidden">
           {list.map(member => {
              const hasAck = member.acknowledgments.length > 0
              return (
               <div 
                 key={member.id} 
                 onClick={() => { setSelectedMember(member); setEditGroupId(member.groups?.id.toString() || "") }}
-                className="flex items-center justify-between p-3 bg-card border rounded-md active:bg-muted cursor-pointer"
+                className="relative overflow-hidden flex items-center justify-between p-4 bg-card border rounded-xl shadow-sm active:scale-[0.98] transition-all cursor-pointer"
               >
-                <div className="flex items-center gap-3">
+                {/* Status Indicator Line */}
+                <div className={`absolute left-0 top-0 bottom-0 w-1 ${hasAck ? 'bg-green-500' : 'bg-muted'}`} />
+
+                <div className="flex items-center gap-3 pl-2">
                    {member.rose_pos ? (
-                     <Badge variant="outline" className="h-6 w-6 flex items-center justify-center p-0 rounded-full border-primary/20 bg-primary/5 text-primary">{member.rose_pos}</Badge>
-                   ) : <div className="h-6 w-6" />}
+                     <div className="flex flex-col items-center justify-center h-8 w-8 rounded-full bg-primary/10 text-primary font-bold text-xs border border-primary/20">
+                        {member.rose_pos}
+                     </div>
+                   ) : <div className="h-8 w-8 flex items-center justify-center bg-muted text-muted-foreground rounded-full text-[10px]">-</div>}
+                   
                    <div>
-                     <div className="font-medium text-sm">{member.full_name}</div>
-                     <div className="text-xs text-muted-foreground line-clamp-1">{getMysteryName(member.current_mystery_id)}</div>
+                     <div className="font-semibold text-sm">{member.full_name}</div>
+                     <div className="text-xs text-muted-foreground line-clamp-1 flex items-center gap-1">
+                        <ScrollText className="h-3 w-3" />
+                        {getMysteryName(member.current_mystery_id)}
+                     </div>
                    </div>
                 </div>
                 <div className="flex flex-col items-end">
                   {hasAck ? (
                     <CheckCircle2 className="h-5 w-5 text-green-600" />
-                  ) : <Circle className="h-5 w-5 text-slate-300" />}
+                  ) : <Circle className="h-5 w-5 text-muted-foreground/30" />}
                 </div>
               </div>
              )
           })}
         </div>
 
-        {/* DESKTOP */}
-        <div className="hidden sm:block">
+        {/* DESKTOP VIEW */}
+        <div className="hidden sm:block border rounded-md overflow-hidden">
           <Table>
-            <TableHeader>
+            <TableHeader className="bg-muted/50">
               <TableRow className="hover:bg-transparent">
-                <TableHead className="w-[10%]">Poz.</TableHead>
-                <TableHead className="w-[35%]">Członek</TableHead>
-                <TableHead className="w-[40%]">Tajemnica</TableHead>
-                <TableHead className="w-[15%] text-right">Status</TableHead>
+                <TableHead className="w-[80px] text-center">Poz.</TableHead>
+                <TableHead className="w-[30%]">Członek</TableHead>
+                <TableHead className="w-[40%]">Aktualna Tajemnica</TableHead>
+                <TableHead className="text-right pr-6">Status</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -206,23 +209,29 @@ export default function AdminMembers() {
                 return (
                   <TableRow 
                     key={member.id} 
-                    className="cursor-pointer hover:bg-muted/50"
+                    className="cursor-pointer hover:bg-muted/50 transition-colors"
                     onClick={() => { setSelectedMember(member); setEditGroupId(member.groups?.id.toString() || "") }}
                   >
-                    <TableCell>
-                      {member.rose_pos ? <Badge variant="outline">#{member.rose_pos}</Badge> : "-"}
+                    <TableCell className="text-center font-medium text-muted-foreground">
+                      {member.rose_pos || "-"}
                     </TableCell>
                     <TableCell>
-                      <span className="font-medium">{member.full_name}</span>
-                      {member.role === 'admin' && <Badge variant="secondary" className="ml-2 text-[10px]">Admin</Badge>}
+                      <div className="flex items-center gap-2">
+                          <span className="font-medium">{member.full_name}</span>
+                          {member.role === 'admin' && <Badge variant="secondary" className="text-[10px] px-1 h-5">Admin</Badge>}
+                      </div>
                     </TableCell>
                     <TableCell className="text-muted-foreground text-sm">
                       {getMysteryName(member.current_mystery_id)}
                     </TableCell>
-                    <TableCell className="text-right">
+                    <TableCell className="text-right pr-6">
                       {hasAck ? (
-                        <Badge className="bg-green-600 hover:bg-green-700 cursor-default border-transparent text-white">Potwierdzone</Badge>
-                      ) : <span className="text-xs text-muted-foreground">Oczekuje</span>}
+                        <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400">
+                            <CheckCircle2 className="h-3 w-3" /> Potwierdzone
+                        </div>
+                      ) : (
+                        <span className="text-xs text-muted-foreground">Oczekuje</span>
+                      )}
                     </TableCell>
                   </TableRow>
                 )
@@ -235,25 +244,41 @@ export default function AdminMembers() {
   }
 
   return (
-    <div className="space-y-8 pb-20">
-      {/* HEADER */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 pr-16">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">Struktura Róż</h1>
-          <p className="text-muted-foreground">Przeglądaj członków z podziałem na grupy.</p>
+    <div className="space-y-6 pb-24 max-w-5xl mx-auto">
+      
+      {/* --- TOP BAR --- */}
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-4 border-b pb-6">
+        <div className="space-y-1">
+          <h1 className="text-2xl font-bold tracking-tight">Struktura Róż</h1>
+          <p className="text-sm text-muted-foreground max-w-lg">
+            Zarządzaj członkami, monitoruj postępy modlitwy i edytuj przypisania do grup różańcowych.
+          </p>
         </div>
-        <Button onClick={() => setIsAddOpen(true)} className="w-full sm:w-auto shadow-sm">
-          <Plus className="h-4 w-4 mr-2" /> Dodaj osobę
+        
+        {/* Przycisk DODAJ OSOBĘ (Lepszy UX) */}
+        <Button onClick={() => setIsAddOpen(true)} className="w-full md:w-auto shadow-md gap-2 font-semibold">
+          <UserPlus className="h-4 w-4" />
+          Dodaj Członka
         </Button>
       </div>
 
-      {/* SEARCH */}
-      <div className="relative w-full max-w-sm">
-        <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-        <Input placeholder="Znajdź osobę..." className="pl-9 bg-card" value={search} onChange={e => setSearch(e.target.value)} />
+      {/* --- FILTRY I SZUKANIE --- */}
+      <div className="flex flex-col sm:flex-row gap-4 items-center justify-between">
+        <div className="relative w-full max-w-md">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input 
+                placeholder="Szukaj po imieniu lub nazwisku..." 
+                className="pl-9 h-10 bg-background/50 border-input focus:bg-background transition-all" 
+                value={search} 
+                onChange={e => setSearch(e.target.value)} 
+            />
+        </div>
+        <div className="text-xs text-muted-foreground font-medium uppercase tracking-wide">
+            Łącznie: {members.length} osób
+        </div>
       </div>
 
-      {/* LISTA (Accordion) */}
+      {/* --- LISTA GRUP (ACCORDION) --- */}
       <Accordion type="multiple" className="w-full space-y-4" defaultValue={groups.length > 0 ? [`group-${groups[0].id}`] : []}>
         {groups.map(group => {
           const groupMembers = groupedData.map.get(group.id) || []
@@ -262,166 +287,220 @@ export default function AdminMembers() {
           const isFull = count >= 20
 
           return (
-            <AccordionItem key={group.id} value={`group-${group.id}`} className="border rounded-lg bg-card px-4">
-              <AccordionTrigger className="hover:no-underline py-4">
-                <div className="flex flex-col sm:flex-row sm:items-center w-full gap-2 sm:gap-4 text-left">
-                  <div className="flex items-center gap-2">
-                    <Users className="h-5 w-5 text-primary" />
-                    <span className="font-semibold text-lg">{group.name}</span>
+            <AccordionItem key={group.id} value={`group-${group.id}`} className="border rounded-xl bg-card px-1 overflow-hidden shadow-sm">
+              <AccordionTrigger className="hover:no-underline px-4 py-4 hover:bg-muted/50 transition-colors">
+                <div className="flex flex-col sm:flex-row sm:items-center w-full gap-2 sm:gap-4 text-left justify-between pr-4">
+                  <div className="flex items-center gap-3">
+                    <div className="bg-primary/10 p-2 rounded-lg">
+                        <Users className="h-5 w-5 text-primary" />
+                    </div>
+                    <div>
+                        <span className="font-semibold text-lg block leading-none mb-1">{group.name}</span>
+                        <div className="text-xs text-muted-foreground flex items-center gap-2">
+                             <span>Zajętość: {count}/20</span>
+                             <span className="w-1 h-1 rounded-full bg-muted-foreground/50" />
+                             <span className={isFull ? "text-amber-600 font-medium" : "text-green-600 font-medium"}>
+                                {isFull ? "Grupa Pełna" : "Miejsca dostępne"}
+                             </span>
+                        </div>
+                    </div>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <Badge variant={isFull ? "destructive" : "secondary"} className="text-xs">{count}/20</Badge>
-                    {count > 0 && (
-                      <span className="text-xs text-muted-foreground flex items-center gap-1">
-                        <CheckCircle2 className="h-3 w-3 text-green-600" /> {completed}/{count}
-                      </span>
-                    )}
+                  
+                  {/* Progress Bar Mini */}
+                  <div className="flex items-center gap-3 bg-muted/30 px-3 py-1.5 rounded-full border">
+                    <div className="text-xs font-medium text-muted-foreground">Modlitwa:</div>
+                    <div className="text-sm font-bold flex items-center gap-1">
+                        <span className={completed === count && count > 0 ? "text-green-600" : ""}>{completed}</span>
+                        <span className="text-muted-foreground/50">/</span>
+                        <span>{count}</span>
+                    </div>
                   </div>
                 </div>
               </AccordionTrigger>
-              <AccordionContent className="pt-2 pb-4 border-t mt-2">
+              <AccordionContent className="px-4 pb-4 pt-2 border-t border-dashed">
                 <MembersList list={groupMembers} />
               </AccordionContent>
             </AccordionItem>
           )
         })}
 
-        <AccordionItem value="unassigned" className="border rounded-lg bg-muted/30 border-dashed px-4">
-          <AccordionTrigger className="hover:no-underline py-4">
-            <div className="flex items-center gap-2 text-muted-foreground">
-              <AlertCircle className="h-5 w-5" />
-              <span className="font-semibold">Nieprzypisani</span>
-              <Badge variant="outline" className="ml-2">{groupedData.unassigned.length}</Badge>
+        {/* UNASSIGNED SECTION */}
+        <AccordionItem value="unassigned" className="border rounded-xl bg-muted/20 border-dashed px-1">
+          <AccordionTrigger className="hover:no-underline px-4 py-4">
+            <div className="flex items-center gap-3 text-muted-foreground">
+              <div className="bg-muted p-2 rounded-lg">
+                 <AlertCircle className="h-5 w-5" />
+              </div>
+              <span className="font-semibold">Osoby nieprzypisane</span>
+              <Badge variant="secondary" className="ml-2">{groupedData.unassigned.length}</Badge>
             </div>
           </AccordionTrigger>
-          <AccordionContent className="pt-2 pb-4 border-t mt-2">
+          <AccordionContent className="px-4 pb-4 pt-2 border-t border-dashed">
              <MembersList list={groupedData.unassigned} />
           </AccordionContent>
         </AccordionItem>
       </Accordion>
 
-      {/* DIALOG DODAWANIA */}
+      {/* --- DIALOG DODAWANIA --- */}
       <Dialog open={isAddOpen} onOpenChange={setIsAddOpen}>
          <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle>Nowy członek</DialogTitle>
-            <DialogDescription>System przydzieli wolne miejsce.</DialogDescription>
+            <DialogTitle>Dodaj nowego członka</DialogTitle>
+            <DialogDescription>
+              Utwórz konto dla nowej osoby. Hasło będzie wymagane przy pierwszym logowaniu.
+            </DialogDescription>
           </DialogHeader>
-          <form onSubmit={handleCreateUser} className="space-y-4 py-2">
-            <div className="space-y-2"><Label>Imię i Nazwisko</Label><Input required value={formData.fullName} onChange={e => setFormData({...formData, fullName: e.target.value})} /></div>
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2"><Label>Email</Label><Input type="email" required value={formData.email} onChange={e => setFormData({...formData, email: e.target.value})} /></div>
-              <div className="space-y-2"><Label>Hasło</Label><Input required value={formData.password} onChange={e => setFormData({...formData, password: e.target.value})} /></div>
+          <form onSubmit={handleCreateUser} className="space-y-4 pt-2">
+            <div className="space-y-2">
+                <Label>Imię i Nazwisko</Label>
+                <div className="relative">
+                    <User className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
+                    <Input required className="pl-9" placeholder="np. Jan Kowalski" value={formData.fullName} onChange={e => setFormData({...formData, fullName: e.target.value})} />
+                </div>
             </div>
-            <div className="space-y-2"><Label>Grupa</Label>
-              <select className="flex h-10 w-full rounded-md border bg-background px-3 text-sm" value={formData.groupId} onChange={e => setFormData({...formData, groupId: e.target.value})}>
-                <option value="">-- Wybierz grupę --</option>
+            
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-2">
+                <Label>Adres Email</Label>
+                <div className="relative">
+                    <Mail className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
+                    <Input type="email" required className="pl-9" placeholder="email@domena.pl" value={formData.email} onChange={e => setFormData({...formData, email: e.target.value})} />
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Label>Hasło startowe</Label>
+                <div className="relative">
+                    <KeyRound className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
+                    <Input required className="pl-9" placeholder="min. 6 znaków" value={formData.password} onChange={e => setFormData({...formData, password: e.target.value})} />
+                </div>
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label>Wybierz Grupę</Label>
+              {/* STYLED SELECT TO MATCH SHADCN */}
+              <select 
+                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                value={formData.groupId} 
+                onChange={e => setFormData({...formData, groupId: e.target.value})}
+              >
+                <option value="">-- Bez grupy (nieprzypisany) --</option>
                 {groups.map(g => <option key={g.id} value={g.id}>{g.name}</option>)}
               </select>
             </div>
-            <div className="flex justify-end pt-2">
-              <Button type="submit" disabled={loading}>Utwórz</Button>
-            </div>
+
+            <DialogFooter className="pt-4">
+              <Button type="button" variant="outline" onClick={() => setIsAddOpen(false)}>Anuluj</Button>
+              <Button type="submit" disabled={loading}>
+                 {loading ? "Tworzenie..." : "Utwórz konto"}
+              </Button>
+            </DialogFooter>
           </form>
         </DialogContent>
       </Dialog>
 
-      {/* --- DIALOG SZCZEGÓŁÓW (UI REDESIGN) --- */}
+      {/* --- DIALOG SZCZEGÓŁÓW I EDYCJI --- */}
       <Dialog open={!!selectedMember} onOpenChange={(open) => !open && setSelectedMember(null)}>
-        <DialogContent className="sm:max-w-lg p-0 gap-0 overflow-hidden">
+        <DialogContent className="sm:max-w-lg p-0 gap-0 overflow-hidden border-0">
            
-           <div className="p-6 pb-4 border-b bg-muted/20">
+           <div className="p-6 pb-6 bg-gradient-to-b from-muted/50 to-background border-b">
               <DialogHeader>
-                <DialogTitle className="text-xl flex items-center gap-2">
-                  <User className="h-5 w-5 text-primary" />
-                  {selectedMember?.full_name}
+                <DialogTitle className="text-xl flex items-center gap-3">
+                  <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center text-primary border border-primary/20">
+                    <User className="h-5 w-5" />
+                  </div>
+                  <div className="flex flex-col gap-0.5">
+                    <span>{selectedMember?.full_name}</span>
+                    <span className="text-xs font-normal text-muted-foreground flex items-center gap-1.5">
+                        {selectedMember?.role === 'admin' ? 'Administrator' : 'Użytkownik'} 
+                        <span className="w-1 h-1 rounded-full bg-muted-foreground" />
+                        {selectedMember?.groups ? selectedMember.groups.name : "Brak grupy"}
+                    </span>
+                  </div>
                 </DialogTitle>
-                <DialogDescription>
-                  {selectedMember?.role === 'admin' ? 'Administrator' : 'Użytkownik'} 
-                  {selectedMember?.groups && ` • ${selectedMember.groups.name}`}
-                </DialogDescription>
               </DialogHeader>
            </div>
           
           {selectedMember && (
-            <div className="p-6 space-y-6">
+            <div className="p-6 space-y-6 bg-card">
               
-              {/* 1. SEKCJA INFORMACYJNA (KAFELKI) */}
+              {/* INFO GRID */}
               <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-1">
-                   <Label className="text-xs text-muted-foreground uppercase">Pozycja</Label>
+                <div className="space-y-1.5 p-3 rounded-lg bg-muted/20 border">
+                   <Label className="text-[10px] text-muted-foreground uppercase tracking-wider font-bold">Pozycja w Róży</Label>
                    <div className="flex items-center gap-2 font-medium">
                       <Shield className="h-4 w-4 text-primary" />
-                      {selectedMember.rose_pos ? `#${selectedMember.rose_pos}` : "Brak"}
+                      {selectedMember.rose_pos ? `Miejsce #${selectedMember.rose_pos}` : "Nie dotyczy"}
                    </div>
                 </div>
-                <div className="space-y-1">
-                   <Label className="text-xs text-muted-foreground uppercase">Tajemnica</Label>
-                   <div className="flex items-center gap-2 font-medium text-sm line-clamp-1" title={getMysteryName(selectedMember.current_mystery_id)}>
+                <div className="space-y-1.5 p-3 rounded-lg bg-muted/20 border">
+                   <Label className="text-[10px] text-muted-foreground uppercase tracking-wider font-bold">Aktualna Tajemnica</Label>
+                   <div className="flex items-center gap-2 font-medium text-sm line-clamp-1">
                       <ScrollText className="h-4 w-4 text-primary" />
-                      {getMysteryName(selectedMember.current_mystery_id)}
+                      {getMysteryName(selectedMember.current_mystery_id).split(' ')[0]}...
                    </div>
                 </div>
               </div>
 
-              {/* 2. SEKCJA STATUSU (WYRÓŻNIONA) */}
-              <div className={`rounded-lg border p-4 ${selectedMember.acknowledgments.length > 0 ? 'bg-green-50/50 border-green-200 dark:bg-green-900/10 dark:border-green-900' : 'bg-slate-50 border-slate-200 dark:bg-slate-900/30'}`}>
+              {/* STATUS CARD */}
+              <div className={`rounded-xl border p-4 transition-colors ${selectedMember.acknowledgments.length > 0 ? 'bg-green-50/60 border-green-200 dark:bg-green-950/20 dark:border-green-900' : 'bg-muted/10 border-border'}`}>
                  <div className="flex items-start gap-3">
                     {selectedMember.acknowledgments.length > 0 ? (
-                       <CheckCircle2 className="h-6 w-6 text-green-600 mt-0.5" />
+                       <CheckCircle2 className="h-5 w-5 text-green-600 mt-0.5" />
                     ) : (
-                       <Circle className="h-6 w-6 text-slate-400 mt-0.5" />
+                       <Circle className="h-5 w-5 text-muted-foreground mt-0.5" />
                     )}
                     <div className="space-y-1">
-                       <h4 className="font-semibold text-sm">Status Modlitwy</h4>
+                       <h4 className="font-semibold text-sm">Status Modlitwy (Bieżący miesiąc)</h4>
                        {selectedMember.acknowledgments.length > 0 ? (
                           <div className="text-sm text-muted-foreground flex flex-col">
-                             <span className="text-green-700 dark:text-green-400 font-medium">Potwierdzone</span>
-                             <span className="flex items-center gap-1.5 mt-1 text-xs">
+                             <span className="text-green-700 dark:text-green-400 font-medium text-xs uppercase tracking-wide">Potwierdzone</span>
+                             <span className="flex items-center gap-1.5 mt-1 text-xs opacity-80">
                                 <CalendarClock className="h-3 w-3" />
                                 {formatFullDate(selectedMember.acknowledgments[0].created_at)}
                              </span>
                           </div>
                        ) : (
-                          <p className="text-sm text-muted-foreground">Oczekuje na potwierdzenie.</p>
+                          <p className="text-xs text-muted-foreground">Użytkownik nie potwierdził jeszcze modlitwy w tym miesiącu.</p>
                        )}
                     </div>
                  </div>
               </div>
 
-              {/* 3. SEKCJA ZMIANY GRUPY (PANEL AKCJI) */}
+              {/* MOVE ACTION */}
               <div className="space-y-3 pt-2">
-                 <Label className="flex items-center gap-2">
-                    <ArrowRightLeft className="h-4 w-4" /> Zarządzanie członkostwem
+                 <Label className="flex items-center gap-2 text-xs uppercase font-bold text-muted-foreground">
+                    <ArrowRightLeft className="h-3 w-3" /> Zmień przypisanie
                  </Label>
-                 <div className="p-4 border rounded-lg bg-card space-y-4">
-                    <div className="space-y-2">
-                        <Label className="text-xs text-muted-foreground">PRZENIEŚ DO GRUPY</Label>
-                        <select 
-                            className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                            value={editGroupId}
-                            onChange={(e) => setEditGroupId(e.target.value)}
-                        >
-                            <option value="">-- Wybierz nową grupę (lub usuń) --</option>
-                            {groups.map(g => <option key={g.id} value={g.id}>{g.name}</option>)}
-                        </select>
-                    </div>
-                    
-                    <Button className="w-full" onClick={handleUpdateGroup} disabled={loading} variant="secondary">
-                        <RefreshCcw className="h-4 w-4 mr-2" />
-                        {editGroupId ? "Zapisz i Przenieś" : "Zapisz i Usuń z grupy"}
+                 <div className="flex gap-2">
+                    <select 
+                        className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                        value={editGroupId}
+                        onChange={(e) => setEditGroupId(e.target.value)}
+                    >
+                        <option value="">-- Wybierz (lub usuń z grupy) --</option>
+                        {groups.map(g => <option key={g.id} value={g.id}>{g.name}</option>)}
+                    </select>
+                    <Button onClick={handleUpdateGroup} disabled={loading}>
+                        <RefreshCcw className="h-4 w-4" />
                     </Button>
-                    
-                    <p className="text-[10px] text-muted-foreground text-center">
-                        Uwaga: Zmiana grupy resetuje status modlitwy w bieżącym miesiącu.
-                    </p>
                  </div>
+                 <p className="text-[10px] text-muted-foreground ml-1">
+                    * Zmiana grupy spowoduje wyczyszczenie statusu modlitwy.
+                 </p>
               </div>
 
-              {/* 4. FOOTER (USUWANIE) */}
-              <div className="pt-2 flex justify-center">
-                 <Button variant="link" className="text-red-500 hover:text-red-700 h-auto py-2 text-xs" onClick={handleDeleteUser} disabled={loading}>
-                   <Trash2 className="h-3 w-3 mr-1.5" /> Usuń konto użytkownika trwale
+              {/* DANGER ZONE */}
+              <div className="pt-4 mt-2 border-t flex justify-center">
+                 <Button 
+                    variant="ghost" 
+                    size="sm"
+                    className="text-red-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950/30 text-xs h-9" 
+                    onClick={handleDeleteUser} 
+                    disabled={loading}
+                 >
+                   <Trash2 className="h-3 w-3 mr-2" /> 
+                   Trwale usuń konto użytkownika
                  </Button>
               </div>
             </div>
