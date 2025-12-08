@@ -7,6 +7,7 @@ const corsHeaders = {
 }
 
 serve(async (req) => {
+  // Obsługa CORS
   if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders })
 
   try {
@@ -21,7 +22,7 @@ serve(async (req) => {
 
     let assignedPos = null;
 
-    // --- LOGIKA PRZYDZIAŁU MIEJSCA W RÓŻY ---
+    // --- LOGIKA PRZYDZIAŁU MIEJSCA W RÓŻY (Zachowana Twoja logika) ---
     if (groupId) {
       // 1. Pobierz zajęte pozycje w tej grupie
       const { data: members, error: groupError } = await supabaseAdmin
@@ -57,16 +58,18 @@ serve(async (req) => {
 
     if (userError) throw userError
 
-    // Tworzenie Profilu z przypisaną pozycją
+    // Tworzenie/Aktualizacja Profilu
     if (userData.user) {
       const { error: profileError } = await supabaseAdmin
         .from('profiles')
-        .insert({
+        // Używamy UPSERT zamiast INSERT, żeby nie kłóciło się z triggerem SQL
+        .upsert({
           id: userData.user.id,
           full_name: fullName,
+          email: email,             // <--- DODANO: Teraz zapisujemy email jawnie
           role: 'user',
           group_id: groupId || null,
-          rose_pos: assignedPos // ZAPISUJEMY NUMER KRZESŁA
+          rose_pos: assignedPos     // ZAPISUJEMY WYLICZONY NUMER KRZESŁA
         })
       
       if (profileError) throw profileError
@@ -81,7 +84,7 @@ serve(async (req) => {
       status: 200,
     })
 
-  } catch (error) {
+  } catch (error: any) {
     return new Response(JSON.stringify({ error: error.message }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       status: 400,
