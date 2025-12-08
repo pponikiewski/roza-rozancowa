@@ -1,18 +1,11 @@
-import { Outlet, NavLink, useNavigate } from "react-router-dom"
-import { supabase } from "@/lib/supabase"
+import { Outlet, NavLink } from "react-router-dom"
 import { Button } from "@/components/ui/button"
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet" // Potrzebujemy tego do menu mobilnego
-import { Users, Settings, LogOut, LayoutDashboard, Menu } from "lucide-react"
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
+import { Users, Settings, LayoutDashboard, Menu } from "lucide-react"
 import { useState } from "react"
 
 export default function AdminLayout() {
-  const navigate = useNavigate()
   const [open, setOpen] = useState(false) // Stan otwarcia menu mobilnego
-
-  const handleLogout = async () => {
-    await supabase.auth.signOut()
-    navigate("/login")
-  }
 
   // --- KOMPONENT NAWIGACJI (Wspólny dla Desktop i Mobile) ---
   const NavContent = () => (
@@ -44,12 +37,7 @@ export default function AdminLayout() {
         </NavLink>
       </nav>
 
-      <div className="p-4 border-t">
-        <Button variant="ghost" className="w-full justify-start gap-3 text-red-500 hover:text-red-600 hover:bg-red-50" onClick={handleLogout}>
-          <LogOut className="h-4 w-4" />
-          Wyloguj
-        </Button>
-      </div>
+      {/* USUNIĘTO SEKCJĘ LOGOUT Z DOŁU */}
     </div>
   )
 
