@@ -5,13 +5,22 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Input } from "@/components/ui/input"
-import { Save, CalendarHeart, Check } from "lucide-react"
+import { Save, CalendarHeart, Check, History } from "lucide-react"
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table"
 
 export default function AdminSettings() {
   const [loading, setLoading] = useState(false)
   const [title, setTitle] = useState("")
   const [content, setContent] = useState("")
   const [saved, setSaved] = useState(false)
+  const [history, setHistory] = useState<any[]>([])
 
   const date = new Date()
   const currentMonth = date.getMonth() + 1
@@ -20,6 +29,7 @@ export default function AdminSettings() {
 
   useEffect(() => {
     fetchIntention()
+    fetchHistory()
   }, [])
 
   const fetchIntention = async () => {
@@ -33,6 +43,18 @@ export default function AdminSettings() {
     if (data) {
       setTitle(data.title || "")
       setContent(data.content || "")
+    }
+  }
+
+  const fetchHistory = async () => {
+    const { data } = await supabase
+      .from('intentions')
+      .select('*')
+      .order('year', { ascending: false })
+      .order('month', { ascending: false })
+    
+    if (data) {
+      setHistory(data)
     }
   }
 
@@ -55,8 +77,17 @@ export default function AdminSettings() {
       alert("Błąd: " + error.message)
     } else {
       setSaved(true)
+      setTitle("")
+      setContent("")
+      fetchHistory()
       setTimeout(() => setSaved(false), 3000)
     }
+  }
+
+  const getMonthName = (monthNumber: number) => {
+    const date = new Date();
+    date.setMonth(monthNumber - 1);
+    return date.toLocaleString('pl-PL', { month: 'long' });
   }
 
   return (
@@ -83,10 +114,9 @@ export default function AdminSettings() {
         <CardContent className="space-y-6">
           
           <div className="space-y-2">
-            <Label htmlFor="title">Nagłówek (Za kogo?)</Label>
+            <Label htmlFor="title">Nagłówek</Label>
             <Input 
               id="title" 
-              placeholder="np. Za chrześcijan prześladowanych..." 
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               className="font-semibold"
@@ -94,10 +124,9 @@ export default function AdminSettings() {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="content">Treść modlitwy (Módlmy się...)</Label>
+            <Label htmlFor="content">Treść modlitwy</Label>
             <Textarea 
               id="content" 
-              placeholder="np. Módlmy się, aby..." 
               className="min-h-[120px] text-base leading-relaxed"
               value={content}
               onChange={(e) => setContent(e.target.value)}
@@ -107,6 +136,47 @@ export default function AdminSettings() {
           <Button onClick={handleSave} disabled={loading} className="w-full sm:w-auto min-w-[150px]">
             {loading ? "Zapisywanie..." : saved ? <><Check className="mr-2 h-4 w-4" /> Zapisano</> : <><Save className="mr-2 h-4 w-4" /> Zapisz Intencję</>}
           </Button>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <div className="flex items-center gap-2">
+             <div className="p-2 bg-muted rounded-full">
+               <History className="h-5 w-5" />
+             </div>
+             <CardTitle>Historia Intencji</CardTitle>
+          </div>
+        </CardHeader>
+        <CardContent>
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead className="w-[150px]">Miesiąc</TableHead>
+                <TableHead>Intencja</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {history.map((item) => (
+                <TableRow key={`${item.year}-${item.month}`}>
+                  <TableCell className="font-medium capitalize">
+                    {getMonthName(item.month)} {item.year}
+                  </TableCell>
+                  <TableCell>
+                    <div className="font-semibold text-xs mb-1">{item.title}</div>
+                    <div className="text-xs text-muted-foreground line-clamp-2">{item.content}</div>
+                  </TableCell>
+                </TableRow>
+              ))}
+              {history.length === 0 && (
+                <TableRow>
+                  <TableCell colSpan={2} className="text-center text-muted-foreground py-6">
+                    Brak historii intencji
+                  </TableCell>
+                </TableRow>
+              )}
+            </TableBody>
+          </Table>
         </CardContent>
       </Card>
     </div>
