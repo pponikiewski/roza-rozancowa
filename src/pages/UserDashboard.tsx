@@ -21,7 +21,8 @@ export default function UserDashboard() {
   const [profile, setProfile] = useState<Profile | null>(null)
   const [mystery, setMystery] = useState<Mystery | null>(null)
   const [isAcknowledged, setIsAcknowledged] = useState(false)
-  const [timeLeft, setTimeLeft] = useState({ days: 0, hours: 0, minutes: 0 })
+  
+  const [timeLeft, setTimeLeft] = useState({ days: 0, hours: 0, minutes: 0, seconds: 0 })
 
   useEffect(() => {
     const fetchData = async () => {
@@ -64,11 +65,12 @@ export default function UserDashboard() {
           days: Math.floor(difference / (1000 * 60 * 60 * 24)),
           hours: Math.floor((difference / (1000 * 60 * 60)) % 24),
           minutes: Math.floor((difference / 1000 / 60) % 60),
+          seconds: Math.floor((difference / 1000) % 60),
         })
       }
     }
     calculateTimeLeft()
-    const timer = setInterval(calculateTimeLeft, 60000)
+    const timer = setInterval(calculateTimeLeft, 1000)
     return () => clearInterval(timer)
   }, [])
 
@@ -105,79 +107,81 @@ export default function UserDashboard() {
   )
 
   return (
-    // ZMIANA: min-h-screen pozwala stronie rosnąć. Flexbox centruje, ale py-8 daje marginesy, żeby nie dotykać krawędzi.
-    <div className="min-h-screen w-full bg-background flex flex-col">
+    <div className="min-h-[100dvh] w-full bg-background flex flex-col">
       
       {/* HEADER */}
-      <header className="px-6 py-4 flex justify-between items-center shrink-0">
+      <header className="px-4 py-3 pr-16 md:pr-24 flex justify-between items-center shrink-0">
         <div className="flex items-center gap-3">
-          <Avatar className="h-10 w-10 border border-border/50">
+          <Avatar className="h-8 w-8 border border-border/50">
             <AvatarFallback className="bg-primary/5 text-primary font-bold text-xs">{profile?.full_name.substring(0,1).toUpperCase()}</AvatarFallback>
           </Avatar>
           <div className="flex flex-col">
-            <span className="font-semibold text-sm leading-tight">{profile?.full_name}</span>
+            <span className="font-semibold text-xs leading-tight">{profile?.full_name}</span>
             <span className="text-[10px] text-muted-foreground uppercase tracking-wide">{profile?.groups?.name}</span>
           </div>
         </div>
-        <div className="pr-12">
-           <Button variant="ghost" size="icon" onClick={handleLogout} className="text-muted-foreground hover:text-destructive h-9 w-9">
-             <LogOut className="h-5 w-5" />
-           </Button>
-        </div>
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={handleLogout}
+          className="h-9 rounded-full px-3.5 gap-2 border-border/80 bg-background/70 backdrop-blur hover:bg-background/90 hover:text-destructive shadow-sm mt-1"
+        >
+          <LogOut className="h-4 w-4" />
+          <span className="text-xs font-semibold">Wyloguj</span>
+        </Button>
       </header>
 
-      {/* CONTENT: justify-center wyśrodkuje na dużych ekranach. Na małych paddingi (py-8) zapewnią odstęp. */}
-      <main className="flex-1 flex flex-col items-center justify-center w-full px-4 py-8">
+      {/* CONTENT */}
+      <main className="flex-1 flex flex-col items-center justify-center w-full px-4 py-2 gap-6">
         
-        <Card className="w-full max-w-md overflow-hidden border-none shadow-xl bg-card/80 backdrop-blur-md ring-1 ring-border/50">
+        <Card className="w-full max-w-sm overflow-hidden border-none shadow-xl bg-card/80 backdrop-blur-md ring-1 ring-border/50 rounded-xl">
           
-          {/* OBRAZEK: 
-              max-h-[40vh] - na wysokich ekranach zajmie max 40%.
-              h-auto - na małych dostosuje się proporcjonalnie.
-          */}
+          {/* OBRAZEK */}
           {mystery.image_url ? (
-            <div className="w-full bg-black/5 dark:bg-black/40 p-4 flex items-center justify-center">
+            <div className="w-full bg-black/5 dark:bg-black/40 p-2 flex items-center justify-center">
                <img 
                  src={mystery.image_url} 
                  alt={mystery.name} 
-                 className="w-auto h-auto max-h-[40vh] object-contain shadow-md rounded-sm" 
+                 className="w-auto h-auto max-h-[45vh] object-contain shadow-md rounded-md" 
                />
             </div>
           ) : (
-            <div className="h-32 flex items-center justify-center text-muted-foreground bg-muted/20">Brak obrazka</div>
+            <div className="h-24 flex items-center justify-center text-muted-foreground bg-muted/20">Brak obrazka</div>
           )}
 
           <div className="relative">
-             {/* Badge przeniesione nieco wyżej dla estetyki */}
              <div className="absolute -top-3 left-0 right-0 flex justify-center gap-2 px-4 pointer-events-none">
-                <Badge variant="secondary" className="shadow-sm border bg-background/95 backdrop-blur text-xs">{mystery.part}</Badge>
-                {profile?.rose_pos && <Badge variant="outline" className="bg-background/95 shadow-sm text-xs backdrop-blur">Miejsce #{profile.rose_pos}</Badge>}
+                <Badge variant="secondary" className="shadow-sm border bg-background/95 backdrop-blur text-[10px] px-2 h-5">{mystery.part}</Badge>
+                {profile?.rose_pos && <Badge variant="outline" className="bg-background/95 shadow-sm text-[10px] backdrop-blur px-2 h-5">Miejsce #{profile.rose_pos}</Badge>}
              </div>
 
-             <CardHeader className="text-center pt-6 pb-2 px-4">
-                <h2 className="text-xl md:text-2xl font-serif font-bold text-primary tracking-tight leading-tight mt-1">
+             <CardHeader className="text-center pt-4 pb-1 px-4">
+                <h2 className="text-lg md:text-xl font-serif font-bold text-primary tracking-tight leading-tight">
                   {mystery.name}
                 </h2>
              </CardHeader>
 
-             <CardContent className="text-center px-6 pb-6">
+             <CardContent className="text-center px-4 pb-4">
                 <div className="relative">
-                  <Quote className="h-4 w-4 text-primary/10 absolute -top-1 -left-2" />
-                  <p className="text-muted-foreground italic leading-relaxed font-serif text-sm md:text-base line-clamp-6 px-2">
+                  <Quote className="h-3 w-3 text-primary/10 absolute -top-1 -left-1" />
+                  <p className="text-muted-foreground italic leading-relaxed font-serif text-sm line-clamp-4 px-2">
                     {mystery.meditation}
                   </p>
                 </div>
              </CardContent>
 
-             <CardFooter className="px-6 pb-6 pt-0">
+             <CardFooter className="px-6 pb-4 pt-0 justify-center">
                 {isAcknowledged ? (
-                  <Button className="w-full h-12 text-base bg-green-600 hover:bg-green-700 text-white shadow-sm cursor-default">
-                    <CheckCircle2 className="mr-2 h-5 w-5" />
+                  // PRZYCISK: Mniejszy (h-9), węższy (max-w-[200px])
+                  <Button size="sm" className="h-9 w-full max-w-[200px] text-xs font-medium bg-green-600/90 hover:bg-green-600 text-white shadow-sm cursor-default rounded-xl">
+                    <CheckCircle2 className="mr-1.5 h-3.5 w-3.5" />
                     Potwierdzone
                   </Button>
                 ) : (
+                  // PRZYCISK: Mniejszy (h-9), węższy (max-w-[200px])
                   <Button 
-                    className="w-full h-12 text-base font-semibold shadow-md hover:scale-[1.02] transition-transform" 
+                    size="sm"
+                    className="h-9 w-full max-w-[200px] text-xs font-semibold shadow-md hover:scale-[1.02] transition-transform rounded-xl" 
                     onClick={handleAcknowledge}
                   >
                     Potwierdzam
@@ -187,18 +191,40 @@ export default function UserDashboard() {
           </div>
         </Card>
 
-        {/* LICZNIK: Marginesy (my-8) oddzielają go od karty i stopki strony */}
-        <div className="my-8 flex flex-col items-center gap-2 text-muted-foreground animate-in fade-in slide-in-from-bottom-2">
-           <div className="flex items-center gap-1.5 text-[10px] uppercase tracking-widest font-semibold opacity-60">
+        {/* LICZNIK - ZMNIEJSZONY do 'text-lg' (zamiast 2xl) */}
+        <div className="flex flex-col items-center gap-2 text-muted-foreground animate-in fade-in slide-in-from-bottom-2 shrink-0 pb-4">
+           <div className="flex items-center gap-1.5 text-[9px] uppercase tracking-widest font-semibold opacity-50">
               <Timer className="h-3 w-3" /> Zmiana tajemnic
            </div>
            
-           <div className="flex gap-3 text-sm font-mono bg-muted/40 px-6 py-2 rounded-full border border-border/40 shadow-sm backdrop-blur-sm">
-              <span className="flex items-baseline gap-0.5"><span className="font-bold text-foreground text-lg">{timeLeft.days}</span>d</span>
-              <span className="text-muted-foreground/30 text-lg">:</span>
-              <span className="flex items-baseline gap-0.5"><span className="font-bold text-foreground text-lg">{timeLeft.hours}</span>h</span>
-              <span className="text-muted-foreground/30 text-lg">:</span>
-              <span className="flex items-baseline gap-0.5"><span className="font-bold text-foreground text-lg">{timeLeft.minutes}</span>m</span>
+           <div className="flex gap-4 text-xs font-mono bg-muted/30 px-6 py-2 rounded-2xl border border-border/30 shadow-sm backdrop-blur-sm">
+              
+              <span className="flex items-baseline gap-0.5 text-rose-500">
+                <span className="font-bold text-lg">{timeLeft.days}</span>
+                <span className="text-[12px] opacity-80">d</span>
+              </span>
+              
+              <span className="text-muted-foreground/30 text-lg font-light self-center">:</span>
+              
+              <span className="flex items-baseline gap-0.5 text-rose-500">
+                <span className="font-bold text-lg">{timeLeft.hours}</span>
+                <span className="text-[12px] opacity-80">h</span>
+              </span>
+              
+              <span className="text-muted-foreground/30 text-lg font-light self-center">:</span>
+              
+              <span className="flex items-baseline gap-0.5 text-rose-500">
+                <span className="font-bold text-lg">{timeLeft.minutes}</span>
+                <span className="text-[12px] opacity-80">m</span>
+              </span>
+              
+              <span className="text-muted-foreground/30 text-lg font-light self-center">:</span>
+              
+              <span className="flex items-baseline gap-0.5 text-rose-500">
+                <span className="font-bold text-lg min-w-[1.2em] text-center">{timeLeft.seconds}</span>
+                <span className="text-[12px] opacity-80">s</span>
+              </span>
+
            </div>
         </div>
 

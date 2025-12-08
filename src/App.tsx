@@ -14,30 +14,24 @@ import AdminSettings from "@/pages/admin/AdminSettings"
 function App() {
   return (
     <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
-      {/* Przycisk motywu na dole po prawej */}
+      {/* GLOBALNY PRZYCISK - Zawsze na wierzchu, prawy górny róg */}
       <div className="fixed top-4 right-4 z-50">
         <ModeToggle />
       </div>
       
       <BrowserRouter>
         <Routes>
-          {/* GŁÓWNA STRONA TO TERAZ LOGOWANIE */}
           <Route path="/" element={<LoginPage />} />
-          
-          {/* Zachowujemy /login jako alias do strony głównej (dla wstecznej kompatybilności) */}
           <Route path="/login" element={<Navigate to="/" replace />} />
           
-          {/* Panel Użytkownika */}
           <Route path="/dashboard" element={<UserDashboard />} />
 
-          {/* Panel Administratora */}
           <Route path="/admin" element={<AdminLayout />}>
             <Route index element={<Navigate to="members" replace />} />
             <Route path="members" element={<AdminMembers />} />
             <Route path="settings" element={<AdminSettings />} />
           </Route>
 
-          {/* Wszystkie inne adresy kierują do logowania */}
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </BrowserRouter>
