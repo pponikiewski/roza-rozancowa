@@ -4,19 +4,18 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
+import { Input } from "@/components/ui/input"
 import { Save, CalendarHeart, Check } from "lucide-react"
 
 export default function AdminSettings() {
   const [loading, setLoading] = useState(false)
+  const [title, setTitle] = useState("")
   const [content, setContent] = useState("")
   const [saved, setSaved] = useState(false)
 
-  // Pobieramy obecną datę
   const date = new Date()
   const currentMonth = date.getMonth() + 1
   const currentYear = date.getFullYear()
-
-  // Nazwa miesiąca po polsku
   const monthName = date.toLocaleString('pl-PL', { month: 'long' })
 
   useEffect(() => {
@@ -26,24 +25,27 @@ export default function AdminSettings() {
   const fetchIntention = async () => {
     const { data } = await supabase
       .from('intentions')
-      .select('content')
+      .select('title, content')
       .eq('month', currentMonth)
       .eq('year', currentYear)
       .single()
     
-    if (data) setContent(data.content)
+    if (data) {
+      setTitle(data.title || "")
+      setContent(data.content || "")
+    }
   }
 
   const handleSave = async () => {
     setLoading(true)
     setSaved(false)
 
-    // Upsert (Wstaw lub Aktualizuj jeśli istnieje)
     const { error } = await supabase
       .from('intentions')
       .upsert({ 
         month: currentMonth, 
         year: currentYear, 
+        title: title,
         content: content 
       }, { onConflict: 'month, year' })
 
@@ -53,7 +55,7 @@ export default function AdminSettings() {
       alert("Błąd: " + error.message)
     } else {
       setSaved(true)
-      setTimeout(() => setSaved(false), 3000) // Ukryj "Zapisano" po 3s
+      setTimeout(() => setSaved(false), 3000)
     }
   }
 
@@ -78,29 +80,32 @@ export default function AdminSettings() {
              </div>
           </div>
         </CardHeader>
-        <CardContent className="space-y-4">
+        <CardContent className="space-y-6">
+          
           <div className="space-y-2">
-            <Label htmlFor="intention">Treść intencji</Label>
+            <Label htmlFor="title">Nagłówek (Za kogo?)</Label>
+            <Input 
+              id="title" 
+              placeholder="np. Za chrześcijan prześladowanych..." 
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              className="font-semibold"
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="content">Treść modlitwy (Módlmy się...)</Label>
             <Textarea 
-              id="intention" 
-              placeholder="Wpisz intencję, w której będziemy się modlić w tym miesiącu..." 
+              id="content" 
+              placeholder="np. Módlmy się, aby..." 
               className="min-h-[120px] text-base leading-relaxed"
               value={content}
               onChange={(e) => setContent(e.target.value)}
             />
-            <p className="text-xs text-muted-foreground">
-              Ta treść będzie widoczna dla wszystkich użytkowników na ich stronie głównej.
-            </p>
           </div>
 
           <Button onClick={handleSave} disabled={loading} className="w-full sm:w-auto min-w-[150px]">
-            {loading ? (
-              "Zapisywanie..."
-            ) : saved ? (
-              <><Check className="mr-2 h-4 w-4" /> Zapisano</>
-            ) : (
-              <><Save className="mr-2 h-4 w-4" /> Zapisz Intencję</>
-            )}
+            {loading ? "Zapisywanie..." : saved ? <><Check className="mr-2 h-4 w-4" /> Zapisano</> : <><Save className="mr-2 h-4 w-4" /> Zapisz Intencję</>}
           </Button>
         </CardContent>
       </Card>

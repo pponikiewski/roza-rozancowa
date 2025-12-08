@@ -14,15 +14,22 @@ interface Mystery {
 interface Profile {
   id: string; full_name: string; rose_pos: number | null; groups: { name: string } | null;
 }
+// Nowy typ dla Intencji
+interface Intention {
+  title: string;
+  content: string;
+}
 
 export default function UserDashboard() {
   const navigate = useNavigate()
   const [loading, setLoading] = useState(true)
   const [profile, setProfile] = useState<Profile | null>(null)
   const [mystery, setMystery] = useState<Mystery | null>(null)
-  const [intention, setIntention] = useState<string | null>(null) // NOWE: Stan intencji
-  const [isAcknowledged, setIsAcknowledged] = useState(false)
   
+  // Zmiana: Intencja to teraz obiekt (tytuł + treść) lub null
+  const [intention, setIntention] = useState<Intention | null>(null) 
+  
+  const [isAcknowledged, setIsAcknowledged] = useState(false)
   const [timeLeft, setTimeLeft] = useState({ days: 0, hours: 0, minutes: 0, seconds: 0 })
 
   useEffect(() => {
@@ -35,16 +42,21 @@ export default function UserDashboard() {
         .from('profiles').select('id, full_name, rose_pos, groups(name)').eq('id', user.id).single()
       if (profileData) setProfile(profileData as any)
 
-      // 2. NOWE: Pobieranie Intencji Miesięcznej
+      // 2. Pobieranie Intencji Miesięcznej
       const date = new Date()
       const { data: intentionData } = await supabase
         .from('intentions')
-        .select('content')
+        .select('title, content') // Pobieramy title i content
         .eq('month', date.getMonth() + 1)
         .eq('year', date.getFullYear())
         .single()
       
-      if (intentionData) setIntention(intentionData.content)
+      if (intentionData) {
+        setIntention({
+          title: intentionData.title || "",
+          content: intentionData.content
+        })
+      }
 
       // 3. Tajemnica
       let currentMysteryId: number | null = null
@@ -124,7 +136,7 @@ export default function UserDashboard() {
     <div className="min-h-[100dvh] w-full bg-background flex flex-col">
       
       {/* HEADER */}
-      <header className="px-4 py-3 pr-16 md:pr-24 flex justify-between items-center shrink-0">
+      <header className="px-4 py-3 flex justify-between items-center shrink-0">
         <div className="flex items-center gap-3">
           <Avatar className="h-8 w-8 border border-border/50">
             <AvatarFallback className="bg-primary/5 text-primary font-bold text-xs">{profile?.full_name.substring(0,1).toUpperCase()}</AvatarFallback>
@@ -134,28 +146,31 @@ export default function UserDashboard() {
             <span className="text-[10px] text-muted-foreground uppercase tracking-wide">{profile?.groups?.name}</span>
           </div>
         </div>
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={handleLogout}
-          className="h-9 rounded-full px-3.5 gap-2 border-border/80 bg-background/70 backdrop-blur hover:bg-background/90 hover:text-destructive shadow-sm mt-1"
-        >
-          <LogOut className="h-4 w-4" />
-          <span className="text-xs font-semibold">Wyloguj</span>
+        <Button variant="ghost" size="icon" onClick={handleLogout} className="text-muted-foreground hover:text-destructive h-8 w-8">
+             <LogOut className="h-4 w-4" />
         </Button>
       </header>
 
       {/* CONTENT */}
-      <main className="flex-1 flex flex-col items-center justify-center w-full px-4 py-2 gap-6">
+      <main className="flex-1 flex flex-col items-center justify-center w-full px-4 py-2 gap-4">
         
-        {/* NOWOŚĆ: SEKCJA INTENCJI (Pojawia się tylko jeśli admin ustawił) */}
+        {/* SEKCJA INTENCJI - ZMODYFIKOWANA */}
         {intention && (
-          <div className="w-full max-w-sm text-center animate-in fade-in slide-in-from-top-4 duration-700">
-             <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-rose-100 dark:bg-rose-900/30 text-rose-600 dark:text-rose-300 text-[10px] font-bold uppercase tracking-widest mb-2">
+          <div className="w-full max-w-sm text-center animate-in fade-in slide-in-from-top-4 duration-700 mb-2">
+             <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-rose-100 dark:bg-rose-900/30 text-rose-600 dark:text-rose-300 text-[10px] font-bold uppercase tracking-widest mb-3">
                 <HeartHandshake className="h-3 w-3" /> Intencja miesięczna
              </div>
-             <p className="text-sm font-medium text-foreground/90 leading-relaxed px-2 italic">
-                "{intention}"
+             
+             {/* TYTUŁ (Za kogo?) */}
+             {intention.title && (
+               <h3 className="text-sm font-bold text-foreground leading-snug mb-1">
+                 {intention.title}
+               </h3>
+             )}
+             
+             {/* TREŚĆ (Módlmy się...) */}
+             <p className="text-xs text-muted-foreground leading-relaxed px-2">
+                {intention.content}
              </p>
           </div>
         )}
@@ -183,7 +198,7 @@ export default function UserDashboard() {
              </div>
 
              <CardHeader className="text-center pt-4 pb-1 px-4">
-               <h2 className="text-lg md:text-xl font-bold text-primary tracking-tight leading-tight">
+                <h2 className="text-lg md:text-xl font-serif font-bold text-primary tracking-tight leading-tight">
                   {mystery.name}
                 </h2>
              </CardHeader>
@@ -191,7 +206,7 @@ export default function UserDashboard() {
              <CardContent className="text-center px-4 pb-4">
                 <div className="relative">
                   <Quote className="h-3 w-3 text-primary/10 absolute -top-1 -left-1" />
-                  <p className="text-muted-foreground italic leading-relaxed text-sm line-clamp-4 px-2">
+                  <p className="text-muted-foreground italic leading-relaxed font-serif text-sm line-clamp-4 px-2">
                     {mystery.meditation}
                   </p>
                 </div>
@@ -199,13 +214,11 @@ export default function UserDashboard() {
 
              <CardFooter className="px-6 pb-4 pt-0 justify-center">
                 {isAcknowledged ? (
-                  // PRZYCISK: Mały, zaokrąglony (rounded-xl)
                   <Button size="sm" className="h-9 w-full max-w-[200px] text-xs font-medium bg-green-600/90 hover:bg-green-600 text-white shadow-sm cursor-default rounded-xl">
                     <CheckCircle2 className="mr-1.5 h-3.5 w-3.5" />
                     Potwierdzone
                   </Button>
                 ) : (
-                  // PRZYCISK: Mały, zaokrąglony (rounded-xl)
                   <Button 
                     size="sm"
                     className="h-9 w-full max-w-[200px] text-xs font-semibold shadow-md hover:scale-[1.02] transition-transform rounded-xl" 
@@ -218,32 +231,20 @@ export default function UserDashboard() {
           </div>
         </Card>
 
-        {/* LICZNIK (RÓŻOWY, POGRUBIONY) */}
+        {/* LICZNIK */}
         <div className="flex flex-col items-center gap-2 text-muted-foreground animate-in fade-in slide-in-from-bottom-2 shrink-0 pb-4">
            <div className="flex items-center gap-1.5 text-[9px] uppercase tracking-widest font-semibold opacity-50">
               <Timer className="h-3 w-3" /> Zmiana tajemnic
            </div>
            
            <div className="flex gap-4 text-xs font-mono bg-muted/30 px-6 py-2 rounded-2xl border border-border/30 shadow-sm backdrop-blur-sm">
-              <span className="flex items-baseline gap-0.5 text-rose-500">
-                <span className="font-bold text-lg">{timeLeft.days}</span>
-                <span className="text-[12px] opacity-80">d</span>
-              </span>
+              <span className="flex items-baseline gap-0.5 text-rose-500"><span className="font-bold text-lg">{timeLeft.days}</span><span className="text-[10px] opacity-80">d</span></span>
               <span className="text-muted-foreground/30 text-lg font-light self-center">:</span>
-              <span className="flex items-baseline gap-0.5 text-rose-500">
-                <span className="font-bold text-lg">{timeLeft.hours}</span>
-                <span className="text-[12px] opacity-80">h</span>
-              </span>
+              <span className="flex items-baseline gap-0.5 text-rose-500"><span className="font-bold text-lg">{timeLeft.hours}</span><span className="text-[10px] opacity-80">h</span></span>
               <span className="text-muted-foreground/30 text-lg font-light self-center">:</span>
-              <span className="flex items-baseline gap-0.5 text-rose-500">
-                <span className="font-bold text-lg">{timeLeft.minutes}</span>
-                <span className="text-[12px] opacity-80">m</span>
-              </span>
+              <span className="flex items-baseline gap-0.5 text-rose-500"><span className="font-bold text-lg">{timeLeft.minutes}</span><span className="text-[10px] opacity-80">m</span></span>
               <span className="text-muted-foreground/30 text-lg font-light self-center">:</span>
-              <span className="flex items-baseline gap-0.5 text-rose-500">
-                <span className="font-bold text-lg min-w-[1.2em] text-center">{timeLeft.seconds}</span>
-                <span className="text-[12px] opacity-80">s</span>
-              </span>
+              <span className="flex items-baseline gap-0.5 text-rose-500"><span className="font-bold text-lg min-w-[1.2em] text-center">{timeLeft.seconds}</span><span className="text-[10px] opacity-80">s</span></span>
            </div>
         </div>
 
