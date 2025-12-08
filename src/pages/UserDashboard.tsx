@@ -6,7 +6,6 @@ import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Separator } from "@/components/ui/separator"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog"
-import { ScrollArea } from "@/components/ui/scroll-area"
 import { CheckCircle2, AlertCircle, LogOut, Timer, ChevronRight, Loader2, Users, Flower2, ScrollText } from "lucide-react"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 
@@ -15,14 +14,12 @@ interface Mystery {
   id: number; part: string; name: string; meditation: string; image_url: string;
 }
 interface Profile {
-  // Zmiana: groups musi zawierać id, abyśmy mogli pobrać innych członków tej grupy
   id: string; full_name: string; rose_pos: number | null; groups: { id: number, name: string } | null;
 }
 interface Intention {
   title: string;
   content: string;
 }
-// Nowy typ dla członka listy
 interface RoseMember {
   id: string
   full_name: string
@@ -52,7 +49,7 @@ export default function UserDashboard() {
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) { navigate("/login"); return }
 
-      // 1. Profil (Pobieramy teraz ID grupy oraz nazwę)
+      // 1. Profil
       const { data: profileData } = await supabase
         .from('profiles')
         .select('id, full_name, rose_pos, groups(id, name)')
@@ -96,7 +93,6 @@ export default function UserDashboard() {
     fetchData()
   }, [navigate])
 
-  // Timer odliczający do końca miesiąca
   useEffect(() => {
     const calculateTimeLeft = () => {
       const now = new Date()
@@ -120,28 +116,23 @@ export default function UserDashboard() {
     return () => clearInterval(timer)
   }, [])
 
-  // --- FUNKCJA: Pobieranie członków róży (Lazy Load) ---
   const handleOpenRose = async () => {
     setIsRoseOpen(true)
-    // Jeśli nie mamy grupy lub dane są już pobrane, nie robimy zapytania
     if (!profile?.groups?.id || roseMembers.length > 0) return
 
     setRoseLoading(true)
     try {
-        // 1. Pobierz wszystkich z tej samej grupy (SQL Policy musi na to pozwalać)
         const { data: members, error } = await supabase
             .from('profiles')
             .select('id, full_name, rose_pos')
-            .eq('group_id', profile.groups.id) // Zakładam, że w bazie kolumna klucza obcego to group_id
+            .eq('group_id', profile.groups.id)
             .order('rose_pos', { ascending: true })
 
         if (error) throw error
 
-        // 2. Pobierz słownik tajemnic (id -> nazwa)
         const { data: allMysteries } = await supabase.from('mysteries').select('id, name')
 
         if (members && allMysteries) {
-            // 3. Dla każdego członka wylicz jego aktualną tajemnicę
             const processed = await Promise.all(members.map(async (m) => {
                 const { data: mysteryId } = await supabase.rpc('get_mystery_id_for_user', { p_user_id: m.id })
                 const mysteryName = allMysteries.find(mys => mys.id === mysteryId)?.name || "Brak przydziału"
@@ -180,7 +171,6 @@ export default function UserDashboard() {
     navigate("/login")
   }
 
-  // --- LOADER ---
   if (loading) return (
     <div className="flex h-screen w-full items-center justify-center bg-muted/30">
       <div className="flex flex-col items-center gap-4">
@@ -190,7 +180,6 @@ export default function UserDashboard() {
     </div>
   )
 
-  // --- BRAK PRZYDZIAŁU ---
   if (!mystery) return (
     <div className="flex flex-col min-h-screen bg-muted/30 p-6 items-center justify-center text-center">
       <Card className="w-full max-w-sm border-dashed border-2 shadow-none bg-transparent">
@@ -215,14 +204,12 @@ export default function UserDashboard() {
     </div>
   )
 
-  // --- GŁÓWNY WIDOK ---
   return (
     <div className="min-h-screen w-full bg-muted/20 flex flex-col pb-safe">
       
       {/* HEADER */}
       <header className="sticky top-0 z-10 bg-background/80 backdrop-blur-md border-b px-6 py-3 flex justify-between items-center shadow-sm">
         
-        {/* KLIKALNA SEKCJA PROFILU (OTWIERA MODAL) */}
         <div 
             className="flex items-center gap-3 cursor-pointer p-1.5 -ml-1.5 rounded-lg hover:bg-muted/60 transition-colors group select-none"
             onClick={handleOpenRose}
@@ -236,7 +223,6 @@ export default function UserDashboard() {
           <div className="flex flex-col">
             <span className="text-sm font-semibold leading-none flex items-center gap-1.5">
                 {profile?.full_name}
-                {/* Ikona sugerująca, że można kliknąć */}
                 <Users className="h-3 w-3 text-muted-foreground/50 group-hover:text-primary transition-colors" />
             </span>
             <span className="text-[11px] text-muted-foreground mt-0.5 font-medium group-hover:text-foreground transition-colors">
@@ -245,16 +231,14 @@ export default function UserDashboard() {
           </div>
         </div>
 
-        {/* Przycisk Wyloguj - oddzielny od sekcji profilu */}
         <Button variant="ghost" size="icon" onClick={handleLogout} className="text-muted-foreground hover:text-destructive hover:bg-destructive/10">
              <LogOut className="h-5 w-5" />
         </Button>
       </header>
 
-      {/* SCROLLABLE CONTENT */}
+      {/* CONTENT */}
       <main className="flex-1 w-full max-w-lg mx-auto p-4 flex flex-col gap-5">
         
-        {/* SEKCJA INTENCJI */}
         {intention && (
           <div className="bg-gradient-to-br from-rose-50 to-white dark:from-rose-950/30 dark:to-background border border-rose-100 dark:border-rose-900/50 rounded-xl p-5 shadow-sm">
              <div>
@@ -273,9 +257,7 @@ export default function UserDashboard() {
           </div>
         )}
 
-        {/* KARTA TAJEMNICY */}
         <Card className="overflow-hidden shadow-lg border-border/60">
-          
           <div className="w-full bg-black/5 dark:bg-black/20 flex items-center justify-center p-4">
              {mystery.image_url ? (
                 <img 
@@ -344,7 +326,7 @@ export default function UserDashboard() {
 
       {/* --- MODAL MOJA RÓŻA --- */}
       <Dialog open={isRoseOpen} onOpenChange={setIsRoseOpen}>
-        <DialogContent className="max-w-md max-h-[90vh] flex flex-col p-0 gap-0 overflow-hidden">
+        <DialogContent className="max-w-md max-h-[85vh] flex flex-col p-0 gap-0 overflow-hidden">
             <div className="p-6 pb-4 border-b bg-muted/20">
                 <DialogHeader>
                     <DialogTitle className="flex items-center gap-2">
@@ -357,7 +339,14 @@ export default function UserDashboard() {
                 </DialogHeader>
             </div>
 
-            <ScrollArea className="flex-1 p-0">
+            {/* ZMIANA: Stylizacja paska scrolla (custom scrollbar) */}
+            <div className="
+                flex-1 overflow-y-auto min-h-0
+                [&::-webkit-scrollbar]:w-1.5
+                [&::-webkit-scrollbar-track]:bg-transparent
+                [&::-webkit-scrollbar-thumb]:bg-muted-foreground/20
+                [&::-webkit-scrollbar-thumb]:rounded-full
+            ">
                 {roseLoading ? (
                     <div className="flex flex-col items-center justify-center p-12 gap-3 text-muted-foreground">
                         <Loader2 className="h-6 w-6 animate-spin text-primary" /> 
@@ -375,12 +364,9 @@ export default function UserDashboard() {
                                     key={member.id} 
                                     className={`flex items-center p-4 gap-3 transition-colors ${member.id === profile?.id ? "bg-primary/5" : "hover:bg-muted/50"}`}
                                 >
-                                    {/* Pozycja */}
                                     <div className="flex flex-col items-center justify-center h-8 w-8 min-w-[2rem] rounded-full bg-background border text-xs font-semibold text-muted-foreground shadow-sm">
                                         {member.rose_pos || "-"}
                                     </div>
-                                    
-                                    {/* Dane */}
                                     <div className="flex flex-col min-w-0">
                                         <div className="flex items-center gap-2">
                                             <span className={`text-sm font-medium truncate ${member.id === profile?.id ? "text-primary" : "text-foreground"}`}>
@@ -400,7 +386,7 @@ export default function UserDashboard() {
                         )}
                     </div>
                 )}
-            </ScrollArea>
+            </div>
         </DialogContent>
       </Dialog>
     </div>

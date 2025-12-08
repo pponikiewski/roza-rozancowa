@@ -93,8 +93,8 @@ export default function AdminSettings() {
   return (
     <div className="space-y-6 max-w-2xl mx-auto">
       <div>
-        <h1 className="text-3xl font-bold tracking-tight">Ustawienia</h1>
-        <p className="text-muted-foreground">Konfiguracja aplikacji.</p>
+        <h1 className="text-3xl font-bold tracking-tight">Intencja</h1>
+        <p className="text-muted-foreground">Zmiana intencji modlitwy na dany miesiąc.</p>
       </div>
 
       <Card>
