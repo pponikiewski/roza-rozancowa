@@ -121,7 +121,7 @@ export default function LoginPage() {
 
       {/* SEKCJA CYTATU (FOOTER) */}
       <div className="mt-12 max-w-sm text-center px-4">
-        <blockquote className="italic text-muted-foreground font-serif">
+        <blockquote className="italic text-muted-foreground">
           &ldquo;{quote.text}&rdquo;
         </blockquote>
         <p className="text-xs text-primary mt-2 font-medium">

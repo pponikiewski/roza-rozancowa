@@ -7,6 +7,9 @@ export default {
   ],
   theme: {
   	extend: {
+		fontFamily: {
+			sans: ["Inter", "var(--font-sans)", "system-ui", "-apple-system", "Segoe UI", "sans-serif"],
+		},
   		borderRadius: {
   			lg: 'var(--radius)',
   			md: 'calc(var(--radius) - 2px)',
