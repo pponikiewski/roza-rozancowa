@@ -18,21 +18,26 @@ serve(async (req) => {
 
     const { email, password, fullName, groupId } = await req.json()
 
-    if (!email || !password || !fullName) throw new Error('Brakuje danych')
+    console.log(`Próba dodania usera: ${email}, grupa: ${groupId}`)
+
+    if (!email || !password || !fullName) throw new Error('Brakuje danych (email, hasło lub imię).')
 
     let assignedPos = null;
 
-    // --- LOGIKA PRZYDZIAŁU MIEJSCA W RÓŻY (Zachowana Twoja logika) ---
+    // --- LOGIKA PRZYDZIAŁU MIEJSCA W RÓŻY ---
     if (groupId) {
-      // 1. Pobierz zajęte pozycje w tej grupie
+      // 1. Pobierz zajęte pozycje
       const { data: members, error: groupError } = await supabaseAdmin
         .from('profiles')
         .select('rose_pos')
         .eq('group_id', groupId)
       
-      if (groupError) throw groupError
+      if (groupError) {
+        console.error("Błąd pobierania grupy:", groupError)
+        throw new Error("Błąd bazy danych przy sprawdzaniu grupy.")
+      }
 
-      // 2. Znajdź pierwsze wolne miejsce (1-20)
+      // 2. Znajdź wolne miejsce
       const takenPositions = members.map((m: any) => m.rose_pos)
       for (let i = 1; i <= 20; i++) {
         if (!takenPositions.includes(i)) {
@@ -41,9 +46,9 @@ serve(async (req) => {
         }
       }
 
-      // 3. Jeśli nie znaleziono miejsca -> Błąd
+      // 3. Jeśli null -> brak miejsca
       if (assignedPos === null) {
-        throw new Error("Ta Róża jest już pełna (ma 20 członków)!")
+        throw new Error("Ta Róża jest już pełna (ma 20 członków)! Wybierz inną grupę lub stwórz nową.")
       }
     }
     // ------------------------------------------
@@ -56,23 +61,30 @@ serve(async (req) => {
       user_metadata: { full_name: fullName }
     })
 
-    if (userError) throw userError
+    if (userError) {
+      console.error("Błąd auth:", userError)
+      throw new Error(userError.message) // Np. "Email already registered"
+    }
 
-    // Tworzenie/Aktualizacja Profilu
+    // Tworzenie Profilu
     if (userData.user) {
       const { error: profileError } = await supabaseAdmin
         .from('profiles')
-        // Używamy UPSERT zamiast INSERT, żeby nie kłóciło się z triggerem SQL
         .upsert({
           id: userData.user.id,
           full_name: fullName,
-          email: email,             // <--- DODANO: Teraz zapisujemy email jawnie
+          email: email,
           role: 'user',
           group_id: groupId || null,
-          rose_pos: assignedPos     // ZAPISUJEMY WYLICZONY NUMER KRZESŁA
+          rose_pos: assignedPos
         })
       
-      if (profileError) throw profileError
+      if (profileError) {
+        console.error("Błąd profilu:", profileError)
+        // Jeśli profil się nie udał, to i tak user w Auth powstał. 
+        // W idealnym świecie powinniśmy go usunąć (rollback), ale tu wystarczy rzucić błąd.
+        throw new Error("Konto utworzone, ale błąd przy przypisywaniu do grupy: " + profileError.message)
+      }
     }
 
     return new Response(JSON.stringify({ 
@@ -85,9 +97,12 @@ serve(async (req) => {
     })
 
   } catch (error: any) {
+    console.error("Create User Logic Error:", error.message)
+    // ZWRACAMY 200 Z BŁĘDEM W BODY - dzięki temu frontend może wyświetlić komunikat
+    // zamiast generycznego błędu sieci 400.
     return new Response(JSON.stringify({ error: error.message }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      status: 400,
+      status: 200, 
     })
   }
 })

@@ -118,7 +118,10 @@ export default function AdminMembers() {
       setFormData({ email: "", password: "", fullName: "", groupId: "" })
       fetchData()
       alert(`Pomyślnie dodano użytkownika!`)
-    } catch (err: any) { alert("Błąd: " + err.message) } finally { setLoading(false) }
+    } catch (err: any) { 
+      console.error("Błąd dodawania użytkownika:", err)
+      alert("Błąd: " + (err.message || "Wystąpił nieznany błąd")) 
+    } finally { setLoading(false) }
   }
 
   const handleUpdateGroup = async () => {
