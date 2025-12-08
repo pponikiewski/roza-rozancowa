@@ -14,13 +14,14 @@ import AdminLayout from "@/layouts/AdminLayout"
 import AdminMembers from "@/pages/admin/AdminMembers"
 import AdminSettings from "@/pages/admin/AdminSettings"
 
-// --- NOWY KOMPONENT: PŁYWAJĄCE MENU ---
-// Musi być osobnym komponentem, aby mógł używać hooków routera (useLocation, useNavigate)
+// --- NOWE IMPORTY (ZABEZPIECZENIA) ---
+import { ProtectedRoute, AdminRoute } from "@/components/ProtectedRoute"
+
+// --- KOMPONENT: PŁYWAJĄCE MENU ---
 function GlobalControls() {
   const location = useLocation()
   const navigate = useNavigate()
 
-  // Sprawdzamy, czy jesteśmy na stronie logowania (ukrywamy wtedy przycisk wylogowania)
   const isLoginPage = location.pathname === "/" || location.pathname === "/login"
 
   const handleLogout = async () => {
@@ -53,21 +54,29 @@ function App() {
     <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
       <BrowserRouter>
         
-        {/* Wstawiamy nasze sterowanie WEWNĄTRZ Routera */}
         <GlobalControls />
 
         <Routes>
+          {/* TRASY PUBLICZNE */}
           <Route path="/" element={<LoginPage />} />
           <Route path="/login" element={<Navigate to="/" replace />} />
           
-          <Route path="/dashboard" element={<UserDashboard />} />
-
-          <Route path="/admin" element={<AdminLayout />}>
-            <Route index element={<Navigate to="members" replace />} />
-            <Route path="members" element={<AdminMembers />} />
-            <Route path="settings" element={<AdminSettings />} />
+          {/* TRASY CHRONIONE DLA UŻYTKOWNIKA (Musi być zalogowany) */}
+          <Route element={<ProtectedRoute />}>
+             <Route path="/dashboard" element={<UserDashboard />} />
           </Route>
 
+          {/* TRASY CHRONIONE DLA ADMINA (Musi być zalogowany + mieć rolę 'admin') */}
+          {/* AdminRoute sprawdzi rolę. Jeśli ok -> renderuje AdminLayout */}
+          <Route path="/admin" element={<AdminRoute />}>
+            <Route element={<AdminLayout />}>
+               <Route index element={<Navigate to="members" replace />} />
+               <Route path="members" element={<AdminMembers />} />
+               <Route path="settings" element={<AdminSettings />} />
+            </Route>
+          </Route>
+
+          {/* FALLBACK - Jeśli wpisze głupoty w URL */}
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </BrowserRouter>
