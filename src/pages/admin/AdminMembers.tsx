@@ -12,6 +12,8 @@ import {
   UserPlus, Search, Trash2, Users, RefreshCcw, ScrollText, 
   Shield, User, CheckCircle2, Circle, AlertCircle, CalendarClock, ArrowRightLeft, Mail, Lock, Eye, EyeOff
 } from "lucide-react"
+// 1. IMPORTUJEMY TOAST
+import { toast } from "sonner"
 
 // --- TYPY DANYCH ---
 interface Group { id: number; name: string }
@@ -104,7 +106,8 @@ export default function AdminMembers() {
     })
   }
 
-  // --- HANDLERY ---
+  // --- HANDLERY Z TOASTAMI ---
+  
   const handleCreateUser = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true)
@@ -117,10 +120,18 @@ export default function AdminMembers() {
       setIsAddOpen(false)
       setFormData({ email: "", password: "", fullName: "", groupId: "" })
       fetchData()
-      alert(`Pomyślnie dodano użytkownika!`)
+      
+      // SUKCES TOAST
+      toast.success("Sukces!", {
+        description: `Dodano użytkownika: ${formData.fullName}`
+      })
+
     } catch (err: any) { 
       console.error("Błąd dodawania użytkownika:", err)
-      alert("Błąd: " + (err.message || "Wystąpił nieznany błąd")) 
+      // BŁĄD TOAST
+      toast.error("Błąd tworzenia", {
+        description: err.message || "Wystąpił nieznany błąd"
+      })
     } finally { setLoading(false) }
   }
 
@@ -135,14 +146,27 @@ export default function AdminMembers() {
       })
       if (error) throw error
       await fetchData()
-      alert("Grupa została zaktualizowana.")
+      
+      toast.success("Zaktualizowano", {
+        description: "Przypisanie do grupy zostało zmienione."
+      })
+      
       setSelectedMember(null)
-    } catch (err: any) { alert("Błąd: " + err.message) } finally { setActionLoading(false) }
+    } catch (err: any) { 
+      toast.error("Błąd aktualizacji", {
+        description: err.message
+      })
+    } finally { setActionLoading(false) }
   }
 
   const handlePasswordChange = async () => {
     if (!selectedMember || !newPassword) return
-    if (newPassword.length < 6) { alert("Hasło musi mieć min. 6 znaków"); return }
+    if (newPassword.length < 6) { 
+      toast.warning("Hasło za krótkie", {
+        description: "Hasło musi mieć minimum 6 znaków."
+      })
+      return 
+    }
     
     setActionLoading(true)
     try {
@@ -152,24 +176,38 @@ export default function AdminMembers() {
 
         if (error || data?.error) throw new Error(error?.message || data?.error)
         
-        alert("Hasło zostało zmienione pomyślnie.")
+        toast.success("Hasło zmienione", {
+          description: "Nowe hasło zostało ustawione pomyślnie."
+        })
         setNewPassword("")
     } catch (err: any) {
-        alert("Błąd zmiany hasła: " + err.message)
+        toast.error("Błąd zmiany hasła", {
+          description: err.message
+        })
     } finally {
         setActionLoading(false)
     }
   }
 
   const handleDeleteUser = async () => {
+    // Confirm zostawiamy natywny, bo jest bezpieczniejszy (blokuje przeglądarkę)
     if (!selectedMember || !confirm("CZY NA PEWNO? To usunie konto bezpowrotnie.")) return
     setActionLoading(true)
     try {
       const { data, error } = await supabase.functions.invoke('delete-user', { body: { user_id: selectedMember.id } })
       if (error || data?.error) throw new Error(error?.message || data?.error)
+      
+      toast.success("Użytkownik usunięty", {
+        description: "Konto zostało trwale usunięte z bazy."
+      })
+      
       setSelectedMember(null)
       fetchData()
-    } catch (err: any) { alert("Błąd: " + err.message) } finally { setActionLoading(false) }
+    } catch (err: any) { 
+      toast.error("Błąd usuwania", {
+        description: err.message
+      })
+    } finally { setActionLoading(false) }
   }
 
   // --- UI LISTY ---
@@ -272,11 +310,9 @@ export default function AdminMembers() {
 
 
   return (
-    // ZMIANA: pt-16 (padding top) aby odsunąć treść od fixed buttonów na górze
     <div className="space-y-6 pb-24 max-w-6xl mx-auto p-6 pt-16">
       
       {/* HEADER */}
-      {/* justify-between zapewnia, że przycisk jest na samym końcu linii */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 border-b pb-6">
         <div className="space-y-1">
           <h1 className="text-2xl font-bold tracking-tight">Struktura Róż</h1>
@@ -383,11 +419,18 @@ export default function AdminMembers() {
                     </span>
                   </div>
                 </DialogTitle>
+                <DialogDescription className="sr-only">Szczegóły profilu użytkownika</DialogDescription>
               </DialogHeader>
            </div>
           
           {selectedMember && (
-            <div className="p-6 space-y-6 bg-card max-h-[80vh] overflow-y-auto">
+            <div className="
+              p-6 space-y-6 bg-card max-h-[80vh] overflow-y-auto
+              [&::-webkit-scrollbar]:w-1.5
+              [&::-webkit-scrollbar-track]:bg-transparent
+              [&::-webkit-scrollbar-thumb]:bg-muted-foreground/20
+              [&::-webkit-scrollbar-thumb]:rounded-full
+            ">
               
               {/* INFO SECTION */}
               <div className="space-y-4">
@@ -397,7 +440,6 @@ export default function AdminMembers() {
                         <div className="font-medium text-sm">{selectedMember.rose_pos ? `Miejsce #${selectedMember.rose_pos}` : "Brak"}</div>
                      </div>
                      
-                     {/* KAFELEK EMAIL (Rozszerzalny) */}
                      <div className="space-y-1.5 p-3 rounded-lg bg-muted/20 border transition-all duration-300 ease-in-out hover:bg-muted/30 group">
                         <Label className="text-[10px] text-muted-foreground uppercase tracking-wider font-bold flex items-center gap-1"><Mail className="h-3 w-3" /> Email</Label>
                         <div className="font-medium text-sm truncate group-hover:whitespace-normal group-hover:break-all group-hover:overflow-visible">
@@ -414,7 +456,7 @@ export default function AdminMembers() {
                  </div>
               </div>
 
-              {/* --- STATUS MODLITWY (PRZYWRÓCONE) --- */}
+              {/* --- STATUS MODLITWY --- */}
               <div className={`rounded-xl border p-4 transition-colors ${selectedMember.acknowledgments.length > 0 ? 'bg-green-50/60 border-green-200 dark:bg-green-950/20 dark:border-green-900' : 'bg-muted/10 border-border'}`}>
                  <div className="flex items-start gap-3">
                     {selectedMember.acknowledgments.length > 0 ? (

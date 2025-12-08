@@ -4,6 +4,8 @@ import { ModeToggle } from "@/components/mode-toggle"
 import { Button } from "@/components/ui/button"
 import { LogOut } from "lucide-react"
 import { supabase } from "@/lib/supabase"
+// 1. IMPORT TOSTERA
+import { Toaster } from "@/components/ui/sonner"
 
 // Importy stron
 import LoginPage from "@/pages/Login"
@@ -55,6 +57,9 @@ function App() {
       <BrowserRouter>
         
         <GlobalControls />
+        
+        {/* 2. UMIESZCZENIE TOSTERA W APLIKACJI */}
+        <Toaster position="top-center" richColors />
 
         <Routes>
           {/* TRASY PUBLICZNE */}
@@ -67,7 +72,6 @@ function App() {
           </Route>
 
           {/* TRASY CHRONIONE DLA ADMINA (Musi być zalogowany + mieć rolę 'admin') */}
-          {/* AdminRoute sprawdzi rolę. Jeśli ok -> renderuje AdminLayout */}
           <Route path="/admin" element={<AdminRoute />}>
             <Route element={<AdminLayout />}>
                <Route index element={<Navigate to="members" replace />} />

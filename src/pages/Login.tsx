@@ -6,6 +6,8 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Loader2, Lock, Mail } from "lucide-react"
+// 1. IMPORTUJEMY TOAST
+import { toast } from "sonner"
 
 // Baza cytatów
 const ROSARY_QUOTES = [
@@ -22,10 +24,9 @@ export default function LoginPage() {
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [loading, setLoading] = useState(false)
-  const [quote, setQuote] = useState(ROSARY_QUOTES[0]) // Domyślny pierwszy
+  const [quote, setQuote] = useState(ROSARY_QUOTES[0]) 
   const navigate = useNavigate()
 
-  // 1. Inicjalizacja (Sprawdzenie sesji + Losowanie cytatu)
   useEffect(() => {
     // Losuj cytat
     const randomQuote = ROSARY_QUOTES[Math.floor(Math.random() * ROSARY_QUOTES.length)]
@@ -50,12 +51,21 @@ export default function LoginPage() {
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true)
+    
     const { data, error } = await supabase.auth.signInWithPassword({ email, password })
     
     if (error) {
-      alert("Błąd logowania: " + error.message)
+      // 2. ZAMIAST ALERT -> TOAST ERROR
+      console.error("Login Error:", error.message)
+      toast.error("Błąd logowania", {
+        description: "Sprawdź poprawność adresu email i hasła."
+      })
       setLoading(false)
     } else if (data.user) {
+      // 3. OPCJONALNIE -> TOAST SUKCES
+      toast.success("Zalogowano pomyślnie", {
+        description: "Witamy z powrotem!"
+      })
       await checkRoleAndRedirect(data.user.id)
     }
   }
