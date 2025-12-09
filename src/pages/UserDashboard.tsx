@@ -230,10 +230,6 @@ export default function UserDashboard() {
             </span>
           </div>
         </div>
-
-        <Button variant="ghost" size="icon" onClick={handleLogout} className="text-muted-foreground hover:text-destructive hover:bg-destructive/10">
-             <LogOut className="h-5 w-5" />
-        </Button>
       </header>
 
       {/* CONTENT */}
