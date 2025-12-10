@@ -180,7 +180,7 @@ export default function AdminGroups() {
   const filteredGroups = groups.filter(g => g.name.toLowerCase().includes(search.toLowerCase()))
 
   return (
-    <div className="space-y-6 max-w-5xl mx-auto pb-20">
+    <div className="space-y-6 max-w-5xl mx-auto pb-20 p-6 pt-6">
       
       {/* HEADER */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-4 border-b pb-6">

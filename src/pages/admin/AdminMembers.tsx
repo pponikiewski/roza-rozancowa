@@ -320,7 +320,7 @@ export default function AdminMembers() {
 
 
   return (
-    <div className="space-y-6 pb-24 max-w-6xl mx-auto p-6 pt-16">
+    <div className="space-y-6 pb-24 max-w-6xl mx-auto p-6 pt-6">
       
       {/* HEADER */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 border-b pb-6">
