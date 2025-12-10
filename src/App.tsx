@@ -15,6 +15,8 @@ import UserDashboard from "@/pages/UserDashboard"
 import AdminLayout from "@/layouts/AdminLayout"
 import AdminMembers from "@/pages/admin/AdminMembers"
 import AdminSettings from "@/pages/admin/AdminSettings"
+import AdminGroups from "@/pages/admin/AdminGroups" 
+
 
 // --- NOWE IMPORTY (ZABEZPIECZENIA) ---
 import { ProtectedRoute, AdminRoute } from "@/components/ProtectedRoute"
@@ -77,6 +79,7 @@ function App() {
                <Route index element={<Navigate to="members" replace />} />
                <Route path="members" element={<AdminMembers />} />
                <Route path="settings" element={<AdminSettings />} />
+               <Route path="groups" element={<AdminGroups />} />
             </Route>
           </Route>
 
