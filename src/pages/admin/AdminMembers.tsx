@@ -10,9 +10,8 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/
 import { Separator } from "@/components/ui/separator"
 import { 
   UserPlus, Search, Trash2, Users, RefreshCcw, ScrollText, 
-  Shield, User, CheckCircle2, Circle, AlertCircle, CalendarClock, ArrowRightLeft, Mail, Lock, Eye, EyeOff
+  User, CheckCircle2, Circle, AlertCircle, CalendarClock, ArrowRightLeft, Mail, Lock, Eye, EyeOff
 } from "lucide-react"
-// 1. IMPORTUJEMY TOAST
 import { toast } from "sonner"
 
 // --- TYPY DANYCH ---
@@ -54,7 +53,7 @@ export default function AdminMembers() {
   // --- INICJALIZACJA ---
   useEffect(() => { fetchData() }, [])
 
-  // Resetowanie stanów hasła przy zamknięciu dialogu
+  // Resetowanie stanów przy zamknięciu dialogu
   useEffect(() => {
     if (!selectedMember) {
         setNewPassword("")
@@ -73,7 +72,7 @@ export default function AdminMembers() {
         id, full_name, email, role, rose_pos, created_at,
         groups(id, name), acknowledgments(created_at, mystery_id)
       `)
-      .order('rose_pos', { ascending: true })
+      .order('full_name', { ascending: true }) 
 
     if (error) { console.error(error); return; }
 
@@ -106,8 +105,7 @@ export default function AdminMembers() {
     })
   }
 
-  // --- HANDLERY Z TOASTAMI ---
-  
+  // --- HANDLERY ---
   const handleCreateUser = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true)
@@ -120,18 +118,10 @@ export default function AdminMembers() {
       setIsAddOpen(false)
       setFormData({ email: "", password: "", fullName: "", groupId: "" })
       fetchData()
-      
-      // SUKCES TOAST
-      toast.success("Sukces!", {
-        description: `Dodano użytkownika: ${formData.fullName}`
-      })
-
+      toast.success("Sukces!", { description: `Dodano użytkownika: ${formData.fullName}` })
     } catch (err: any) { 
       console.error("Błąd dodawania użytkownika:", err)
-      // BŁĄD TOAST
-      toast.error("Błąd tworzenia", {
-        description: err.message || "Wystąpił nieznany błąd"
-      })
+      toast.error("Błąd tworzenia", { description: err.message || "Wystąpił nieznany błąd" })
     } finally { setLoading(false) }
   }
 
@@ -146,25 +136,17 @@ export default function AdminMembers() {
       })
       if (error) throw error
       await fetchData()
-      
-      toast.success("Zaktualizowano", {
-        description: "Przypisanie do grupy zostało zmienione."
-      })
-      
+      toast.success("Zaktualizowano", { description: "Przypisanie do grupy zostało zmienione." })
       setSelectedMember(null)
     } catch (err: any) { 
-      toast.error("Błąd aktualizacji", {
-        description: err.message
-      })
+      toast.error("Błąd aktualizacji", { description: err.message })
     } finally { setActionLoading(false) }
   }
 
   const handlePasswordChange = async () => {
     if (!selectedMember || !newPassword) return
     if (newPassword.length < 6) { 
-      toast.warning("Hasło za krótkie", {
-        description: "Hasło musi mieć minimum 6 znaków."
-      })
+      toast.warning("Hasło za krótkie", { description: "Hasło musi mieć minimum 6 znaków." })
       return 
     }
     
@@ -176,38 +158,44 @@ export default function AdminMembers() {
 
         if (error || data?.error) throw new Error(error?.message || data?.error)
         
-        toast.success("Hasło zmienione", {
-          description: "Nowe hasło zostało ustawione pomyślnie."
-        })
+        toast.success("Hasło zmienione", { description: "Nowe hasło zostało ustawione pomyślnie." })
         setNewPassword("")
     } catch (err: any) {
-        toast.error("Błąd zmiany hasła", {
-          description: err.message
-        })
+        toast.error("Błąd zmiany hasła", { description: err.message })
     } finally {
         setActionLoading(false)
     }
   }
 
-  const handleDeleteUser = async () => {
-    // Confirm zostawiamy natywny, bo jest bezpieczniejszy (blokuje przeglądarkę)
-    if (!selectedMember || !confirm("CZY NA PEWNO? To usunie konto bezpowrotnie.")) return
-    setActionLoading(true)
-    try {
-      const { data, error } = await supabase.functions.invoke('delete-user', { body: { user_id: selectedMember.id } })
-      if (error || data?.error) throw new Error(error?.message || data?.error)
-      
-      toast.success("Użytkownik usunięty", {
-        description: "Konto zostało trwale usunięte z bazy."
-      })
-      
-      setSelectedMember(null)
-      fetchData()
-    } catch (err: any) { 
-      toast.error("Błąd usuwania", {
-        description: err.message
-      })
-    } finally { setActionLoading(false) }
+  // --- USUWANIE Z TOASTEM (Zamiast confirm) ---
+  const handleDeleteUser = () => {
+    if (!selectedMember) return
+
+    toast("Czy na pewno chcesz usunąć użytkownika?", {
+      description: `Konto "${selectedMember.full_name}" zostanie trwale usunięte.`,
+      action: {
+        label: "Usuń",
+        onClick: async () => {
+            setActionLoading(true)
+            try {
+              const { data, error } = await supabase.functions.invoke('delete-user', { body: { user_id: selectedMember.id } })
+              if (error || data?.error) throw new Error(error?.message || data?.error)
+              
+              toast.success("Użytkownik usunięty", { description: "Konto zostało trwale usunięte z bazy." })
+              setSelectedMember(null)
+              fetchData()
+            } catch (err: any) { 
+              toast.error("Błąd usuwania", { description: err.message })
+            } finally { 
+              setActionLoading(false) 
+            }
+        }
+      },
+      cancel: {
+        label: "Anuluj",
+        onClick: () => {}
+      }
+    })
   }
 
   // --- UI LISTY ---
@@ -228,11 +216,6 @@ export default function AdminMembers() {
               >
                 <div className={`absolute left-0 top-0 bottom-0 w-1 ${hasAck ? 'bg-green-500' : 'bg-muted'}`} />
                 <div className="flex items-center gap-3 pl-2">
-                   {member.rose_pos ? (
-                     <div className="flex flex-col items-center justify-center h-8 w-8 rounded-full bg-primary/10 text-primary font-bold text-xs border border-primary/20">
-                        {member.rose_pos}
-                     </div>
-                   ) : <div className="h-8 w-8 flex items-center justify-center bg-muted text-muted-foreground rounded-full text-[10px]">-</div>}
                    <div>
                      <div className="font-semibold text-sm">{member.full_name}</div>
                      <div className="text-xs text-muted-foreground line-clamp-1 flex items-center gap-1">
@@ -254,9 +237,8 @@ export default function AdminMembers() {
           <Table>
             <TableHeader className="bg-muted/50">
               <TableRow className="hover:bg-transparent">
-                <TableHead className="w-[80px] text-center">Poz.</TableHead>
-                <TableHead className="w-[30%]">Członek</TableHead>
-                <TableHead className="w-[40%]">Tajemnica</TableHead>
+                <TableHead className="pl-6 w-[40%]">Członek</TableHead>
+                <TableHead className="w-[45%]">Tajemnica</TableHead>
                 <TableHead className="text-right pr-6">Status</TableHead>
               </TableRow>
             </TableHeader>
@@ -269,8 +251,7 @@ export default function AdminMembers() {
                     className="cursor-pointer hover:bg-muted/50 transition-colors"
                     onClick={() => { setSelectedMember(member); setEditGroupId(member.groups?.id.toString() || "") }}
                   >
-                    <TableCell className="text-center font-medium text-muted-foreground">{member.rose_pos || "-"}</TableCell>
-                    <TableCell>
+                    <TableCell className="pl-6">
                       <div className="flex items-center gap-2">
                           <span className="font-medium">{member.full_name}</span>
                           {member.role === 'admin' && <Badge variant="secondary" className="text-[10px] px-1 h-5">Admin</Badge>}
@@ -434,12 +415,8 @@ export default function AdminMembers() {
               
               {/* INFO SECTION */}
               <div className="space-y-4">
-                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                     <div className="space-y-1.5 p-3 rounded-lg bg-muted/20 border">
-                        <Label className="text-[10px] text-muted-foreground uppercase tracking-wider font-bold flex items-center gap-1"><Shield className="h-3 w-3" /> Pozycja</Label>
-                        <div className="font-medium text-sm">{selectedMember.rose_pos ? `Miejsce #${selectedMember.rose_pos}` : "Brak"}</div>
-                     </div>
-                     
+                 <div className="grid grid-cols-1 gap-4">
+                     {/* KAFELEK EMAIL (Rozszerzalny) */}
                      <div className="space-y-1.5 p-3 rounded-lg bg-muted/20 border transition-all duration-300 ease-in-out hover:bg-muted/30 group">
                         <Label className="text-[10px] text-muted-foreground uppercase tracking-wider font-bold flex items-center gap-1"><Mail className="h-3 w-3" /> Email</Label>
                         <div className="font-medium text-sm truncate group-hover:whitespace-normal group-hover:break-all group-hover:overflow-visible">
