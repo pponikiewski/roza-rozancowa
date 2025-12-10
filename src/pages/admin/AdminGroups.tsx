@@ -6,8 +6,8 @@ import { Label } from "@/components/ui/label"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog"
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card"
-import { toast } from "sonner" // Import Sonnera
-import { Plus, Pencil, Trash2, Flower2, Loader2, Search } from "lucide-react"
+import { toast } from "sonner"
+import { Plus, Pencil, Trash2, Flower2, Loader2, Search, RotateCw } from "lucide-react"
 
 // --- TYPY ---
 interface Group {
@@ -69,7 +69,7 @@ export default function AdminGroups() {
       if (editingGroup) {
         const { error } = await supabase.from('groups').update({ name: formData.name }).eq('id', editingGroup.id)
         if (error) throw error
-        toast.success("Zaktualizowano Różę")
+        toast.success("Zaktualizowano nazwę Róży")
       } else {
         const { error } = await supabase.from('groups').insert({ name: formData.name })
         if (error) throw error
@@ -84,22 +84,17 @@ export default function AdminGroups() {
     }
   }
 
-  // --- NOWE USUWANIE (Toast zamiast confirm) ---
+  // Usuwanie
   const handleDelete = (group: Group) => {
-    // Wyświetlamy toast z pytaniem
     toast("Czy na pewno chcesz usunąć?", {
       description: `Róża "${group.name}" zostanie trwale usunięta.`,
       action: {
         label: "Usuń",
         onClick: async () => {
-            // Logika usuwania po kliknięciu w "Usuń" w toście
             const { error } = await supabase.from('groups').delete().eq('id', group.id)
-    
             if (error) {
               if (error.code === '23503') {
-                toast.error("Nie można usunąć", { 
-                    description: "Ta grupa posiada członków. Najpierw ich przenieś lub usuń." 
-                })
+                toast.error("Nie można usunąć", { description: "Ta grupa ma członków. Najpierw ich usuń." })
               } else {
                 toast.error("Błąd usuwania", { description: error.message })
               }
@@ -109,10 +104,37 @@ export default function AdminGroups() {
             }
         },
       },
-      cancel: {
-        label: "Anuluj",
-        onClick: () => {} // Nic nie rób, toast zniknie
+      cancel: { label: "Anuluj", onClick: () => {} },
+    })
+  }
+
+  // --- NOWA FUNKCJA: RĘCZNA ROTACJA ---
+  const handleRotate = (group: Group) => {
+    toast("Potwierdź rotację tajemnic", {
+      description: `Wszyscy członkowie róży "${group.name}" przesuną się o jedno miejsce do przodu. Potwierdzenia modlitwy zostaną zresetowane.`,
+      action: {
+        label: "Rotuj",
+        onClick: async () => {
+            const loadingToast = toast.loading("Trwa rotacja...")
+            
+            // Wywołujemy naszą funkcję SQL
+            const { error } = await supabase.rpc('rotate_group_members', {
+                p_group_id: group.id
+            })
+
+            toast.dismiss(loadingToast)
+
+            if (error) {
+                console.error(error)
+                toast.error("Błąd rotacji", { description: error.message })
+            } else {
+                toast.success("Rotacja zakończona pomyślnie!", { 
+                    description: "Wszyscy członkowie mają nowe tajemnice." 
+                })
+            }
+        },
       },
+      cancel: { label: "Anuluj", onClick: () => {} },
     })
   }
 
@@ -128,7 +150,7 @@ export default function AdminGroups() {
             <Flower2 className="h-6 w-6 text-primary" /> Zarządzanie Różami
           </h1>
           <p className="text-sm text-muted-foreground">
-            Twórz nowe grupy modlitewne i edytuj ich nazwy.
+            Twórz nowe grupy, edytuj nazwy i zarządzaj rotacją.
           </p>
         </div>
         <Button onClick={() => handleOpenDialog()} className="shadow-md font-semibold">
@@ -176,15 +198,27 @@ export default function AdminGroups() {
                                     <TableRow key={group.id}>
                                         <TableCell className="font-mono text-xs text-muted-foreground">#{group.id}</TableCell>
                                         <TableCell className="font-medium text-base">{group.name}</TableCell>
-                                        <TableCell className="text-right space-x-2">
-                                            <Button variant="ghost" size="icon" onClick={() => handleOpenDialog(group)}>
-                                                <Pencil className="h-4 w-4 text-muted-foreground hover:text-primary" />
-                                            </Button>
-                                            
-                                            {/* ZMIANA: Przekazujemy cały obiekt 'group', nie tylko id */}
-                                            <Button variant="ghost" size="icon" onClick={() => handleDelete(group)}>
-                                                <Trash2 className="h-4 w-4 text-muted-foreground hover:text-destructive" />
-                                            </Button>
+                                        <TableCell className="text-right">
+                                            <div className="flex justify-end gap-1">
+                                                {/* PRZYCISK ROTACJI */}
+                                                <Button 
+                                                    variant="outline" 
+                                                    size="icon" 
+                                                    onClick={() => handleRotate(group)}
+                                                    title="Wymuś zmianę tajemnic (Rotacja)"
+                                                    className="text-amber-600 border-amber-200 hover:bg-amber-50 hover:text-amber-700 dark:border-amber-900/50 dark:hover:bg-amber-900/20"
+                                                >
+                                                    <RotateCw className="h-4 w-4" />
+                                                </Button>
+
+                                                <Button variant="ghost" size="icon" onClick={() => handleOpenDialog(group)}>
+                                                    <Pencil className="h-4 w-4 text-muted-foreground hover:text-primary" />
+                                                </Button>
+                                                
+                                                <Button variant="ghost" size="icon" onClick={() => handleDelete(group)}>
+                                                    <Trash2 className="h-4 w-4 text-muted-foreground hover:text-destructive" />
+                                                </Button>
+                                            </div>
                                         </TableCell>
                                     </TableRow>
                                 ))
@@ -196,20 +230,20 @@ export default function AdminGroups() {
         </CardContent>
       </Card>
 
-      {/* DIALOG DODAWANIA / EDYCJI */}
+      {/* DIALOG */}
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
         <DialogContent className="sm:max-w-md">
             <DialogHeader>
                 <DialogTitle>{editingGroup ? "Edytuj Różę" : "Utwórz Nową Różę"}</DialogTitle>
                 <DialogDescription>
-                    {editingGroup ? "Zmień nazwę istniejącej grupy." : "Dodaj nową grupę modlitewną do systemu."}
+                    {editingGroup ? "Zmień nazwę istniejącej grupy." : "Dodaj nową grupę modlitewną."}
                 </DialogDescription>
             </DialogHeader>
             <form onSubmit={handleSave} className="space-y-4 py-2">
                 <div className="space-y-2">
                     <Label>Nazwa Róży</Label>
                     <Input 
-                        placeholder="np. Róża pw. Św. Jana Pawła II" 
+                        placeholder="np. Róża pw. Św. Rity" 
                         value={formData.name} 
                         onChange={e => setFormData({ name: e.target.value })}
                         autoFocus
