@@ -46,7 +46,7 @@ export default function AdminLayout() {
         {[
           { to: "/admin/members", icon: Users, label: "Użytkownicy" },
           { to: "/admin/intentions", icon: HandHeart, label: "Intencja" },
-          { to: "/admin/groups", icon: Rose, label: "Róże" },
+          { to: "/admin/roses", icon: Rose, label: "Róże" },
         ].map(({ to, icon: Icon, label }) => (
           <NavLink
             key={to}

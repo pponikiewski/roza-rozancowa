@@ -14,7 +14,7 @@ interface Group {
   created_at: string
 }
 
-export default function AdminGroups() {
+export default function AdminRoses() {
   const [loading, setLoading] = useState(true)
   const [actionLoading, setActionLoading] = useState(false)
   const [groups, setGroups] = useState<Group[]>([])
