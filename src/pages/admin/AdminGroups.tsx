@@ -7,7 +7,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog"
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card"
 import { toast } from "sonner"
-import { Plus, Pencil, Trash2, Flower2, Loader2, Search, RotateCw, AlertCircle } from "lucide-react"
+import { Plus, Pencil, Trash2, Rose, Loader2, Search, RotateCw, AlertCircle } from "lucide-react"
 
 // --- TYPY ---
 interface Group {
@@ -130,32 +130,51 @@ export default function AdminGroups() {
 
   // --- NOWA FUNKCJA: RĘCZNA ROTACJA ---
   const handleRotate = (group: Group) => {
-    toast("Potwierdź rotację tajemnic", {
-      description: `Wszyscy członkowie róży "${group.name}" przesuną się o jedno miejsce do przodu. Potwierdzenia modlitwy zostaną zresetowane.`,
-      action: {
-        label: "Rotuj",
-        onClick: async () => {
-            const loadingToast = toast.loading("Trwa rotacja...")
+    toast.custom((t) => (
+      <div className="bg-background border border-border p-4 rounded-xl shadow-xl flex flex-col gap-3 w-full max-w-[340px]">
+        <div className="flex items-start gap-3">
+          <div className="bg-primary/10 p-2 rounded-full shrink-0">
+             <RotateCw className="h-5 w-5 text-primary" />
+          </div>
+          <div className="space-y-1">
+             <h3 className="font-semibold text-sm leading-none pt-1">Rotacja tajemnic</h3>
+             <p className="text-xs text-muted-foreground leading-relaxed">
+               Czy chcesz przesunąć tajemnice w Róży <b>{group.name}</b>? Wszyscy członkowie otrzymają nową tajemnicę, a potwierdzenia modlitwy zostaną zresetowane.
+             </p>
+          </div>
+        </div>
+
+        <div className="flex justify-end gap-2 mt-2">
+          <Button variant="outline" size="sm" onClick={() => toast.dismiss(t)} className="h-8 text-xs">Anuluj</Button>
+          <Button 
+            size="sm" 
+            className="h-8 text-xs shadow-sm"
+            onClick={async () => {
+               toast.dismiss(t)
+               const loadingToast = toast.loading("Trwa rotacja...")
             
-            // Wywołujemy naszą funkcję SQL
-            const { error } = await supabase.rpc('rotate_group_members', {
-                p_group_id: group.id
-            })
-
-            toast.dismiss(loadingToast)
-
-            if (error) {
-                console.error(error)
-                toast.error("Błąd rotacji", { description: error.message })
-            } else {
-                toast.success("Rotacja zakończona pomyślnie!", { 
-                    description: "Wszyscy członkowie mają nowe tajemnice." 
-                })
-            }
-        },
-      },
-      cancel: { label: "Anuluj", onClick: () => {} },
-    })
+               // Wywołujemy naszą funkcję SQL
+               const { error } = await supabase.rpc('rotate_group_members', {
+                   p_group_id: group.id
+               })
+   
+               toast.dismiss(loadingToast)
+   
+               if (error) {
+                   console.error(error)
+                   toast.error("Błąd rotacji", { description: error.message })
+               } else {
+                   toast.success("Rotacja zakończona pomyślnie!", { 
+                       description: "Wszyscy członkowie mają nowe tajemnice." 
+                   })
+               }
+            }}
+          >
+            Potwierdź rotację
+          </Button>
+        </div>
+      </div>
+    ), { duration: Infinity })
   }
 
   const filteredGroups = groups.filter(g => g.name.toLowerCase().includes(search.toLowerCase()))
@@ -167,7 +186,7 @@ export default function AdminGroups() {
       <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-4 border-b pb-6">
         <div className="space-y-1">
           <h1 className="text-2xl font-bold tracking-tight flex items-center gap-2">
-            <Flower2 className="h-6 w-6 text-primary" /> Zarządzanie Różami
+            <Rose className="h-6 w-6 text-primary" /> Zarządzanie Różami
           </h1>
           <p className="text-sm text-muted-foreground">
             Twórz nowe grupy, edytuj nazwy i zarządzaj rotacją.
@@ -226,7 +245,7 @@ export default function AdminGroups() {
                                                     size="icon" 
                                                     onClick={() => handleRotate(group)}
                                                     title="Wymuś zmianę tajemnic (Rotacja)"
-                                                    className="text-amber-600 border-amber-200 hover:bg-amber-50 hover:text-amber-700 dark:border-amber-900/50 dark:hover:bg-amber-900/20"
+                                                    className="text-primary border-primary/20 hover:bg-primary/10 hover:text-primary dark:border-primary/30 dark:hover:bg-primary/20"
                                                 >
                                                     <RotateCw className="h-4 w-4" />
                                                 </Button>
