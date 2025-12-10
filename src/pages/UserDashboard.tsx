@@ -6,8 +6,7 @@ import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Separator } from "@/components/ui/separator"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog"
-import { CheckCircle2, AlertCircle, LogOut, Timer, ChevronRight, Loader2, Users, Flower2, ScrollText } from "lucide-react"
-import { Avatar, AvatarFallback } from "@/components/ui/avatar"
+import { CheckCircle2, AlertCircle, LogOut, Timer, ChevronRight, Loader2, Users, Rose, ScrollText } from "lucide-react"
 
 // --- TYPY ---
 interface Mystery {
@@ -215,11 +214,9 @@ export default function UserDashboard() {
             onClick={handleOpenRose}
             title="Kliknij, aby zobaczyć swoją Różę"
         >
-          <Avatar className="h-9 w-9 border-2 border-primary/10 group-hover:border-primary/40 transition-colors">
-            <AvatarFallback className="bg-primary/5 text-primary text-sm font-semibold">
-                {profile?.full_name.substring(0,1).toUpperCase()}
-            </AvatarFallback>
-          </Avatar>
+          <div className="h-9 w-9 rounded-full overflow-hidden border-2 border-primary/10 group-hover:border-primary/40 transition-colors flex items-center justify-center bg-primary/5">
+             <img src="/rose.svg" alt="Logo" className="h-6 w-6 object-contain" />
+          </div>
           <div className="flex flex-col">
             <span className="text-sm font-semibold leading-none flex items-center gap-1.5">
                 {profile?.full_name}
@@ -326,7 +323,7 @@ export default function UserDashboard() {
             <div className="p-6 pb-4 border-b bg-muted/20">
                 <DialogHeader>
                     <DialogTitle className="flex items-center gap-2">
-                        <Flower2 className="h-5 w-5 text-rose-500" />
+                        <Rose className="h-5 w-5 text-rose-500" />
                         {profile?.groups?.name || "Moja Róża"}
                     </DialogTitle>
                     <DialogDescription>

@@ -359,7 +359,7 @@ export default function AdminMembers() {
                     </div>
                   </div>
                   <div className="flex items-center gap-3 bg-muted/30 px-3 py-1.5 rounded-full border">
-                    <div className="text-xs font-medium text-muted-foreground">Modlitwa:</div>
+                    <div className="text-xs font-medium text-muted-foreground">Zapoznanie się z tajemnicą:</div>
                     <div className="text-sm font-bold flex items-center gap-1">
                         <span className={completed === count && count > 0 ? "text-green-600" : ""}>{completed}</span>
                         <span className="text-muted-foreground/50">/</span>
@@ -467,7 +467,7 @@ export default function AdminMembers() {
                        <Circle className="h-5 w-5 text-muted-foreground mt-0.5" />
                     )}
                     <div className="space-y-1">
-                       <h4 className="font-semibold text-sm">Status Modlitwy (Bieżący miesiąc)</h4>
+                       <h4 className="font-semibold text-sm">Status zapoznania się z tajemnicą (Bieżący miesiąc)</h4>
                        {selectedMember.acknowledgments.length > 0 ? (
                           <div className="text-sm text-muted-foreground flex flex-col">
                              <span className="text-green-700 dark:text-green-400 font-medium text-xs uppercase tracking-wide">Potwierdzone</span>
@@ -477,7 +477,7 @@ export default function AdminMembers() {
                              </span>
                           </div>
                        ) : (
-                          <p className="text-xs text-muted-foreground">Użytkownik nie potwierdził jeszcze modlitwy w tym miesiącu.</p>
+                          <p className="text-xs text-muted-foreground">Użytkownik nie potwierdził jeszcze zapoznania się z tajemnicą w tym miesiącu.</p>
                        )}
                     </div>
                  </div>
