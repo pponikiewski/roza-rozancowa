@@ -3,25 +3,11 @@ import { Button } from "@/components/ui/button"
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
 import { Users, HandHeart, LayoutDashboard, Menu, Rose, Timer } from "lucide-react"
 import { useState, useEffect } from "react"
-import { supabase } from "@/lib/supabase"
-import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 
 export default function AdminLayout() {
   const [open, setOpen] = useState(false)
-  const [adminProfile, setAdminProfile] = useState<{full_name: string} | null>(null)
   const [timeLeft, setTimeLeft] = useState({ days: 0, hours: 0, minutes: 0, seconds: 0 })
   const [targetDate, setTargetDate] = useState<Date | null>(null)
-
-  useEffect(() => {
-    const getProfile = async () => {
-      const { data: { user } } = await supabase.auth.getUser()
-      if (user) {
-         const { data } = await supabase.from('profiles').select('full_name').eq('id', user.id).single()
-         setAdminProfile(data)
-      }
-    }
-    getProfile()
-  }, [])
 
   useEffect(() => {
     const calculateTargetDate = () => {
@@ -135,13 +121,9 @@ export default function AdminLayout() {
         </Sheet>
 
         <div className="flex items-center gap-3">
-            <Avatar className="h-8 w-8 border border-primary/20">
-                <AvatarFallback className="bg-primary/10 text-primary text-xs font-bold">
-                    {adminProfile?.full_name?.substring(0,1).toUpperCase() || "A"}
-                </AvatarFallback>
-            </Avatar>
+            <img src="/rose.svg" alt="Logo" className="h-8 w-8 object-contain" />
             <div className="flex flex-col">
-                <span className="text-sm font-semibold leading-none">{adminProfile?.full_name || "Administrator"}</span>
+                <span className="text-sm font-semibold leading-none">Główny Admin</span>
                 <span className="text-[10px] text-muted-foreground font-medium">Panel Zarządzania</span>
             </div>
         </div>
