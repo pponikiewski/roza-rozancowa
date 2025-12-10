@@ -1,7 +1,7 @@
 import { Outlet, NavLink } from "react-router-dom"
 import { Button } from "@/components/ui/button"
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
-import { Users, Settings, LayoutDashboard, Menu, Rose } from "lucide-react"
+import { Users, HandHeart, LayoutDashboard, Menu, Rose } from "lucide-react"
 import { useState, useEffect } from "react"
 import { supabase } from "@/lib/supabase"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
@@ -46,7 +46,7 @@ export default function AdminLayout() {
           onClick={() => setOpen(false)}
           className={({ isActive }) => `flex items-center gap-3 px-3 py-2 rounded-md transition-colors text-sm font-medium ${isActive ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:bg-muted hover:text-foreground"}`}
         >
-          <Settings className="h-4 w-4" />
+          <HandHeart className="h-4 w-4" />
           Intencja
         </NavLink>
 

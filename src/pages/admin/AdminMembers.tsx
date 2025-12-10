@@ -7,6 +7,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog"
 import { Badge } from "@/components/ui/badge"
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Separator } from "@/components/ui/separator"
 import { 
   UserPlus, Search, Trash2, Users, RefreshCcw, ScrollText, 
@@ -40,7 +41,7 @@ export default function AdminMembers() {
 
   // Dialogi i Formularze
   const [isAddOpen, setIsAddOpen] = useState(false)
-  const [formData, setFormData] = useState({ email: "", password: "", fullName: "", groupId: "" })
+  const [formData, setFormData] = useState({ email: "", password: "", fullName: "", groupId: "unassigned" })
   
   // Edycja Usera
   const [selectedMember, setSelectedMember] = useState<Member | null>(null)
@@ -111,12 +112,12 @@ export default function AdminMembers() {
     setLoading(true)
     try {
       const { data, error } = await supabase.functions.invoke('create-user', {
-        body: { ...formData, groupId: formData.groupId ? parseInt(formData.groupId) : null }
+        body: { ...formData, groupId: (formData.groupId && formData.groupId !== "unassigned") ? parseInt(formData.groupId) : null }
       })
       if (error || data?.error) throw new Error(error?.message || data?.error)
       
       setIsAddOpen(false)
-      setFormData({ email: "", password: "", fullName: "", groupId: "" })
+      setFormData({ email: "", password: "", fullName: "", groupId: "unassigned" })
       fetchData()
       toast.success("Sukces!", { description: `Dodano użytkownika: ${formData.fullName}` })
     } catch (err: any) { 
@@ -129,7 +130,7 @@ export default function AdminMembers() {
     if (!selectedMember) return
     setActionLoading(true)
     try {
-      const targetGroupId = editGroupId ? parseInt(editGroupId) : null
+      const targetGroupId = (editGroupId && editGroupId !== "unassigned") ? parseInt(editGroupId) : null
       const { error } = await supabase.rpc('move_user_to_group', {
         p_user_id: selectedMember.id,
         p_group_id: targetGroupId
@@ -234,7 +235,7 @@ export default function AdminMembers() {
              return (
               <div 
                 key={member.id} 
-                onClick={() => { setSelectedMember(member); setEditGroupId(member.groups?.id.toString() || "") }}
+                onClick={() => { setSelectedMember(member); setEditGroupId(member.groups?.id.toString() || "unassigned") }}
                 className="relative overflow-hidden flex items-center justify-between p-4 bg-card border rounded-xl shadow-sm active:scale-[0.98] transition-all cursor-pointer"
               >
                 <div className={`absolute left-0 top-0 bottom-0 w-1 ${hasAck ? 'bg-green-500' : 'bg-muted'}`} />
@@ -272,7 +273,7 @@ export default function AdminMembers() {
                   <TableRow 
                     key={member.id} 
                     className="cursor-pointer hover:bg-muted/50 transition-colors"
-                    onClick={() => { setSelectedMember(member); setEditGroupId(member.groups?.id.toString() || "") }}
+                    onClick={() => { setSelectedMember(member); setEditGroupId(member.groups?.id.toString() || "unassigned") }}
                   >
                     <TableCell className="pl-6">
                       <div className="flex items-center gap-2">
@@ -396,10 +397,19 @@ export default function AdminMembers() {
               <div className="space-y-2"><Label>Hasło</Label><Input required value={formData.password} onChange={e => setFormData({...formData, password: e.target.value})} /></div>
             </div>
             <div className="space-y-2"><Label>Grupa</Label>
-              <select className="flex h-10 w-full rounded-md border bg-background px-3 text-sm" value={formData.groupId} onChange={e => setFormData({...formData, groupId: e.target.value})}>
-                <option value="">-- Bez grupy --</option>
-                {groups.map(g => <option key={g.id} value={g.id}>{g.name}</option>)}
-              </select>
+              <Select value={formData.groupId} onValueChange={(val) => setFormData({...formData, groupId: val})}>
+                <SelectTrigger className="h-10 w-full text-sm">
+                  <SelectValue placeholder="-- Bez grupy --" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="unassigned">-- Bez grupy --</SelectItem>
+                  {groups.map(g => (
+                    <SelectItem key={g.id} value={g.id.toString()}>
+                      {g.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
             <DialogFooter className="pt-4"><Button type="button" variant="outline" onClick={() => setIsAddOpen(false)}>Anuluj</Button><Button type="submit" disabled={loading}>{loading ? "Tworzenie..." : "Utwórz"}</Button></DialogFooter>
           </form>
@@ -508,14 +518,19 @@ export default function AdminMembers() {
                  <div className="grid gap-2">
                      <Label className="text-xs">Przypisanie do grupy</Label>
                      <div className="flex gap-2">
-                        <select 
-                            className="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
-                            value={editGroupId}
-                            onChange={(e) => setEditGroupId(e.target.value)}
-                        >
-                            <option value="">-- Wybierz (lub usuń z grupy) --</option>
-                            {groups.map(g => <option key={g.id} value={g.id}>{g.name}</option>)}
-                        </select>
+                        <Select value={editGroupId} onValueChange={setEditGroupId}>
+                          <SelectTrigger className="h-9 w-full text-sm">
+                            <SelectValue placeholder="-- Wybierz (lub usuń z grupy) --" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="unassigned">-- Bez grupy (usuń) --</SelectItem>
+                            {groups.map(g => (
+                              <SelectItem key={g.id} value={g.id.toString()}>
+                                {g.name}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
                         <Button onClick={handleUpdateGroup} disabled={actionLoading} size="sm" variant="secondary" className="shrink-0">
                             <RefreshCcw className="h-3.5 w-3.5 mr-2" /> Zmień
                         </Button>
