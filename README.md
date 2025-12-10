@@ -96,6 +96,39 @@ Dostęp do danych jest chroniony przez Row Level Security:
 - Użytkownicy widzą tylko swoje dane wrażliwe, ale mogą widzieć publiczne dane grup.
 - Administratorzy mają pełny dostęp do edycji wszystkich tabel.
 
+## 📦 Storage i Dane (Seed)
+
+**Uwaga:** Migracje bazy danych (`db pull`) przenoszą tylko strukturę tabel, ale **nie przenoszą**:
+1. Plików w Supabase Storage (zdjęcia, dokumenty).
+2. Danych w tabelach (np. listy tajemnic w tabeli `mysteries`).
+
+### Jak przenieść pliki (Storage)?
+Jeśli Twoja aplikacja używa grafik (np. w `mysteries.image_url`), musisz:
+1. Utworzyć bucket w nowym projekcie (np. o nazwie `mysteries`).
+2. Wgrać pliki ręcznie przez panel Supabase lub skryptem.
+3. Zaktualizować linki w bazie danych, aby wskazywały na nowy projekt.
+
+Aby automatycznie utworzyć bucket przy starcie, możesz dodać nową migrację SQL:
+```sql
+insert into storage.buckets (id, name, public) values ('mysteries', 'mysteries', true);
+create policy "Public Access" on storage.objects for select using ( bucket_id = 'mysteries' );
+```
+
+### Jak przenieść dane (Seed)?
+Projekt zawiera gotowy plik `supabase/seed.sql`, który automatycznie wypełnia bazę danych listą 20 tajemnic różańcowych wraz z opisami i linkami do grafik.
+
+**Automatycznie:**
+Podczas uruchamiania lokalnego środowiska (`npx supabase start`) lub resetowania bazy (`npx supabase db reset`), dane te są ładowane automatycznie.
+
+**Ręcznie (na zdalną bazę):**
+Jeśli chcesz załadować te dane na produkcyjną bazę danych (Supabase Cloud), wykonaj polecenie:
+```bash
+npx supabase db reset --linked
+```
+*Uwaga: To polecenie wyczyści całą bazę danych i postawi ją na nowo z danymi seed.*
+
+Alternatywnie, możesz skopiować zawartość pliku `supabase/seed.sql` i wykonać ją w SQL Editorze w panelu Supabase.
+
 ## ☁️ Supabase Edge Functions
 
 Projekt wykorzystuje Edge Functions do operacji administracyjnych:
