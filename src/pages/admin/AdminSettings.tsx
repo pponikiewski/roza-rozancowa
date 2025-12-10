@@ -93,10 +93,10 @@ export default function AdminSettings() {
   }
 
   return (
-    <div className="space-y-6 max-w-2xl mx-auto">
+    <div className="space-y-6 max-w-2xl mx-auto p-6 pt-6">
       <div>
-        <h1 className="text-3xl font-bold tracking-tight flex items-center gap-2">
-          <HandHeart className="h-8 w-8 text-primary" /> Intencja
+        <h1 className="text-2xl font-bold tracking-tight flex items-center gap-2">
+          <HandHeart className="h-6 w-6 text-primary" /> Intencja
         </h1>
         <p className="text-muted-foreground">Zmiana intencji modlitwy na dany miesiąc.</p>
       </div>
@@ -168,7 +168,7 @@ export default function AdminSettings() {
                   </TableCell>
                   <TableCell>
                     <div className="font-semibold text-xs mb-1">{item.title}</div>
-                    <div className="text-xs text-muted-foreground line-clamp-2">{item.content}</div>
+                    <div className="text-xs text-muted-foreground">{item.content}</div>
                   </TableCell>
                 </TableRow>
               ))}
