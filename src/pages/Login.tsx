@@ -6,10 +6,9 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Loader2, Lock, Mail, Eye, EyeOff } from "lucide-react"
-// 1. IMPORTUJEMY TOAST
 import { toast } from "sonner"
 
-// Baza cytatów
+// Baza cytatów wyświetlanych losowo na stronie logowania
 const ROSARY_QUOTES = [
   { text: "Różaniec to potężna broń. Używaj go z ufnością, a zobaczysz cuda.", author: "Św. Josemaria Escriva" },
   { text: "Nie ma takiego problemu, ani osobistego, ani rodzinnego, ani narodowego, ani międzynarodowego, którego nie można byłoby rozwiązać przy pomocy Różańca.", author: "Siostra Łucja z Fatimy" },
@@ -20,6 +19,8 @@ const ROSARY_QUOTES = [
   { text: "Zdrowaś Maryjo dobrze odmawiane, czyli z uwagą, nabożeństwem i skromnością, jest - według świętych - nieprzyjacielem szatana.", author: "Św. Ludwik Maria Grignion de Montfort" }
 ]
 
+// Komponent strony logowania
+// Obsługuje uwierzytelnianie użytkowników i przekierowanie w zależności od roli (admin/user)
 export default function LoginPage() {
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
@@ -29,11 +30,11 @@ export default function LoginPage() {
   const navigate = useNavigate()
 
   useEffect(() => {
-    // Losuj cytat
+    // Losowanie cytatu przy załadowaniu komponentu
     const randomQuote = ROSARY_QUOTES[Math.floor(Math.random() * ROSARY_QUOTES.length)]
     setQuote(randomQuote)
 
-    // Sprawdź sesję
+    // Sprawdzenie czy użytkownik ma już aktywną sesję
     const checkSession = async () => {
       const { data: { session } } = await supabase.auth.getSession()
       if (session) {
@@ -43,12 +44,14 @@ export default function LoginPage() {
     checkSession()
   }, [])
 
+  // Funkcja sprawdzająca rolę użytkownika i przekierowująca na odpowiedni dashboard
   const checkRoleAndRedirect = async (userId: string) => {
     const { data: profile } = await supabase.from('profiles').select('role').eq('id', userId).single()
     if (profile?.role === 'admin') navigate("/admin", { replace: true })
     else navigate("/dashboard", { replace: true })
   }
 
+  // Obsługa procesu logowania
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true)
@@ -56,14 +59,12 @@ export default function LoginPage() {
     const { data, error } = await supabase.auth.signInWithPassword({ email, password })
     
     if (error) {
-      // 2. ZAMIAST ALERT -> TOAST ERROR
       console.error("Login Error:", error.message)
       toast.error("Błąd logowania", {
         description: "Sprawdź poprawność adresu email i hasła."
       })
       setLoading(false)
     } else if (data.user) {
-      // 3. OPCJONALNIE -> TOAST SUKCES
       toast.success("Zalogowano pomyślnie", {
         description: "Witamy z powrotem!"
       })

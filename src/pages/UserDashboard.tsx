@@ -8,7 +8,7 @@ import { Separator } from "@/components/ui/separator"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog"
 import { CheckCircle2, AlertCircle, LogOut, Timer, ChevronRight, Loader2, Users, Rose, ScrollText } from "lucide-react"
 
-// --- TYPY ---
+// --- TYPY DANYCH ---
 interface Mystery {
   id: number; part: string; name: string; meditation: string; image_url: string;
 }
@@ -26,10 +26,12 @@ interface RoseMember {
   current_mystery_name: string
 }
 
+// Główny komponent panelu użytkownika
+// Wyświetla przydzieloną tajemnicę, intencję miesięczną oraz umożliwia podgląd grupy (Róży)
 export default function UserDashboard() {
   const navigate = useNavigate()
   
-  // Stany główne
+  // --- STANY APLIKACJI ---
   const [loading, setLoading] = useState(true)
   const [actionLoading, setActionLoading] = useState(false)
   const [profile, setProfile] = useState<Profile | null>(null)
@@ -43,12 +45,13 @@ export default function UserDashboard() {
   const [roseMembers, setRoseMembers] = useState<RoseMember[]>([])
   const [roseLoading, setRoseLoading] = useState(false)
 
+  // Pobieranie danych użytkownika, tajemnicy i intencji przy załadowaniu
   useEffect(() => {
     const fetchData = async () => {
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) { navigate("/login"); return }
 
-      // 1. Profil
+      // 1. Pobierz profil użytkownika
       const { data: profileData } = await supabase
         .from('profiles')
         .select('id, full_name, rose_pos, groups(id, name)')
@@ -57,7 +60,7 @@ export default function UserDashboard() {
       
       if (profileData) setProfile(profileData as any)
 
-      // 2. Intencja
+      // 2. Pobierz intencję na bieżący miesiąc
       const date = new Date()
       const { data: intentionData } = await supabase
         .from('intentions')
@@ -73,7 +76,7 @@ export default function UserDashboard() {
         })
       }
 
-      // 3. Tajemnica
+      // 3. Oblicz i pobierz aktualną tajemnicę
       let currentMysteryId: number | null = null
       const { data: calculatedId } = await supabase.rpc('get_mystery_id_for_user', { p_user_id: user.id })
       if (calculatedId) currentMysteryId = calculatedId
@@ -85,6 +88,7 @@ export default function UserDashboard() {
       const { data: mysteryData } = await supabase.from('mysteries').select('*').eq('id', currentMysteryId).single()
       setMystery(mysteryData)
 
+      // Sprawdź czy użytkownik już potwierdził modlitwę
       const { data: ackData } = await supabase.from('acknowledgments').select('*').eq('user_id', user.id).eq('mystery_id', currentMysteryId).single()
       setIsAcknowledged(!!ackData)
       setLoading(false)
@@ -92,6 +96,7 @@ export default function UserDashboard() {
     fetchData()
   }, [navigate])
 
+  // Licznik czasu do zmiany tajemnic (pierwsza niedziela miesiąca)
   useEffect(() => {
     const calculateTimeLeft = () => {
       const now = new Date()
@@ -115,6 +120,7 @@ export default function UserDashboard() {
     return () => clearInterval(timer)
   }, [])
 
+  // Obsługa otwarcia modala z listą członków róży
   const handleOpenRose = async () => {
     setIsRoseOpen(true)
     if (!profile?.groups?.id || roseMembers.length > 0) return
@@ -152,9 +158,11 @@ export default function UserDashboard() {
     }
   }
 
+  // Obsługa potwierdzenia zapoznania się z tajemnicą
   const handleAcknowledge = async () => {
     if (!profile || !mystery) return
     setActionLoading(true)
+    // Symulacja opóźnienia dla lepszego UX
     await new Promise(resolve => setTimeout(resolve, 300))
     const { error } = await supabase.from('acknowledgments').insert({ user_id: profile.id, mystery_id: mystery.id })
     if (error) {
@@ -288,7 +296,7 @@ export default function UserDashboard() {
             {isAcknowledged ? (
                  <Button className="w-full bg-green-600 hover:bg-green-700 text-white shadow-md h-12 text-sm font-medium transition-all" disabled>
                     <CheckCircle2 className="mr-2 h-5 w-5" />
-                    Modlitwa potwierdzona
+                    Potwierdzone
                  </Button>
             ) : (
                 <Button 
@@ -300,7 +308,7 @@ export default function UserDashboard() {
                         <Loader2 className="mr-2 h-5 w-5 animate-spin" />
                     ) : (
                         <span className="flex items-center">
-                            Potwierdzam modlitwę <ChevronRight className="ml-1 h-4 w-4 opacity-70" />
+                            Zapoznałem się z tajemnicą <ChevronRight className="ml-1 h-4 w-4 opacity-70" />
                         </span>
                     )}
                 </Button>
