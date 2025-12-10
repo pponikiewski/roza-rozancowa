@@ -10,7 +10,7 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/
 import { Separator } from "@/components/ui/separator"
 import { 
   UserPlus, Search, Trash2, Users, RefreshCcw, ScrollText, 
-  User, CheckCircle2, Circle, AlertCircle, CalendarClock, ArrowRightLeft, Mail, Lock, Eye, EyeOff
+  User, CheckCircle2, Circle, AlertCircle, CalendarClock, Mail, Eye, EyeOff
 } from "lucide-react"
 import { toast } from "sonner"
 
@@ -410,19 +410,21 @@ export default function AdminMembers() {
       <Dialog open={!!selectedMember} onOpenChange={(open) => !open && setSelectedMember(null)}>
         <DialogContent className="sm:max-w-lg p-0 gap-0 overflow-hidden border-0">
            {/* HEADER */}
-           <div className="p-6 pb-6 bg-gradient-to-b from-muted/50 to-background border-b">
+           <div className="p-6 pb-6 bg-muted/30 border-b">
               <DialogHeader>
-                <DialogTitle className="text-xl flex items-center gap-3">
-                  <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center text-primary border border-primary/20">
-                    <User className="h-5 w-5" />
+                <DialogTitle className="text-xl flex items-center gap-4">
+                  <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center text-primary border border-primary/20 shadow-sm">
+                    <User className="h-6 w-6" />
                   </div>
-                  <div className="flex flex-col gap-0.5">
-                    <span>{selectedMember?.full_name}</span>
-                    <span className="text-xs font-normal text-muted-foreground flex items-center gap-1.5">
-                        {selectedMember?.role === 'admin' ? 'Administrator' : 'Użytkownik'} 
-                        <span className="w-1 h-1 rounded-full bg-muted-foreground" />
-                        {selectedMember?.groups ? selectedMember.groups.name : "Brak grupy"}
-                    </span>
+                  <div className="flex flex-col gap-1">
+                    <span className="text-lg font-bold leading-none">{selectedMember?.full_name}</span>
+                    <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                        <Badge variant={selectedMember?.role === 'admin' ? "default" : "secondary"} className="h-5 px-1.5 font-normal">
+                            {selectedMember?.role === 'admin' ? 'Administrator' : 'Użytkownik'}
+                        </Badge>
+                        <span className="w-1 h-1 rounded-full bg-muted-foreground/40" />
+                        <span className="font-medium text-foreground/80">{selectedMember?.groups ? selectedMember.groups.name : "Brak grupy"}</span>
+                    </div>
                   </div>
                 </DialogTitle>
                 <DialogDescription className="sr-only">Szczegóły profilu użytkownika</DialogDescription>
@@ -438,24 +440,37 @@ export default function AdminMembers() {
               [&::-webkit-scrollbar-thumb]:rounded-full
             ">
               
-              {/* INFO SECTION */}
-              <div className="space-y-4">
-                 <div className="grid grid-cols-1 gap-4">
-                     {/* KAFELEK EMAIL (Rozszerzalny) */}
-                     <div className="space-y-1.5 p-3 rounded-lg bg-muted/20 border transition-all duration-300 ease-in-out hover:bg-muted/30 group">
-                        <Label className="text-[10px] text-muted-foreground uppercase tracking-wider font-bold flex items-center gap-1"><Mail className="h-3 w-3" /> Email</Label>
-                        <div className="font-medium text-sm truncate group-hover:whitespace-normal group-hover:break-all group-hover:overflow-visible">
-                            {selectedMember.email || <span className="text-muted-foreground italic text-xs">Brak (zaktualizuj profiles)</span>}
-                        </div>
-                     </div>
-                 </div>
-
-                 <div className="space-y-1.5 p-3 rounded-lg bg-muted/20 border">
-                    <Label className="text-[10px] text-muted-foreground uppercase tracking-wider font-bold flex items-center gap-1"><ScrollText className="h-3 w-3" /> Aktualna Tajemnica</Label>
-                    <div className="font-medium text-sm whitespace-normal leading-relaxed">
-                       {getMysteryName(selectedMember.current_mystery_id)}
+              {/* INFO GRID */}
+              <div className="grid grid-cols-2 gap-4">
+                 {/* EMAIL */}
+                 <div className="space-y-1.5">
+                    <Label className="text-[10px] text-muted-foreground uppercase tracking-wider font-bold flex items-center gap-1.5">
+                        <Mail className="h-3 w-3" /> Email
+                    </Label>
+                    <div className="font-medium text-sm truncate p-2.5 bg-muted/40 rounded-md border border-transparent hover:border-border transition-colors" title={selectedMember.email}>
+                        {selectedMember.email || <span className="text-muted-foreground italic">Brak</span>}
                     </div>
                  </div>
+
+                 {/* DATA DOŁĄCZENIA */}
+                 <div className="space-y-1.5">
+                    <Label className="text-[10px] text-muted-foreground uppercase tracking-wider font-bold flex items-center gap-1.5">
+                        <CalendarClock className="h-3 w-3" /> Dołączył(a)
+                    </Label>
+                    <div className="font-medium text-sm p-2.5 bg-muted/40 rounded-md border border-transparent hover:border-border transition-colors">
+                        {new Date(selectedMember.created_at).toLocaleDateString('pl-PL')}
+                    </div>
+                 </div>
+              </div>
+
+              {/* TAJEMNICA */}
+              <div className="space-y-1.5">
+                <Label className="text-[10px] text-muted-foreground uppercase tracking-wider font-bold flex items-center gap-1.5">
+                    <ScrollText className="h-3 w-3" /> Aktualna Tajemnica
+                </Label>
+                <div className="font-medium text-sm p-3 bg-primary/5 border border-primary/10 rounded-lg text-primary">
+                    {getMysteryName(selectedMember.current_mystery_id)}
+                </div>
               </div>
 
               {/* --- STATUS MODLITWY --- */}
@@ -485,54 +500,64 @@ export default function AdminMembers() {
 
               <Separator />
 
-              {/* ACTION: ZMIANA GRUPY */}
-              <div className="space-y-3">
-                 <Label className="flex items-center gap-2 text-xs uppercase font-bold text-muted-foreground"><ArrowRightLeft className="h-3 w-3" /> Przypisanie do grupy</Label>
-                 <div className="flex gap-2">
-                    <select 
-                        className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                        value={editGroupId}
-                        onChange={(e) => setEditGroupId(e.target.value)}
-                    >
-                        <option value="">-- Wybierz (lub usuń z grupy) --</option>
-                        {groups.map(g => <option key={g.id} value={g.id}>{g.name}</option>)}
-                    </select>
-                    <Button onClick={handleUpdateGroup} disabled={actionLoading} variant="secondary"><RefreshCcw className="h-4 w-4" /></Button>
+              {/* SEKCJA ADMINISTRACYJNA */}
+              <div className="space-y-4">
+                 <h3 className="text-xs font-bold text-muted-foreground uppercase tracking-wider mb-3">Zarządzanie</h3>
+                 
+                 {/* ZMIANA GRUPY */}
+                 <div className="grid gap-2">
+                     <Label className="text-xs">Przypisanie do grupy</Label>
+                     <div className="flex gap-2">
+                        <select 
+                            className="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                            value={editGroupId}
+                            onChange={(e) => setEditGroupId(e.target.value)}
+                        >
+                            <option value="">-- Wybierz (lub usuń z grupy) --</option>
+                            {groups.map(g => <option key={g.id} value={g.id}>{g.name}</option>)}
+                        </select>
+                        <Button onClick={handleUpdateGroup} disabled={actionLoading} size="sm" variant="secondary" className="shrink-0">
+                            <RefreshCcw className="h-3.5 w-3.5 mr-2" /> Zmień
+                        </Button>
+                     </div>
+                 </div>
+
+                 {/* ZMIANA HASŁA */}
+                 <div className="grid gap-2">
+                     <Label className="text-xs">Zmiana hasła</Label>
+                     <div className="flex gap-2">
+                        <div className="relative w-full">
+                            <Input 
+                                type={showPassword ? "text" : "password"} 
+                                placeholder="Wpisz nowe hasło..." 
+                                value={newPassword}
+                                onChange={(e) => setNewPassword(e.target.value)}
+                                className="pr-8 h-9"
+                            />
+                            <button 
+                              type="button" 
+                              onClick={() => setShowPassword(!showPassword)}
+                              className="absolute right-2 top-2.5 text-muted-foreground hover:text-foreground"
+                            >
+                              {showPassword ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
+                            </button>
+                        </div>
+                        <Button onClick={handlePasswordChange} disabled={actionLoading || !newPassword} size="sm" variant="outline" className="shrink-0">
+                            Zapisz
+                        </Button>
+                     </div>
                  </div>
               </div>
 
               <Separator />
 
-              {/* ACTION: ZMIANA HASŁA */}
-              <div className="space-y-3 bg-red-50/50 dark:bg-red-950/10 p-4 rounded-lg border border-red-100 dark:border-red-900/30">
-                 <Label className="flex items-center gap-2 text-xs uppercase font-bold text-red-600 dark:text-red-400">
-                    <Lock className="h-3 w-3" /> Zmień hasło użytkownika
-                 </Label>
-                 <div className="flex gap-2">
-                    <div className="relative w-full">
-                        <Input 
-                            type={showPassword ? "text" : "password"} 
-                            placeholder="Nowe hasło..." 
-                            value={newPassword}
-                            onChange={(e) => setNewPassword(e.target.value)}
-                            className="pr-8 bg-background"
-                        />
-                        <button 
-                          type="button" 
-                          onClick={() => setShowPassword(!showPassword)}
-                          className="absolute right-2 top-2.5 text-muted-foreground hover:text-foreground"
-                        >
-                          {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                        </button>
-                    </div>
-                    <Button onClick={handlePasswordChange} disabled={actionLoading || !newPassword} variant="destructive">Zmień</Button>
+              {/* DANGER ZONE */}
+              <div className="flex justify-between items-center pt-2">
+                 <div className="text-xs text-muted-foreground">
+                    ID: <span className="font-mono">{selectedMember.id.substring(0, 8)}...</span>
                  </div>
-              </div>
-
-              {/* FOOTER */}
-              <div className="pt-2 flex justify-center">
-                 <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-red-500 text-xs" onClick={handleDeleteUser} disabled={actionLoading}>
-                   <Trash2 className="h-3 w-3 mr-2" /> Usuń konto trwale
+                 <Button variant="destructive" size="sm" className="h-8 text-xs" onClick={handleDeleteUser} disabled={actionLoading}>
+                   <Trash2 className="h-3.5 w-3.5 mr-2" /> Usuń konto
                  </Button>
               </div>
             </div>
