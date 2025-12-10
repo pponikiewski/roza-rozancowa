@@ -307,7 +307,12 @@ export default function AdminMembers() {
       if (m.groups?.id) {
         if (!map.has(m.groups.id)) map.set(m.groups.id, [])
         map.get(m.groups.id)!.push(m)
-      } else { unassigned.push(m) }
+      } else { 
+        // Ukrywamy adminów z listy "Nieprzypisane", aby nie zaśmiecali widoku
+        if (m.role !== 'admin') {
+           unassigned.push(m) 
+        }
+      }
     })
     return { map, unassigned }
   }, [filteredAllMembers])
