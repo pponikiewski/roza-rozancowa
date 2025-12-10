@@ -6,7 +6,7 @@ import { Label } from "@/components/ui/label"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog"
 import { Separator } from "@/components/ui/separator"
 import { toast } from "sonner"
-import { Plus, Pencil, Trash2, Rose, Loader2, Search, RotateCw, AlertCircle, ChevronRight, CalendarClock } from "lucide-react"
+import { AlertCircle, CalendarClock, ChevronRight, Loader2, Pencil, Plus, Rose, RotateCw, Search, Trash2 } from "lucide-react"
 
 interface Group {
   id: number
@@ -14,6 +14,7 @@ interface Group {
   created_at: string
 }
 
+/** Komponent zarządzania Różami (grupami modlitewnymi) - tworzenie, edycja, usuwanie i rotacja */
 export default function AdminRoses() {
   const [loading, setLoading] = useState(true)
   const [actionLoading, setActionLoading] = useState(false)
