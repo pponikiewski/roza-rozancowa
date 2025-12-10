@@ -1,31 +1,22 @@
 import { BrowserRouter, Routes, Route, Navigate, useLocation, useNavigate } from "react-router-dom"
+import { LogOut } from "lucide-react"
+import { supabase } from "@/lib/supabase"
 import { ThemeProvider } from "@/components/theme-provider"
 import { ModeToggle } from "@/components/mode-toggle"
 import { Button } from "@/components/ui/button"
-import { LogOut } from "lucide-react"
-import { supabase } from "@/lib/supabase"
-// 1. IMPORT TOSTERA
 import { Toaster } from "@/components/ui/sonner"
-
-// Importy stron
+import { ProtectedRoute, AdminRoute } from "@/components/ProtectedRoute"
+import AdminLayout from "@/layouts/AdminLayout"
 import LoginPage from "@/pages/Login"
 import UserDashboard from "@/pages/UserDashboard"
-
-// Importy Admina
-import AdminLayout from "@/layouts/AdminLayout"
 import AdminMembers from "@/pages/admin/AdminMembers"
 import AdminIntentions from "@/pages/admin/AdminIntentions"
-import AdminRoses from "@/pages/admin/AdminRoses" 
+import AdminRoses from "@/pages/admin/AdminRoses"
 
-
-// --- NOWE IMPORTY (ZABEZPIECZENIA) ---
-import { ProtectedRoute, AdminRoute } from "@/components/ProtectedRoute"
-
-// --- KOMPONENT: PŁYWAJĄCE MENU ---
+/** Komponent globalnych kontrolek (zmiana motywu, wylogowanie) widoczny na każdej podstronie */
 function GlobalControls() {
   const location = useLocation()
   const navigate = useNavigate()
-
   const isLoginPage = location.pathname === "/" || location.pathname === "/login"
 
   const handleLogout = async () => {
@@ -36,7 +27,6 @@ function GlobalControls() {
   return (
     <div className="fixed top-4 right-10 z-50 flex items-center gap-2">
       <ModeToggle />
-      
       {!isLoginPage && (
         <Button 
           variant="outline" 
@@ -53,27 +43,21 @@ function GlobalControls() {
   )
 }
 
+/** Główny komponent aplikacji zarządzający routingiem i globalnymi providerami */
 function App() {
   return (
     <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
       <BrowserRouter>
-        
         <GlobalControls />
-        
-        {/* 2. UMIESZCZENIE TOSTERA W APLIKACJI */}
         <Toaster position="top-center" richColors />
-
         <Routes>
-          {/* TRASY PUBLICZNE */}
           <Route path="/" element={<LoginPage />} />
           <Route path="/login" element={<Navigate to="/" replace />} />
           
-          {/* TRASY CHRONIONE DLA UŻYTKOWNIKA (Musi być zalogowany) */}
           <Route element={<ProtectedRoute />}>
              <Route path="/dashboard" element={<UserDashboard />} />
           </Route>
 
-          {/* TRASY CHRONIONE DLA ADMINA (Musi być zalogowany + mieć rolę 'admin') */}
           <Route path="/admin" element={<AdminRoute />}>
             <Route element={<AdminLayout />}>
                <Route index element={<Navigate to="members" replace />} />
@@ -83,7 +67,6 @@ function App() {
             </Route>
           </Route>
 
-          {/* FALLBACK - Jeśli wpisze głupoty w URL */}
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </BrowserRouter>
