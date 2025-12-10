@@ -20,6 +20,7 @@ const initialState: ThemeProviderState = {
 
 const ThemeProviderContext = createContext<ThemeProviderState>(initialState)
 
+// Provider motywu zarządzający zmianą klas CSS na elemencie root oraz zapisem w localStorage
 export function ThemeProvider({
   children,
   defaultTheme = "system",
@@ -63,6 +64,7 @@ export function ThemeProvider({
   )
 }
 
+// Hook ułatwiający dostęp do kontekstu motywu w komponentach
 export const useTheme = () => {
   const context = useContext(ThemeProviderContext)
 

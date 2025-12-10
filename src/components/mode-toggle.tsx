@@ -2,11 +2,12 @@ import { Moon, Sun } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { useTheme } from "@/components/theme-provider"
 
+// Komponent przycisku do przełączania motywu aplikacji (jasny/ciemny)
 export function ModeToggle() {
   const { theme, setTheme } = useTheme()
 
+  // Funkcja zmieniająca motyw na przeciwny do obecnego
   const toggleTheme = () => {
-    // Jeśli obecny motyw to "dark", zmień na "light", w przeciwnym razie na "dark"
     setTheme(theme === "dark" ? "light" : "dark")
   }
 

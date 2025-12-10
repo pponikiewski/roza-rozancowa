@@ -3,7 +3,8 @@ import { Navigate, Outlet } from "react-router-dom"
 import { supabase } from "@/lib/supabase"
 import { Loader2 } from "lucide-react"
 
-// 1. Komponent chroniący zwykłe trasy (np. Dashboard)
+// Komponent chroniący trasy dostępne tylko dla zalogowanych użytkowników
+// Jeśli użytkownik nie jest zalogowany, przekierowuje na stronę główną
 export const ProtectedRoute = () => {
   const [loading, setLoading] = useState(true)
   const [user, setUser] = useState<any>(null)
@@ -22,7 +23,8 @@ export const ProtectedRoute = () => {
   return user ? <Outlet /> : <Navigate to="/" replace />
 }
 
-// 2. Komponent chroniący trasy Admina
+// Komponent chroniący trasy administracyjne
+// Sprawdza, czy użytkownik jest zalogowany ORAZ czy ma rolę 'admin' w tabeli profiles
 export const AdminRoute = () => {
   const [loading, setLoading] = useState(true)
   const [isAdmin, setIsAdmin] = useState(false)
