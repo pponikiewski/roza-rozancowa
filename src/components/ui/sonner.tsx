@@ -10,6 +10,8 @@ const Toaster = ({ ...props }: ToasterProps) => {
     <Sonner
       theme={theme as ToasterProps["theme"]}
       className="toaster group"
+      // Wymuszamy bardzo wysoki z-index, aby toasty były nad Dialogami (z-index: 50)
+      style={{ zIndex: 99999 }}
       toastOptions={{
         classNames: {
           toast:

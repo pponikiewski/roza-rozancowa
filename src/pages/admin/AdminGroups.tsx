@@ -7,7 +7,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog"
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card"
 import { toast } from "sonner"
-import { Plus, Pencil, Trash2, Flower2, Loader2, Search, RotateCw } from "lucide-react"
+import { Plus, Pencil, Trash2, Flower2, Loader2, Search, RotateCw, AlertCircle } from "lucide-react"
 
 // --- TYPY ---
 interface Group {
@@ -86,26 +86,46 @@ export default function AdminGroups() {
 
   // Usuwanie
   const handleDelete = (group: Group) => {
-    toast("Czy na pewno chcesz usunąć?", {
-      description: `Róża "${group.name}" zostanie trwale usunięta.`,
-      action: {
-        label: "Usuń",
-        onClick: async () => {
-            const { error } = await supabase.from('groups').delete().eq('id', group.id)
-            if (error) {
-              if (error.code === '23503') {
-                toast.error("Nie można usunąć", { description: "Ta grupa ma członków. Najpierw ich usuń." })
-              } else {
-                toast.error("Błąd usuwania", { description: error.message })
-              }
-            } else {
-              toast.success("Róża usunięta", { description: group.name })
-              fetchGroups()
-            }
-        },
-      },
-      cancel: { label: "Anuluj", onClick: () => {} },
-    })
+    toast.custom((t) => (
+      <div className="bg-background border border-border p-4 rounded-xl shadow-xl flex flex-col gap-3 w-full max-w-[340px]">
+        <div className="flex items-start gap-3">
+          <div className="bg-red-100 dark:bg-red-900/30 p-2 rounded-full shrink-0">
+             <AlertCircle className="h-5 w-5 text-red-600 dark:text-red-500" />
+          </div>
+          <div className="space-y-1">
+             <h3 className="font-semibold text-sm leading-none pt-1">Usunąć Różę?</h3>
+             <p className="text-xs text-muted-foreground leading-relaxed">
+               Czy na pewno chcesz trwale usunąć Różę <b>{group.name}</b>? Tej operacji nie można cofnąć.
+             </p>
+          </div>
+        </div>
+
+        <div className="flex justify-end gap-2 mt-2">
+          <Button variant="outline" size="sm" onClick={() => toast.dismiss(t)} className="h-8 text-xs">Anuluj</Button>
+          <Button 
+            variant="destructive" 
+            size="sm" 
+            className="h-8 text-xs shadow-sm"
+            onClick={async () => {
+               toast.dismiss(t)
+               const { error } = await supabase.from('groups').delete().eq('id', group.id)
+               if (error) {
+                 if (error.code === '23503') {
+                   toast.error("Nie można usunąć", { description: "Ta grupa ma członków. Najpierw ich usuń lub przenieś." })
+                 } else {
+                   toast.error("Błąd usuwania", { description: error.message })
+                 }
+               } else {
+                 toast.success("Róża usunięta")
+                 fetchGroups()
+               }
+            }}
+          >
+            Potwierdź usunięcie
+          </Button>
+        </div>
+      </div>
+    ), { duration: Infinity })
   }
 
   // --- NOWA FUNKCJA: RĘCZNA ROTACJA ---

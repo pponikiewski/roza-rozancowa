@@ -167,35 +167,58 @@ export default function AdminMembers() {
     }
   }
 
-  // --- USUWANIE Z TOASTEM (Zamiast confirm) ---
+  // --- USUWANIE Z TOASTEM (Custom UI) ---
   const handleDeleteUser = () => {
     if (!selectedMember) return
+    
+    // 1. Zapisujemy referencję do użytkownika, bo zaraz zamkniemy modal
+    const userToDelete = selectedMember
+    
+    // 2. Zamykamy modal natychmiast, aby odblokować interakcję z Toastem
+    setSelectedMember(null)
 
-    toast("Czy na pewno chcesz usunąć użytkownika?", {
-      description: `Konto "${selectedMember.full_name}" zostanie trwale usunięte.`,
-      action: {
-        label: "Usuń",
-        onClick: async () => {
-            setActionLoading(true)
-            try {
-              const { data, error } = await supabase.functions.invoke('delete-user', { body: { user_id: selectedMember.id } })
-              if (error || data?.error) throw new Error(error?.message || data?.error)
-              
-              toast.success("Użytkownik usunięty", { description: "Konto zostało trwale usunięte z bazy." })
-              setSelectedMember(null)
-              fetchData()
-            } catch (err: any) { 
-              toast.error("Błąd usuwania", { description: err.message })
-            } finally { 
-              setActionLoading(false) 
-            }
-        }
-      },
-      cancel: {
-        label: "Anuluj",
-        onClick: () => {}
-      }
-    })
+    toast.custom((t) => (
+      <div className="bg-background border border-border p-4 rounded-xl shadow-xl flex flex-col gap-3 w-full max-w-[340px]">
+        <div className="flex items-start gap-3">
+          <div className="bg-red-100 dark:bg-red-900/30 p-2 rounded-full shrink-0">
+             <AlertCircle className="h-5 w-5 text-red-600 dark:text-red-500" />
+          </div>
+          <div className="space-y-1">
+             <h3 className="font-semibold text-sm leading-none pt-1">Usunąć użytkownika?</h3>
+             <p className="text-xs text-muted-foreground leading-relaxed">
+               Czy na pewno chcesz trwale usunąć konto <b>{userToDelete.full_name}</b>? Tej operacji nie można cofnąć.
+             </p>
+          </div>
+        </div>
+
+        <div className="flex justify-end gap-2 mt-2">
+          <Button variant="outline" size="sm" onClick={() => toast.dismiss(t)} className="h-8 text-xs">Anuluj</Button>
+          <Button 
+            variant="destructive" 
+            size="sm" 
+            className="h-8 text-xs shadow-sm"
+            onClick={async () => {
+               toast.dismiss(t)
+               setActionLoading(true)
+               try {
+                 const { data, error } = await supabase.functions.invoke('delete-user', { body: { user_id: userToDelete.id } })
+                 if (error || data?.error) throw new Error(error?.message || data?.error)
+                 
+                 toast.success("Użytkownik usunięty", { description: "Konto zostało trwale usunięte." })
+                 // Modal już zamknięty, więc tylko odświeżamy listę
+                 fetchData()
+               } catch (err: any) { 
+                 toast.error("Błąd usuwania", { description: err.message })
+               } finally { 
+                 setActionLoading(false) 
+               }
+            }}
+          >
+            Potwierdź usunięcie
+          </Button>
+        </div>
+      </div>
+    ), { duration: Infinity })
   }
 
   // --- UI LISTY ---
