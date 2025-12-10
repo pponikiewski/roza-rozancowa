@@ -14,7 +14,7 @@ import UserDashboard from "@/pages/UserDashboard"
 // Importy Admina
 import AdminLayout from "@/layouts/AdminLayout"
 import AdminMembers from "@/pages/admin/AdminMembers"
-import AdminSettings from "@/pages/admin/AdminSettings"
+import AdminIntentions from "@/pages/admin/AdminIntentions"
 import AdminGroups from "@/pages/admin/AdminGroups" 
 
 
@@ -78,7 +78,7 @@ function App() {
             <Route element={<AdminLayout />}>
                <Route index element={<Navigate to="members" replace />} />
                <Route path="members" element={<AdminMembers />} />
-               <Route path="settings" element={<AdminSettings />} />
+               <Route path="intentions" element={<AdminIntentions />} />
                <Route path="groups" element={<AdminGroups />} />
             </Route>
           </Route>

@@ -45,7 +45,7 @@ export default function AdminLayout() {
       <nav className="flex-1 p-4 space-y-2">
         {[
           { to: "/admin/members", icon: Users, label: "Użytkownicy" },
-          { to: "/admin/settings", icon: HandHeart, label: "Intencja" },
+          { to: "/admin/intentions", icon: HandHeart, label: "Intencja" },
           { to: "/admin/groups", icon: Rose, label: "Róże" },
         ].map(({ to, icon: Icon, label }) => (
           <NavLink
