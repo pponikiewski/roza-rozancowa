@@ -215,7 +215,7 @@ export default function UserDashboard() {
     <div className="min-h-screen w-full bg-muted/20 flex flex-col pb-safe">
       
       {/* HEADER */}
-      <header className="sticky top-0 z-10 bg-background/80 backdrop-blur-md border-b px-6 py-3 flex justify-between items-center shadow-sm">
+      <header className="sticky top-0 z-10 bg-background/80 backdrop-blur-md border-b px-4 py-3 flex justify-between items-center shadow-sm">
         
         <div 
             className="flex items-center gap-3 cursor-pointer p-1.5 -ml-1.5 rounded-lg hover:bg-muted/60 transition-colors group select-none"
@@ -238,7 +238,7 @@ export default function UserDashboard() {
       </header>
 
       {/* CONTENT */}
-      <main className="flex-1 w-full max-w-lg mx-auto p-4 flex flex-col gap-5">
+      <main className="flex-1 w-full max-w-lg mx-auto p-8 md:p-8 flex flex-col gap-5">
         
         {intention && (
           <div className="bg-gradient-to-br from-rose-50 to-white dark:from-rose-950/30 dark:to-background border border-rose-100 dark:border-rose-900/50 rounded-xl p-5 shadow-sm">
