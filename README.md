@@ -58,14 +58,55 @@ VITE_SUPABASE_ANON_KEY=twoj_klucz_anon
 npm run dev
 ```
 
-## 🗄️ Struktura Bazy Danych (Supabase)
+## 🗄️ Baza Danych (PostgreSQL / Supabase)
 
-Aplikacja korzysta z następujących tabel:
-- `profiles`: Rozszerzone dane użytkowników (imię, nazwisko, rola, przypisanie do grupy).
-- `groups`: Grupy modlitewne (Róże).
-- `mysteries`: Lista tajemnic różańcowych.
-- `acknowledgments`: Potwierdzenia modlitwy.
-- `intentions`: Miesięczne intencje modlitewne.
+### Struktura Tabel
+- **`profiles`**: Rozszerzenie tabeli `auth.users`. Przechowuje dane osobowe, rolę (`admin`/`user`), przypisanie do grupy (`group_id`) oraz pozycję w róży (`rose_pos`).
+- **`groups`**: Definicje grup modlitewnych (Róż).
+- **`mysteries`**: Statyczna lista 20 tajemnic różańcowych z przypisanymi częściami.
+- **`intentions`**: Intencje modlitewne przypisane do konkretnego miesiąca i roku.
+- **`acknowledgments`**: Rejestr potwierdzeń odmówienia tajemnicy przez użytkowników.
+
+### Kluczowe Funkcje SQL
+Logika biznesowa rotacji tajemnic jest zaimplementowana bezpośrednio w bazie danych:
+- `get_mystery_id_for_user(user_id)`: Automatycznie oblicza aktualną tajemnicę dla użytkownika na podstawie daty i jego pozycji w kole (algorytm modulo 20).
+- `rotate_group_members(group_id)`: Przesuwa członków grupy o jedną pozycję (rotacja).
+- `move_user_to_group(user_id, group_id)`: Przypisuje użytkownika do pierwszego wolnego miejsca w grupie (1-20).
+
+### Bezpieczeństwo (RLS)
+Dostęp do danych jest chroniony przez Row Level Security:
+- Użytkownicy widzą tylko swoje dane wrażliwe, ale mogą widzieć publiczne dane grup.
+- Administratorzy mają pełny dostęp do edycji wszystkich tabel.
+
+## 🔄 Zarządzanie Migracjami
+
+Projekt wykorzystuje Supabase CLI do zarządzania schematem bazy danych.
+
+### Najważniejsze komendy:
+
+1. **Pobranie schematu ze zdalnej bazy (Pull):**
+   Służy do synchronizacji lokalnego środowiska ze zmianami wprowadzonymi w panelu Supabase.
+   ```bash
+   npx supabase db pull
+   ```
+
+2. **Tworzenie nowej migracji:**
+   Po wprowadzeniu zmian w lokalnej bazie (jeśli używasz Dockera) lub w celu stworzenia pliku SQL ręcznie.
+   ```bash
+   npx supabase migration new nazwa_zmiany
+   ```
+
+3. **Wypychanie zmian (Push):**
+   Aplikowanie lokalnych migracji do zdalnej bazy danych.
+   ```bash
+   npx supabase db push
+   ```
+
+### Rozwiązywanie problemów
+W przypadku błędu "migration history mismatch", należy naprawić historię migracji:
+```bash
+npx supabase migration repair --status applied <wersja_migracji>
+```
 
 ## ☁️ Supabase Edge Functions
 

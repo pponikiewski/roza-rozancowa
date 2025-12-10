@@ -1,0 +1,1 @@
+npx supabase db pull --db-url "postgresql://postgres:[TWOJE_HASLO]@db.jjlxuqnwbakmiwqfycha.supabase.co:5432/postgres"
