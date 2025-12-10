@@ -15,7 +15,7 @@ import UserDashboard from "@/pages/UserDashboard"
 import AdminLayout from "@/layouts/AdminLayout"
 import AdminMembers from "@/pages/admin/AdminMembers"
 import AdminIntentions from "@/pages/admin/AdminIntentions"
-import AdminGroups from "@/pages/admin/AdminGroups" 
+import AdminRoses from "@/pages/admin/AdminRoses" 
 
 
 // --- NOWE IMPORTY (ZABEZPIECZENIA) ---
@@ -79,7 +79,7 @@ function App() {
                <Route index element={<Navigate to="members" replace />} />
                <Route path="members" element={<AdminMembers />} />
                <Route path="intentions" element={<AdminIntentions />} />
-               <Route path="groups" element={<AdminGroups />} />
+               <Route path="roses" element={<AdminRoses />} />
             </Route>
           </Route>
 
