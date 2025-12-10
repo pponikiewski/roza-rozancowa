@@ -241,13 +241,12 @@ export default function AdminGroups() {
                                             <div className="flex justify-end gap-1">
                                                 {/* PRZYCISK ROTACJI */}
                                                 <Button 
-                                                    variant="outline" 
+                                                    variant="ghost" 
                                                     size="icon" 
                                                     onClick={() => handleRotate(group)}
                                                     title="Wymuś zmianę tajemnic (Rotacja)"
-                                                    className="text-primary border-primary/20 hover:bg-primary/10 hover:text-primary dark:border-primary/30 dark:hover:bg-primary/20"
                                                 >
-                                                    <RotateCw className="h-4 w-4" />
+                                                    <RotateCw className="h-4 w-4 text-muted-foreground hover:text-primary" />
                                                 </Button>
 
                                                 <Button variant="ghost" size="icon" onClick={() => handleOpenDialog(group)}>
