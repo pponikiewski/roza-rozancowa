@@ -1,7 +1,7 @@
 import { Outlet, NavLink } from "react-router-dom"
 import { Button } from "@/components/ui/button"
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
-import { Users, HandHeart, LayoutDashboard, Menu, Rose } from "lucide-react"
+import { Users, HandHeart, LayoutDashboard, Menu, Rose, Timer } from "lucide-react"
 import { useState, useEffect } from "react"
 import { supabase } from "@/lib/supabase"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
@@ -9,6 +9,8 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 export default function AdminLayout() {
   const [open, setOpen] = useState(false)
   const [adminProfile, setAdminProfile] = useState<{full_name: string} | null>(null)
+  const [timeLeft, setTimeLeft] = useState({ days: 0, hours: 0, minutes: 0, seconds: 0 })
+  const [targetDate, setTargetDate] = useState<Date | null>(null)
 
   useEffect(() => {
     const getProfile = async () => {
@@ -19,6 +21,38 @@ export default function AdminLayout() {
       }
     }
     getProfile()
+  }, [])
+
+  useEffect(() => {
+    const calculateTargetDate = () => {
+      const now = new Date()
+      const nextMonth = new Date(now.getFullYear(), now.getMonth() + 1, 1)
+      // Znajdź pierwszą niedzielę
+      let dayOfWeek = nextMonth.getDay()
+      let daysUntilSunday = (7 - dayOfWeek) % 7 
+      nextMonth.setDate(nextMonth.getDate() + daysUntilSunday)
+      nextMonth.setHours(0, 0, 0, 0) 
+      return nextMonth
+    }
+
+    const target = calculateTargetDate()
+    setTargetDate(target)
+
+    const calculateTimeLeft = () => {
+      const now = new Date()
+      const difference = target.getTime() - now.getTime()
+      if (difference > 0) {
+        setTimeLeft({
+          days: Math.floor(difference / (1000 * 60 * 60 * 24)),
+          hours: Math.floor((difference / (1000 * 60 * 60)) % 24),
+          minutes: Math.floor((difference / 1000 / 60) % 60),
+          seconds: Math.floor((difference / 1000) % 60),
+        })
+      }
+    }
+    calculateTimeLeft()
+    const timer = setInterval(calculateTimeLeft, 1000)
+    return () => clearInterval(timer)
   }, [])
 
   // --- KOMPONENT NAWIGACJI (Wspólny dla Desktop i Mobile) ---
@@ -60,7 +94,22 @@ export default function AdminLayout() {
         </NavLink>
       </nav>
 
-      {/* USUNIĘTO SEKCJĘ LOGOUT Z DOŁU */}
+      <div className="p-4 border-t bg-muted/20">
+        <div className="flex flex-col gap-1.5">
+            <div className="flex items-center gap-2 text-xs font-medium text-muted-foreground">
+                <Timer className="h-3.5 w-3.5" />
+                <span>Do zmiany tajemnic:</span>
+            </div>
+            <div className="text-sm font-mono font-semibold tabular-nums pl-5">
+                {timeLeft.days}d {timeLeft.hours}h {timeLeft.minutes}m {timeLeft.seconds}s
+            </div>
+            {targetDate && (
+                <div className="text-[10px] text-muted-foreground pl-5 pt-1">
+                    {targetDate.toLocaleDateString('pl-PL', { day: 'numeric', month: 'long', year: 'numeric' })}
+                </div>
+            )}
+        </div>
+      </div>
     </div>
   )
 
