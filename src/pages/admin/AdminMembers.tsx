@@ -344,7 +344,6 @@ export default function AdminMembers() {
           const groupMembers = groupedData.map.get(group.id) || []
           const count = groupMembers.length
           const completed = groupMembers.filter(m => m.acknowledgments.length > 0).length
-          const isFull = count >= 20
 
           return (
             <AccordionItem key={group.id} value={`group-${group.id}`} className="border rounded-xl bg-card px-1 overflow-hidden shadow-sm">
@@ -355,9 +354,7 @@ export default function AdminMembers() {
                     <div>
                         <span className="font-semibold text-lg block leading-none mb-1">{group.name}</span>
                         <div className="text-xs text-muted-foreground flex items-center gap-2">
-                             <span>{count}/20</span>
-                             <span className="w-1 h-1 rounded-full bg-muted-foreground/50" />
-                             <span className={isFull ? "text-amber-600 font-medium" : "text-green-600 font-medium"}>{isFull ? "Pełna" : "Wolne miejsca"}</span>
+                             <span>{count}/20 członków</span>
                         </div>
                     </div>
                   </div>
