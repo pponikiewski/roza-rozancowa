@@ -222,7 +222,7 @@ export default function AdminGroups() {
                     <Table>
                         <TableHeader>
                             <TableRow>
-                                <TableHead className="w-[50px]">ID</TableHead>
+                                <TableHead className="w-[50px]">Lp.</TableHead>
                                 <TableHead>Nazwa Róży</TableHead>
                                 <TableHead className="text-right">Akcje</TableHead>
                             </TableRow>
@@ -235,7 +235,9 @@ export default function AdminGroups() {
                             ) : (
                                 filteredGroups.map((group) => (
                                     <TableRow key={group.id}>
-                                        <TableCell className="font-mono text-xs text-muted-foreground">#{group.id}</TableCell>
+                                        <TableCell className="font-mono text-xs text-muted-foreground">
+                                            {groups.findIndex(g => g.id === group.id) + 1}
+                                        </TableCell>
                                         <TableCell className="font-medium text-base">{group.name}</TableCell>
                                         <TableCell className="text-right">
                                             <div className="flex justify-end gap-1">
