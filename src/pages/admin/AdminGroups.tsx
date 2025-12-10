@@ -3,11 +3,10 @@ import { supabase } from "@/lib/supabase"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog"
-import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card"
+import { Separator } from "@/components/ui/separator"
 import { toast } from "sonner"
-import { Plus, Pencil, Trash2, Rose, Loader2, Search, RotateCw, AlertCircle } from "lucide-react"
+import { Plus, Pencil, Trash2, Rose, Loader2, Search, RotateCw, AlertCircle, ChevronRight, CalendarClock } from "lucide-react"
 
 // --- TYPY ---
 interface Group {
@@ -25,6 +24,7 @@ export default function AdminGroups() {
   // Stan dla Dialogów
   const [isDialogOpen, setIsDialogOpen] = useState(false)
   const [editingGroup, setEditingGroup] = useState<Group | null>(null)
+  const [viewingGroup, setViewingGroup] = useState<Group | null>(null)
   const [formData, setFormData] = useState({ name: "" })
 
   useEffect(() => {
@@ -209,68 +209,103 @@ export default function AdminGroups() {
       </div>
 
       {/* LISTA GRUP */}
-      <Card>
-        <CardHeader className="pb-2">
-            <CardTitle className="text-lg">Lista Grup</CardTitle>
-            <CardDescription>Aktualnie w systemie: {groups.length}</CardDescription>
-        </CardHeader>
-        <CardContent>
-            {loading ? (
-                <div className="flex justify-center p-8"><Loader2 className="h-8 w-8 animate-spin text-primary" /></div>
-            ) : (
-                <div className="rounded-md border">
-                    <Table>
-                        <TableHeader>
-                            <TableRow>
-                                <TableHead className="w-[50px]">Lp.</TableHead>
-                                <TableHead>Nazwa Róży</TableHead>
-                                <TableHead className="text-right">Akcje</TableHead>
-                            </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                            {filteredGroups.length === 0 ? (
-                                <TableRow>
-                                    <TableCell colSpan={3} className="text-center h-24 text-muted-foreground">Brak wyników.</TableCell>
-                                </TableRow>
-                            ) : (
-                                filteredGroups.map((group) => (
-                                    <TableRow key={group.id}>
-                                        <TableCell className="font-mono text-xs text-muted-foreground">
-                                            {groups.findIndex(g => g.id === group.id) + 1}
-                                        </TableCell>
-                                        <TableCell className="font-medium text-base">{group.name}</TableCell>
-                                        <TableCell className="text-right">
-                                            <div className="flex justify-end gap-1">
-                                                {/* PRZYCISK ROTACJI */}
-                                                <Button 
-                                                    variant="ghost" 
-                                                    size="icon" 
-                                                    onClick={() => handleRotate(group)}
-                                                    title="Wymuś zmianę tajemnic (Rotacja)"
-                                                >
-                                                    <RotateCw className="h-4 w-4 text-muted-foreground hover:text-primary" />
-                                                </Button>
-
-                                                <Button variant="ghost" size="icon" onClick={() => handleOpenDialog(group)}>
-                                                    <Pencil className="h-4 w-4 text-muted-foreground hover:text-primary" />
-                                                </Button>
-                                                
-                                                <Button variant="ghost" size="icon" onClick={() => handleDelete(group)}>
-                                                    <Trash2 className="h-4 w-4 text-muted-foreground hover:text-destructive" />
-                                                </Button>
-                                            </div>
-                                        </TableCell>
-                                    </TableRow>
-                                ))
-                            )}
-                        </TableBody>
-                    </Table>
+      <div className="grid gap-3">
+        {loading ? (
+            <div className="flex justify-center p-8"><Loader2 className="h-8 w-8 animate-spin text-primary" /></div>
+        ) : filteredGroups.length === 0 ? (
+            <div className="text-center p-8 border rounded-xl border-dashed text-muted-foreground">
+                Brak róż spełniających kryteria.
+            </div>
+        ) : (
+            filteredGroups.map((group) => (
+                <div 
+                  key={group.id}
+                  onClick={() => setViewingGroup(group)}
+                  className="flex items-center justify-between p-4 bg-card border rounded-xl shadow-sm hover:bg-accent/50 transition-all cursor-pointer active:scale-[0.99]"
+                >
+                   <div className="flex items-center gap-4">
+                      <div className="bg-primary/10 p-2.5 rounded-full text-primary shrink-0">
+                         <Rose className="h-5 w-5" />
+                      </div>
+                      <div className="flex flex-col">
+                        <span className="font-semibold text-base">{group.name}</span>
+                        <span className="text-xs text-muted-foreground">Kliknij, aby zarządzać</span>
+                      </div>
+                   </div>
+                   <ChevronRight className="h-5 w-5 text-muted-foreground/50" />
                 </div>
-            )}
-        </CardContent>
-      </Card>
+            ))
+        )}
+      </div>
 
-      {/* DIALOG */}
+      {/* DIALOG SZCZEGÓŁÓW */}
+      <Dialog open={!!viewingGroup} onOpenChange={(open) => !open && setViewingGroup(null)}>
+        <DialogContent className="sm:max-w-md">
+           <DialogHeader>
+              <DialogTitle className="flex items-center gap-2 text-xl">
+                 <div className="bg-primary/10 p-2 rounded-full text-primary">
+                    <Rose className="h-5 w-5" />
+                 </div>
+                 {viewingGroup?.name}
+              </DialogTitle>
+              <DialogDescription>Szczegóły i zarządzanie Różą.</DialogDescription>
+           </DialogHeader>
+           
+           {viewingGroup && (
+             <div className="space-y-6 py-2">
+                {/* INFO */}
+                <div className="bg-muted/30 p-3 rounded-lg border flex items-center gap-3">
+                   <CalendarClock className="h-5 w-5 text-muted-foreground" />
+                   <div className="flex flex-col">
+                      <span className="text-xs font-medium text-muted-foreground uppercase">Data utworzenia</span>
+                      <span className="text-sm font-medium">
+                        {new Date(viewingGroup.created_at).toLocaleDateString('pl-PL', { 
+                            day: 'numeric', month: 'long', year: 'numeric' 
+                        })}
+                      </span>
+                   </div>
+                </div>
+
+                <Separator />
+                
+                {/* AKCJE */}
+                <div className="space-y-3">
+                   <h4 className="text-sm font-medium text-muted-foreground uppercase tracking-wider">Dostępne akcje</h4>
+                   <div className="grid gap-2">
+                      <Button 
+                        variant="outline" 
+                        className="justify-start h-11" 
+                        onClick={() => { setViewingGroup(null); handleRotate(viewingGroup) }}
+                      >
+                         <RotateCw className="mr-2 h-4 w-4 text-primary" /> 
+                         Wymuś rotację tajemnic
+                      </Button>
+                      
+                      <Button 
+                        variant="outline" 
+                        className="justify-start h-11" 
+                        onClick={() => { setViewingGroup(null); handleOpenDialog(viewingGroup) }}
+                      >
+                         <Pencil className="mr-2 h-4 w-4" /> 
+                         Edytuj nazwę
+                      </Button>
+
+                      <Button 
+                        variant="destructive" 
+                        className="justify-start h-11" 
+                        onClick={() => { setViewingGroup(null); handleDelete(viewingGroup) }}
+                      >
+                         <Trash2 className="mr-2 h-4 w-4" /> 
+                         Usuń Różę
+                      </Button>
+                   </div>
+                </div>
+             </div>
+           )}
+        </DialogContent>
+      </Dialog>
+
+      {/* DIALOG EDYCJI/TWORZENIA */}
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
         <DialogContent className="sm:max-w-md">
             <DialogHeader>
