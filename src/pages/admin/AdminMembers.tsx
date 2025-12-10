@@ -325,7 +325,9 @@ export default function AdminMembers() {
       {/* HEADER */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 border-b pb-6">
         <div className="space-y-1">
-          <h1 className="text-2xl font-bold tracking-tight">Struktura Róż</h1>
+          <h1 className="text-2xl font-bold tracking-tight flex items-center gap-2">
+            <Users className="h-6 w-6 text-primary" /> Struktura Róż
+          </h1>
           <p className="text-sm text-muted-foreground">Zarządzaj członkami, monitoruj modlitwę i edytuj dane.</p>
         </div>
         <Button onClick={() => setIsAddOpen(true)} className="w-full md:w-auto shadow-md gap-2 font-semibold">

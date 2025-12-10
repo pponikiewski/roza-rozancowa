@@ -5,7 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Input } from "@/components/ui/input"
-import { Save, CalendarHeart, Check, History } from "lucide-react"
+import { Save, CalendarHeart, Check, History, HandHeart } from "lucide-react"
 import {
   Table,
   TableBody,
@@ -95,7 +95,9 @@ export default function AdminSettings() {
   return (
     <div className="space-y-6 max-w-2xl mx-auto">
       <div>
-        <h1 className="text-3xl font-bold tracking-tight">Intencja</h1>
+        <h1 className="text-3xl font-bold tracking-tight flex items-center gap-2">
+          <HandHeart className="h-8 w-8 text-primary" /> Intencja
+        </h1>
         <p className="text-muted-foreground">Zmiana intencji modlitwy na dany miesiąc.</p>
       </div>
 
