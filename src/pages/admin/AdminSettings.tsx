@@ -28,10 +28,11 @@ export default function AdminSettings() {
   const monthName = date.toLocaleString('pl-PL', { month: 'long' })
 
   useEffect(() => {
-    fetchIntention()
+    // fetchIntention() - Usunięto, aby formularz był domyślnie pusty
     fetchHistory()
   }, [])
 
+  /* 
   const fetchIntention = async () => {
     const { data } = await supabase
       .from('intentions')
@@ -45,6 +46,7 @@ export default function AdminSettings() {
       setContent(data.content || "")
     }
   }
+  */
 
   const fetchHistory = async () => {
     const { data } = await supabase
