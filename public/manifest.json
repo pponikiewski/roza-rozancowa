@@ -1,0 +1,21 @@
+{
+  "name": "Róża Różańcowa",
+  "short_name": "Róża",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0c0a09",
+  "theme_color": "#e11d48",
+  "icons": [
+    {
+      "src": "/rose.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/rose.webp",
+      "sizes": "512x512",
+      "type": "image/webp"
+    }
+  ]
+}
