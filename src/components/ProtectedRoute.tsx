@@ -11,12 +11,19 @@ export const ProtectedRoute = () => {
   const [user, setUser] = useState<User | null>(null)
 
   useEffect(() => {
-    const checkAuth = async () => {
-      const { data: { user } } = await supabase.auth.getUser()
-      if (user) setUser(user)
+    // Sprawdź aktualną sesję (z localStorage)
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setUser(session?.user ?? null)
       setLoading(false)
-    }
-    checkAuth()
+    })
+
+    // Nasłuchuj zmian w autoryzacji (np. odświeżenie tokena, wylogowanie)
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user ?? null)
+      setLoading(false)
+    })
+
+    return () => subscription.unsubscribe()
   }, [])
 
   if (loading) return <div className="flex h-screen w-full items-center justify-center"><Loader2 className="h-8 w-8 animate-spin text-primary" /></div>
@@ -32,9 +39,10 @@ export const AdminRoute = () => {
 
   useEffect(() => {
     const checkAdmin = async () => {
-      const { data: { user } } = await supabase.auth.getUser()
+      // Używamy getSession zamiast getUser dla lepszej obsługi persystencji
+      const { data: { session } } = await supabase.auth.getSession()
       
-      if (!user) {
+      if (!session?.user) {
         setLoading(false)
         return
       }
@@ -43,7 +51,7 @@ export const AdminRoute = () => {
       const { data: profile } = await supabase
         .from('profiles')
         .select('role')
-        .eq('id', user.id)
+        .eq('id', session.user.id)
         .single()
 
       if (profile && profile.role === 'admin') {
