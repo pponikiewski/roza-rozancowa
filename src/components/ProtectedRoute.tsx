@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react"
 import { Navigate, Outlet } from "react-router-dom"
+import type { User } from "@supabase/supabase-js"
 import { supabase } from "@/lib/supabase"
 import { Loader2 } from "lucide-react"
 
@@ -7,7 +8,7 @@ import { Loader2 } from "lucide-react"
 // Jeśli użytkownik nie jest zalogowany, przekierowuje na stronę główną
 export const ProtectedRoute = () => {
   const [loading, setLoading] = useState(true)
-  const [user, setUser] = useState<any>(null)
+  const [user, setUser] = useState<User | null>(null)
 
   useEffect(() => {
     const checkAuth = async () => {
