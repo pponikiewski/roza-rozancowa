@@ -2,7 +2,7 @@ import { useEffect, useState } from "react"
 import { useNavigate } from "react-router-dom"
 import { CheckCircle2, AlertCircle, LogOut, Timer, ChevronRight, Loader2, Users, Rose, ScrollText } from "lucide-react"
 import { supabase } from "@/lib/supabase"
-import { getErrorMessage } from "@/lib/utils"
+import { getErrorMessage, getOptimizedImageUrl } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
@@ -250,8 +250,15 @@ export default function UserDashboard() {
           <div className="w-full bg-black/5 dark:bg-black/20 flex items-center justify-center p-4">
              {mystery.image_url ? (
                 <img 
-                 src={mystery.image_url} 
+                 src={getOptimizedImageUrl(mystery.image_url, 800)} 
+                 srcSet={`
+                   ${getOptimizedImageUrl(mystery.image_url, 300)} 300w,
+                   ${getOptimizedImageUrl(mystery.image_url, 500)} 500w,
+                   ${getOptimizedImageUrl(mystery.image_url, 800)} 800w
+                 `}
+                 sizes="(max-width: 550px) 90vw, 500px"
                  alt={mystery.name} 
+                 fetchPriority="high"
                  className="w-auto h-auto max-h-[50vh] object-contain shadow-sm rounded-md" 
                />
              ) : (
