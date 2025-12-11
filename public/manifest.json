@@ -9,7 +9,7 @@
   "theme_color": "#1a1a1b",
   "icons": [
     {
-      "src": "/rose.svg",
+      "src": "/roseb.svg",
       "sizes": "any",
       "type": "image/svg+xml",
       "purpose": "any maskable"
