@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge"
 import { Separator } from "@/components/ui/separator"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog"
 import { CheckCircle2, AlertCircle, LogOut, Timer, ChevronRight, Loader2, Users, Rose, ScrollText } from "lucide-react"
+import { getErrorMessage } from "@/lib/utils"
 
 // --- TYPY DANYCH ---
 interface Mystery {
@@ -152,7 +153,7 @@ export default function UserDashboard() {
             setRoseMembers(processed)
         }
     } catch (err) {
-        console.error("Błąd pobierania róży:", err)
+        console.error("Błąd pobierania róży:", getErrorMessage(err))
     } finally {
         setRoseLoading(false)
     }
