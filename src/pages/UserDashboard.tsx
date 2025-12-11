@@ -213,7 +213,7 @@ export default function UserDashboard() {
             title="Kliknij, aby zobaczyć swoją Różę"
         >
           <div className="h-9 w-9 rounded-full overflow-hidden border-2 border-primary/10 group-hover:border-primary/40 transition-colors flex items-center justify-center bg-primary/5">
-             <img src="/rose.svg" alt="Logo" className="h-6 w-6 object-contain" />
+             <img src="/roseb.svg" alt="Logo" className="h-6 w-6 object-contain" />
           </div>
           <div className="flex flex-col">
             <span className="text-sm font-semibold leading-none flex items-center gap-1.5">
