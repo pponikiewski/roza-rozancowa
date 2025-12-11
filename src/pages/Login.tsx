@@ -66,7 +66,8 @@ export default function LoginPage() {
       setLoading(false)
     } else if (data.user) {
       toast.success("Zalogowano pomyślnie", {
-        description: "Witamy z powrotem!"
+        description: "Witamy z powrotem!",
+        duration: 1000,
       })
       await checkRoleAndRedirect(data.user.id)
     }
