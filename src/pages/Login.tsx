@@ -78,7 +78,7 @@ export default function LoginPage() {
       
       {/* LOGO / NAGŁÓWEK */}
       <div className="mb-8 text-center space-y-2 flex flex-col items-center">
-        <img src="/rose.svg" alt="Logo" className="w-24 h-24 mb-2" />
+        <img src="/rose.webp" alt="Logo" className="w-24 h-24 mb-2" />
         <h1 className="text-3xl font-bold tracking-tight text-primary">Róża Różańcowa</h1>
         <p className="text-muted-foreground text-sm">Aplikacja dla Żywego Różańca</p>
       </div>

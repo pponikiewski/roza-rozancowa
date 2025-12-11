@@ -99,7 +99,7 @@ export default function AdminLayout() {
           </SheetContent>
         </Sheet>
         <div className="flex items-center gap-3">
-          <img src="/rose.svg" alt="Logo" className="h-8 w-8 object-contain" />
+          <img src="/rose.webp" alt="Logo" className="h-8 w-8 object-contain" />
           <div className="flex flex-col">
             <span className="text-sm font-semibold leading-none">Główny Admin</span>
             <span className="text-[10px] text-muted-foreground font-medium">Panel Zarządzania</span>
