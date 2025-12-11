@@ -7,6 +7,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import { Separator } from "@/components/ui/separator"
 import { toast } from "sonner"
 import { AlertCircle, CalendarClock, ChevronRight, Loader2, Pencil, Plus, Rose, RotateCw, Search, Trash2 } from "lucide-react"
+import { getErrorMessage } from "@/lib/utils"
 
 interface Group {
   id: number
@@ -62,8 +63,8 @@ export default function AdminRoses() {
       toast.success(editingGroup ? "Zaktualizowano nazwę Róży" : "Utworzono nową Różę")
       setIsDialogOpen(false)
       fetchGroups()
-    } catch (error: any) {
-      toast.error("Wystąpił błąd", { description: error.message })
+    } catch (error) {
+      toast.error("Wystąpił błąd", { description: getErrorMessage(error) })
     } finally {
       setActionLoading(false)
     }
