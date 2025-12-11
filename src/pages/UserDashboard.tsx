@@ -1,25 +1,27 @@
 import { useEffect, useState } from "react"
 import { useNavigate } from "react-router-dom"
+import { CheckCircle2, AlertCircle, LogOut, Timer, ChevronRight, Loader2, Users, Rose, ScrollText } from "lucide-react"
 import { supabase } from "@/lib/supabase"
+import { getErrorMessage } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Separator } from "@/components/ui/separator"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog"
-import { CheckCircle2, AlertCircle, LogOut, Timer, ChevronRight, Loader2, Users, Rose, ScrollText } from "lucide-react"
-import { getErrorMessage } from "@/lib/utils"
 
-// --- TYPY DANYCH ---
 interface Mystery {
   id: number; part: string; name: string; meditation: string; image_url: string;
 }
+
 interface Profile {
   id: string; full_name: string; rose_pos: number | null; groups: { id: number, name: string } | null;
 }
+
 interface Intention {
   title: string;
   content: string;
 }
+
 interface RoseMember {
   id: string
   full_name: string
@@ -27,12 +29,10 @@ interface RoseMember {
   current_mystery_name: string
 }
 
-// Główny komponent panelu użytkownika
-// Wyświetla przydzieloną tajemnicę, intencję miesięczną oraz umożliwia podgląd grupy (Róży)
+/** Główny komponent panelu użytkownika - wyświetla przydzieloną tajemnicę, intencję oraz podgląd Róży */
 export default function UserDashboard() {
   const navigate = useNavigate()
   
-  // --- STANY APLIKACJI ---
   const [loading, setLoading] = useState(true)
   const [actionLoading, setActionLoading] = useState(false)
   const [profile, setProfile] = useState<Profile | null>(null)
@@ -41,18 +41,15 @@ export default function UserDashboard() {
   const [isAcknowledged, setIsAcknowledged] = useState(false)
   const [timeLeft, setTimeLeft] = useState({ days: 0, hours: 0, minutes: 0, seconds: 0 })
 
-  // Stany dla Modala "Moja Róża"
   const [isRoseOpen, setIsRoseOpen] = useState(false)
   const [roseMembers, setRoseMembers] = useState<RoseMember[]>([])
   const [roseLoading, setRoseLoading] = useState(false)
 
-  // Pobieranie danych użytkownika, tajemnicy i intencji przy załadowaniu
   useEffect(() => {
     const fetchData = async () => {
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) { navigate("/login"); return }
 
-      // 1. Pobierz profil użytkownika
       const { data: profileData } = await supabase
         .from('profiles')
         .select('id, full_name, rose_pos, groups(id, name)')
@@ -61,7 +58,6 @@ export default function UserDashboard() {
       
       if (profileData) setProfile(profileData as any)
 
-      // 2. Pobierz intencję na bieżący miesiąc
       const date = new Date()
       const { data: intentionData } = await supabase
         .from('intentions')
@@ -77,7 +73,6 @@ export default function UserDashboard() {
         })
       }
 
-      // 3. Oblicz i pobierz aktualną tajemnicę
       let currentMysteryId: number | null = null
       const { data: calculatedId } = await supabase.rpc('get_mystery_id_for_user', { p_user_id: user.id })
       if (calculatedId) currentMysteryId = calculatedId
@@ -89,7 +84,6 @@ export default function UserDashboard() {
       const { data: mysteryData } = await supabase.from('mysteries').select('*').eq('id', currentMysteryId).single()
       setMystery(mysteryData)
 
-      // Sprawdź czy użytkownik już potwierdził modlitwę
       const { data: ackData } = await supabase.from('acknowledgments').select('*').eq('user_id', user.id).eq('mystery_id', currentMysteryId).single()
       setIsAcknowledged(!!ackData)
       setLoading(false)
@@ -97,7 +91,6 @@ export default function UserDashboard() {
     fetchData()
   }, [navigate])
 
-  // Licznik czasu do zmiany tajemnic (pierwsza niedziela miesiąca)
   useEffect(() => {
     const calculateTimeLeft = () => {
       const now = new Date()
@@ -121,7 +114,7 @@ export default function UserDashboard() {
     return () => clearInterval(timer)
   }, [])
 
-  // Obsługa otwarcia modala z listą członków róży
+  /** Pobiera listę członków róży i ich tajemnice */
   const handleOpenRose = async () => {
     setIsRoseOpen(true)
     if (!profile?.groups?.id || roseMembers.length > 0) return
@@ -159,11 +152,10 @@ export default function UserDashboard() {
     }
   }
 
-  // Obsługa potwierdzenia zapoznania się z tajemnicą
+  /** Zapisuje potwierdzenie odmówienia tajemnicy */
   const handleAcknowledge = async () => {
     if (!profile || !mystery) return
     setActionLoading(true)
-    // Symulacja opóźnienia dla lepszego UX
     await new Promise(resolve => setTimeout(resolve, 300))
     const { error } = await supabase.from('acknowledgments').insert({ user_id: profile.id, mystery_id: mystery.id })
     if (error) {
@@ -214,10 +206,7 @@ export default function UserDashboard() {
 
   return (
     <div className="min-h-screen w-full bg-muted/20 flex flex-col pb-safe">
-      
-      {/* HEADER */}
       <header className="sticky top-0 z-10 bg-background/80 backdrop-blur-md border-b px-4 py-3 flex justify-between items-center shadow-sm">
-        
         <div 
             className="flex items-center gap-3 cursor-pointer p-1.5 -ml-1.5 rounded-lg hover:bg-muted/60 transition-colors group select-none"
             onClick={handleOpenRose}
@@ -238,9 +227,7 @@ export default function UserDashboard() {
         </div>
       </header>
 
-      {/* CONTENT */}
       <main className="flex-1 w-full max-w-lg mx-auto p-8 md:p-8 flex flex-col gap-5">
-        
         {intention && (
           <div className="bg-gradient-to-br from-rose-50 to-white dark:from-rose-950/30 dark:to-background border border-rose-100 dark:border-rose-900/50 rounded-xl p-5 shadow-sm">
              <div>
@@ -326,7 +313,6 @@ export default function UserDashboard() {
         </Card>
       </main>
 
-      {/* --- MODAL MOJA RÓŻA --- */}
       <Dialog open={isRoseOpen} onOpenChange={setIsRoseOpen}>
         <DialogContent className="max-w-md max-h-[85vh] flex flex-col p-0 gap-0 overflow-hidden">
             <div className="p-6 pb-4 border-b bg-muted/20">
@@ -341,7 +327,6 @@ export default function UserDashboard() {
                 </DialogHeader>
             </div>
 
-            {/* ZMIANA: Stylizacja paska scrolla (custom scrollbar) */}
             <div className="
                 flex-1 overflow-y-auto min-h-0
                 [&::-webkit-scrollbar]:w-1.5
