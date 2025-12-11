@@ -1,12 +1,12 @@
 {
-  "name": "Róża Różańcowa",
+  "name": "Moja róża",
   "short_name": "Moja róża",
   "description": "Aplikacja do zarządzania Różami Różańcowymi",
   "start_url": "/",
   "display": "standalone",
   "orientation": "portrait",
   "background_color": "#0c0a09",
-  "theme_color": "#e11d48",
+  "theme_color": "#0c0a09",
   "icons": [
     {
       "src": "/rose.svg",
