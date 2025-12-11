@@ -74,11 +74,16 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center p-10 bg-background">
+    <main className="min-h-screen flex flex-col items-center justify-center p-10 bg-background">
       
       {/* LOGO / NAGŁÓWEK */}
       <div className="mb-8 text-center space-y-2 flex flex-col items-center">
-        <img src="/roseb.svg" alt="Logo" className="w-24 h-24 mb-2" />
+        <img 
+          src="/roseb.svg" 
+          alt="Logo" 
+          className="w-24 h-24 mb-2" 
+          fetchPriority="high"
+        />
         <h1 className="text-3xl font-bold tracking-tight text-primary">Róża Różańcowa</h1>
         <p className="text-muted-foreground text-sm">Aplikacja dla Żywego Różańca</p>
       </div>
@@ -130,6 +135,7 @@ export default function LoginPage() {
                   onClick={() => setShowPassword(!showPassword)}
                   className="absolute right-3 top-3 text-muted-foreground hover:text-foreground focus:outline-none"
                   tabIndex={-1}
+                  aria-label={showPassword ? "Ukryj hasło" : "Pokaż hasło"}
                 >
                   {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                 </button>
@@ -153,6 +159,6 @@ export default function LoginPage() {
         </p>
       </div>
 
-    </div>
+    </main>
   )
 }
