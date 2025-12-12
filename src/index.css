@@ -195,10 +195,10 @@
     align-items: center !important;
     justify-content: center !important;
     padding: 0 !important;
-    top: 1.5rem !important; /* Align with header text baseline approx */
-    right: 1.5rem !important;
-    width: 3.5rem !important;
-    height: 3.5rem !important;
+    top: 1rem !important; /* Align with header text baseline approx */
+    right: 1rem !important;
+    width: 2.25rem !important;
+    height: 2.25rem !important;
     background-color: hsl(var(--destructive)) !important;
     color: hsl(var(--destructive-foreground)) !important;
     opacity: 1 !important;
@@ -208,8 +208,8 @@
   }
   
   html.ultra-senior-mode .ultra-senior-close svg {
-    width: 2rem !important;
-    height: 2rem !important;
+    width: 1.25rem !important;
+    height: 1.25rem !important;
   }
 
   /* Ensure Dialog Header has space for the large close button and align text left */
@@ -218,9 +218,9 @@
   }
 
   html.ultra-senior-mode [role="dialog"] h2 {
-    padding-right: 4.5rem !important; /* More space for the bigger button */
+    padding-right: 3rem !important; /* More space for the bigger button */
     line-height: 1.3 !important;
-    margin-top: 0.5rem !important; /* Push text down slightly to align with button center if needed */
+    margin-top: 0.25rem !important; /* Push text down slightly to align with button center if needed */
   }
 
   * {
