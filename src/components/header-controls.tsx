@@ -20,7 +20,7 @@ export function HeaderControls({ className }: HeaderControlsProps) {
 
   const handleLogout = async () => {
     await supabase.auth.signOut()
-    navigate("/login")
+    navigate("/login", { replace: true })
   }
 
   return (
