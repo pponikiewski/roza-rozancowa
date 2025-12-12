@@ -178,6 +178,23 @@
     margin-bottom: 0.5rem !important;
   }
 
+  @media (max-width: 768px) {
+    /* Login Page Mobile Ultra Senior Mode Fix */
+    html.ultra-senior-mode .login-container {
+      justify-content: flex-start !important;
+      padding-top: 2rem !important;
+    }
+
+    html.ultra-senior-mode .login-container .header-controls {
+      position: relative !important;
+      top: auto !important;
+      right: auto !important;
+      width: 100% !important;
+      justify-content: flex-end !important;
+      margin-bottom: 3rem !important; /* Duży odstęp od loga */
+    }
+  }
+
   html.ultra-senior-mode .app-header .header-controls {
     width: 100% !important;
     justify-content: flex-end !important;
