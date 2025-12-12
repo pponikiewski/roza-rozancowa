@@ -278,7 +278,28 @@ export default function AdminMembers() {
               <div className="space-y-4">
                  <h3 className="text-xs font-bold text-muted-foreground uppercase tracking-wider mb-3">Zarządzanie</h3>
                  <div className="grid gap-2"><Label className="text-xs">Przypisanie do grupy</Label><div className="flex gap-2"><Select value={editGroupId} onValueChange={setEditGroupId}><SelectTrigger className="h-9 w-full text-sm"><SelectValue placeholder="-- Wybierz (lub usuń z grupy) --" /></SelectTrigger><SelectContent><SelectItem value="unassigned">-- Bez grupy (usuń) --</SelectItem>{groups.map(g => (<SelectItem key={g.id} value={g.id.toString()}>{g.name}</SelectItem>))}</SelectContent></Select><Button onClick={handleUpdateGroup} disabled={actionLoading} size="sm" variant="secondary" className="shrink-0"><RefreshCcw className="h-3.5 w-3.5 mr-2" /> Zmień</Button></div></div>
-                 <div className="grid gap-2"><Label className="text-xs">Zmiana hasła</Label><div className="flex gap-2"><div className="relative w-full"><Input type={showPassword ? "text" : "password"} placeholder="Wpisz nowe hasło..." value={newPassword} onChange={(e) => setNewPassword(e.target.value)} className="pr-8 h-9" /><button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-2 top-2.5 text-muted-foreground hover:text-foreground">{showPassword ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}</button></div><Button onClick={handlePasswordChange} disabled={actionLoading || !newPassword} size="sm" variant="outline" className="shrink-0">Zapisz</Button></div></div>
+                 <div className="grid gap-2">
+                   <Label className="text-xs">Zmiana hasła</Label>
+                   <div className="flex gap-2">
+                     <div className="relative w-full">
+                       <Input 
+                         type={showPassword ? "text" : "password"} 
+                         placeholder="Wpisz nowe hasło..." 
+                         value={newPassword} 
+                         onChange={(e) => setNewPassword(e.target.value)} 
+                         className="pr-10 h-9" 
+                       />
+                       <button 
+                         type="button" 
+                         onClick={() => setShowPassword(!showPassword)} 
+                         className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground p-1"
+                       >
+                         {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                       </button>
+                     </div>
+                     <Button onClick={handlePasswordChange} disabled={actionLoading || !newPassword} size="sm" variant="outline" className="shrink-0">Zapisz</Button>
+                   </div>
+                 </div>
               </div>
               <Separator />
               <div className="flex justify-between items-center pt-2"><div className="text-xs text-muted-foreground">ID: <span className="font-mono">{selectedMember.id.substring(0, 8)}...</span></div><Button variant="destructive" size="sm" className="h-8 text-xs" onClick={handleDeleteUser} disabled={actionLoading}><Trash2 className="h-3.5 w-3.5 mr-2" /> Usuń konto</Button></div>
