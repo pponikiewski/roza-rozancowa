@@ -37,9 +37,11 @@ export default function LoginPage() {
 
     // Sprawdzenie czy użytkownik ma już aktywną sesję
     const checkSession = async () => {
-      const { data: { session } } = await supabase.auth.getSession()
-      if (session) {
-        checkRoleAndRedirect(session.user.id)
+      // Używamy getUser() zamiast getSession(), aby upewnić się, że token jest ważny po stronie serwera
+      // To zapobiega problemom z "fantomowymi" sesjami po wylogowaniu
+      const { data: { user } } = await supabase.auth.getUser()
+      if (user) {
+        checkRoleAndRedirect(user.id)
       }
     }
     checkSession()
