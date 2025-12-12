@@ -88,8 +88,8 @@ export default function AdminLayout() {
       <aside className="hidden md:flex w-64 border-r bg-card flex-col">
         <NavContent />
       </aside>
-      <div className="md:hidden sticky top-0 z-40 bg-background/80 backdrop-blur-md border-b px-4 py-3 flex items-center justify-between shadow-sm">
-        <div className="flex items-center gap-3">
+      <div className="app-header md:hidden sticky top-0 z-40 bg-background/80 backdrop-blur-md border-b px-4 py-3 flex items-center justify-between shadow-sm">
+        <div className="header-user-info flex items-center gap-3">
           <Sheet open={open} onOpenChange={setOpen}>
             <SheetTrigger asChild>
               <Button variant="ghost" size="icon" className="-ml-2">
