@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button"
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
 import { Users, HandHeart, LayoutDashboard, Menu, Rose, Timer } from "lucide-react"
 import { useState, useEffect } from "react"
+import { HeaderControls } from "@/components/header-controls"
 
 // Główny komponent układu panelu administratora, zarządzający stanem nawigacji i licznikiem czasu
 export default function AdminLayout() {
@@ -87,26 +88,32 @@ export default function AdminLayout() {
       <aside className="hidden md:flex w-64 border-r bg-card flex-col">
         <NavContent />
       </aside>
-      <div className="md:hidden sticky top-0 z-40 bg-background/80 backdrop-blur-md border-b px-4 py-3 flex items-center gap-3 shadow-sm">
-        <Sheet open={open} onOpenChange={setOpen}>
-          <SheetTrigger asChild>
-            <Button variant="ghost" size="icon" className="-ml-2">
-              <Menu className="h-5 w-5" />
-            </Button>
-          </SheetTrigger>
-          <SheetContent side="left" className="p-0 w-64">
-            <NavContent />
-          </SheetContent>
-        </Sheet>
+      <div className="md:hidden sticky top-0 z-40 bg-background/80 backdrop-blur-md border-b px-4 py-3 flex items-center justify-between shadow-sm">
         <div className="flex items-center gap-3">
-          <img src="/roseb.svg" alt="Logo" className="h-8 w-8 object-contain" />
-          <div className="flex flex-col">
-            <span className="text-sm font-semibold leading-none">Główny Admin</span>
-            <span className="text-[10px] text-muted-foreground font-medium">Panel Zarządzania</span>
+          <Sheet open={open} onOpenChange={setOpen}>
+            <SheetTrigger asChild>
+              <Button variant="ghost" size="icon" className="-ml-2">
+                <Menu className="h-5 w-5" />
+              </Button>
+            </SheetTrigger>
+            <SheetContent side="left" className="p-0 w-64">
+              <NavContent />
+            </SheetContent>
+          </Sheet>
+          <div className="flex items-center gap-3">
+            <img src="/roseb.svg" alt="Logo" className="h-8 w-8 object-contain" />
+            <div className="flex flex-col">
+              <span className="text-sm font-semibold leading-none">Główny Admin</span>
+              <span className="text-[10px] text-muted-foreground font-medium">Panel Zarządzania</span>
+            </div>
           </div>
         </div>
+        <HeaderControls />
       </div>
-      <main className="flex-1 overflow-auto bg-muted/10 p-4 md:p-8">
+      <main className="flex-1 overflow-auto bg-muted/10 p-4 md:p-8 relative">
+        <div className="hidden md:flex absolute top-4 right-4 z-10">
+          <HeaderControls />
+        </div>
         <Outlet />
       </main>
     </div>

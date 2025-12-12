@@ -48,9 +48,129 @@
     --input: 240 3.7% 15.9%;
     --ring: 346.8 77.2% 49.8%;
   }
-}
- 
-@layer base {
+
+  .senior-mode {
+    font-size: 125%; /* Zwiększenie bazowego rozmiaru czcionki */
+    --radius: 0.75rem; /* Większe zaokrąglenia */
+  }
+  
+  .senior-mode body {
+    line-height: 1.8; /* Większy odstęp między liniami */
+  }
+
+  html.light.ultra-senior-mode {
+    /* High contrast colors - Custom Senior Light Theme */
+    --background: 60 11% 96.5%;
+    --foreground: 0 0% 10%;
+    --card: 0 0% 100%;
+    --card-foreground: 0 0% 10%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 0 0% 10%;
+    --primary: 211 100% 37%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 60 9% 94.5%;
+    --secondary-foreground: 0 0% 10%;
+    --muted: 60 9% 94.5%;
+    --muted-foreground: 0 0% 29%;
+    --accent: 60 9% 94.5%;
+    --accent-foreground: 0 0% 10%;
+    --destructive: 0 58% 46%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 0 0% 82%;
+    --input: 0 0% 82%;
+    --ring: 211 100% 37%;
+    --radius: 0.5rem;
+  }
+
+  html.dark.ultra-senior-mode {
+    /* High contrast colors - Custom Senior Dark Theme */
+    --background: 216 8% 12%;
+    --foreground: 0 0% 98%;
+    --card: 223 8% 18%;
+    --card-foreground: 0 0% 98%;
+    --popover: 223 8% 18%;
+    --popover-foreground: 0 0% 98%;
+    --primary: 211 100% 65%;
+    --primary-foreground: 0 0% 0%;
+    --secondary: 220 7% 16%;
+    --secondary-foreground: 0 0% 98%;
+    --muted: 220 7% 16%;
+    --muted-foreground: 0 0% 78%;
+    --accent: 220 7% 16%;
+    --accent-foreground: 0 0% 98%;
+    --destructive: 0 100% 71%;
+    --destructive-foreground: 0 0% 0%;
+    --border: 218 6% 25%;
+    --input: 218 6% 25%;
+    --ring: 211 100% 65%;
+    --radius: 0.5rem;
+  }
+
+  /* Force high contrast on elements with hardcoded backgrounds in Ultra Mode */
+  html.ultra-senior-mode [class*="bg-gradient-"],
+  html.ultra-senior-mode [class*="bg-rose-"],
+  html.ultra-senior-mode [class*="bg-amber-"],
+  html.ultra-senior-mode [class*="bg-slate-"],
+  html.ultra-senior-mode [class*="bg-gray-"],
+  html.ultra-senior-mode [class*="bg-zinc-"],
+  html.ultra-senior-mode [class*="bg-neutral-"],
+  html.ultra-senior-mode [class*="bg-stone-"] {
+    background-image: none !important;
+    background-color: hsl(var(--card)) !important;
+    color: hsl(var(--foreground)) !important;
+    border-color: hsl(var(--border)) !important;
+  }
+  
+  html.ultra-senior-mode img {
+    filter: contrast(1.2) brightness(1.1); /* Enhance image visibility */
+  }
+
+  /* Dodatkowe zasady dostępności dla Ultra Senior Mode */
+  html.ultra-senior-mode body {
+    font-size: 20px; /* Minimalna wielkość fontu: 18-20px */
+    font-weight: 500; /* Brak cienkich fontów - minimum medium */
+    line-height: 2; /* Duże odstępy między liniami */
+  }
+
+  html.ultra-senior-mode a {
+    text-decoration: underline !important; /* Podkreślane linki */
+    text-underline-offset: 4px;
+    font-weight: 600;
+  }
+
+  html.ultra-senior-mode button,
+  html.ultra-senior-mode [role="button"],
+  html.ultra-senior-mode input,
+  html.ultra-senior-mode select,
+  html.ultra-senior-mode textarea {
+    min-width: 44px; /* Przyciski minimum 44x44 px */
+    min-height: 44px;
+  }
+
+  html.ultra-senior-mode * {
+    /* Wymuszenie braku cienkich fontów na wszystkich elementach */
+    font-weight: 500; 
+  }
+  
+  html.ultra-senior-mode strong,
+  html.ultra-senior-mode b,
+  html.ultra-senior-mode h1,
+  html.ultra-senior-mode h2,
+  html.ultra-senior-mode h3,
+  html.ultra-senior-mode h4,
+  html.ultra-senior-mode h5,
+  html.ultra-senior-mode h6 {
+    font-weight: 700; /* Zachowanie hierarchii dla nagłówków */
+  }
+
+  /* Zwiększenie odstępów w kontenerach */
+  html.ultra-senior-mode .flex,
+  html.ultra-senior-mode .grid,
+  html.ultra-senior-mode .space-y-2 > *,
+  html.ultra-senior-mode .space-y-4 > * {
+    gap: 1.5rem; /* Większe odstępy między elementami */
+  }
+
   * {
     @apply border-border;
   }
