@@ -1,9 +1,6 @@
-import { BrowserRouter, Routes, Route, Navigate, useLocation, useNavigate } from "react-router-dom"
-import { LogOut, Loader2 } from "lucide-react"
-import { supabase } from "@/lib/supabase"
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom"
+import { Loader2 } from "lucide-react"
 import { ThemeProvider } from "@/components/theme-provider"
-import { ModeToggle } from "@/components/mode-toggle"
-import { Button } from "@/components/ui/button"
 import { Toaster } from "@/components/ui/sonner"
 import { ProtectedRoute, AdminRoute } from "@/components/ProtectedRoute"
 import { lazy, Suspense } from "react"
@@ -16,42 +13,11 @@ const AdminMembers = lazy(() => import("@/pages/admin/AdminMembers"))
 const AdminIntentions = lazy(() => import("@/pages/admin/AdminIntentions"))
 const AdminRoses = lazy(() => import("@/pages/admin/AdminRoses"))
 
-/** Komponent globalnych kontrolek (zmiana motywu, wylogowanie) widoczny na każdej podstronie */
-function GlobalControls() {
-  const location = useLocation()
-  const navigate = useNavigate()
-  const isLoginPage = location.pathname === "/" || location.pathname === "/login"
-
-  const handleLogout = async () => {
-    await supabase.auth.signOut()
-    navigate("/login")
-  }
-
-  return (
-    <div className="fixed top-4 right-10 z-50 flex items-center gap-2">
-      <ModeToggle />
-      {!isLoginPage && (
-        <Button 
-          variant="outline" 
-          size="icon" 
-          onClick={handleLogout} 
-          title="Wyloguj się"
-          className="bg-background/80 backdrop-blur-sm border-border shadow-sm hover:bg-destructive hover:text-white transition-colors"
-        >
-          <LogOut className="h-[1.2rem] w-[1.2rem]" />
-          <span className="sr-only">Wyloguj</span>
-        </Button>
-      )}
-    </div>
-  )
-}
-
 /** Główny komponent aplikacji zarządzający routingiem i globalnymi providerami */
 function App() {
   return (
     <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
       <BrowserRouter>
-        <GlobalControls />
         <Toaster position="top-center" richColors />
         <Suspense fallback={<div className="flex h-screen w-full items-center justify-center"><Loader2 className="h-8 w-8 animate-spin text-primary" /></div>}>
           <Routes>

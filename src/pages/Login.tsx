@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Loader2, Lock, Mail, Eye, EyeOff } from "lucide-react"
 import { toast } from "sonner"
+import { HeaderControls } from "@/components/header-controls"
 
 // Baza cytatów wyświetlanych losowo na stronie logowania
 const ROSARY_QUOTES = [
@@ -74,7 +75,8 @@ export default function LoginPage() {
   }
 
   return (
-    <main className="min-h-screen flex flex-col items-center justify-center p-10 bg-background">
+    <main className="min-h-screen flex flex-col items-center justify-center p-10 bg-background relative">
+      <HeaderControls className="absolute top-4 right-4" />
       
       {/* LOGO / NAGŁÓWEK */}
       <div className="mb-8 text-center space-y-2 flex flex-col items-center">
@@ -101,7 +103,7 @@ export default function LoginPage() {
             <div className="space-y-2">
               <Label htmlFor="email">Email</Label>
               <div className="relative">
-                <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
                   id="email"
                   placeholder="nazwa@przyklad.pl"
@@ -119,7 +121,7 @@ export default function LoginPage() {
                 <Label htmlFor="password">Hasło</Label>
               </div>
               <div className="relative">
-                <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
                   id="password"
                   type={showPassword ? "text" : "password"}
@@ -133,7 +135,7 @@ export default function LoginPage() {
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-3 text-muted-foreground hover:text-foreground focus:outline-none"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground focus:outline-none"
                   tabIndex={-1}
                   aria-label={showPassword ? "Ukryj hasło" : "Pokaż hasło"}
                 >
