@@ -208,9 +208,9 @@ export default function UserDashboard() {
 
   return (
     <div className="min-h-screen w-full bg-muted/20 flex flex-col pb-safe">
-      <header className="sticky top-0 z-10 bg-background/80 backdrop-blur-md border-b px-4 py-3 flex items-center gap-2 shadow-sm">
+      <header className="app-header sticky top-0 z-10 bg-background/80 backdrop-blur-md border-b px-4 py-3 flex items-center gap-2 shadow-sm">
         <div 
-            className="flex items-center gap-3 cursor-pointer p-1.5 -ml-1.5 rounded-lg hover:bg-muted/60 transition-colors group select-none min-w-0 flex-1"
+            className="header-user-info flex items-center gap-3 cursor-pointer p-1.5 -ml-1.5 rounded-lg hover:bg-muted/60 transition-colors group select-none min-w-0 flex-1"
             onClick={handleOpenRose}
             title="Kliknij, aby zobaczyć swoją Różę"
         >
