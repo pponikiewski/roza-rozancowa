@@ -77,7 +77,7 @@ export default function LoginPage() {
   }
 
   return (
-    <main className="min-h-screen flex flex-col items-center justify-center p-10 bg-background relative">
+    <main className="login-container min-h-screen flex flex-col items-center justify-center p-10 bg-background relative">
       <HeaderControls className="absolute top-4 right-4" />
       
       {/* LOGO / NAGŁÓWEK */}
