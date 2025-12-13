@@ -205,7 +205,7 @@ export default function UserDashboard() {
               </Button>
             ) : (
               <Button
-                onClick={acknowledgeMystery}
+                onClick={() => acknowledgeMystery()}
                 disabled={actionLoading}
                 className="w-full h-12 text-base font-semibold shadow-md transition-all active:scale-[0.98]"
               >
