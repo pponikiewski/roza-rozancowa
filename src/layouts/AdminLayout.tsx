@@ -2,37 +2,14 @@ import { Outlet, NavLink } from "react-router-dom"
 import { Button } from "@/components/ui/button"
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
 import { Users, HandHeart, LayoutDashboard, Menu, Rose, Timer } from "lucide-react"
-import { useState, useEffect } from "react"
+import { useState } from "react"
 import { HeaderControls } from "@/components/header-controls"
+import { useMysteryChangeTimer } from "@/hooks/useMysteryChangeTimer"
 
 // Główny komponent układu panelu administratora, zarządzający stanem nawigacji i licznikiem czasu
 export default function AdminLayout() {
   const [open, setOpen] = useState(false)
-  const [timeLeft, setTimeLeft] = useState({ days: 0, hours: 0, minutes: 0, seconds: 0 })
-  const [targetDate, setTargetDate] = useState<Date | null>(null)
-
-  // Oblicza datę zmiany tajemnic (pierwsza niedziela miesiąca) i aktualizuje odliczanie
-  useEffect(() => {
-    const now = new Date()
-    const nextMonth = new Date(now.getFullYear(), now.getMonth() + 1, 1)
-    const daysUntilSunday = (7 - nextMonth.getDay()) % 7
-    nextMonth.setDate(nextMonth.getDate() + daysUntilSunday)
-    nextMonth.setHours(0, 0, 0, 0)
-    setTargetDate(nextMonth)
-
-    const timer = setInterval(() => {
-      const diff = nextMonth.getTime() - new Date().getTime()
-      if (diff > 0) {
-        setTimeLeft({
-          days: Math.floor(diff / 86400000),
-          hours: Math.floor((diff / 3600000) % 24),
-          minutes: Math.floor((diff / 60000) % 60),
-          seconds: Math.floor((diff / 1000) % 60),
-        })
-      }
-    }, 1000)
-    return () => clearInterval(timer)
-  }, [])
+  const { timeLeft, targetDate } = useMysteryChangeTimer()
 
   // Komponent renderujący zawartość paska nawigacyjnego (logo, linki, licznik)
   const NavContent = () => (
@@ -54,8 +31,7 @@ export default function AdminLayout() {
             to={to}
             onClick={() => setOpen(false)}
             className={({ isActive }) =>
-              `flex items-center gap-3 px-3 py-2 rounded-md transition-colors text-sm font-medium ${
-                isActive ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:bg-muted hover:text-foreground"
+              `flex items-center gap-3 px-3 py-2 rounded-md transition-colors text-sm font-medium ${isActive ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:bg-muted hover:text-foreground"
               }`
             }
           >

@@ -8,6 +8,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Loader2, Lock, Mail, Eye, EyeOff } from "lucide-react"
 import { toast } from "sonner"
 import { HeaderControls } from "@/components/header-controls"
+import { useAuth } from "@/context/AuthContext"
 
 // Baza cytatów wyświetlanych losowo na stronie logowania
 const ROSARY_QUOTES = [
@@ -26,66 +27,54 @@ export default function LoginPage() {
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [showPassword, setShowPassword] = useState(false)
-  const [loading, setLoading] = useState(false)
-  const [quote, setQuote] = useState(ROSARY_QUOTES[0]) 
+  const [internalLoading, setInternalLoading] = useState(false)
+  const [quote, setQuote] = useState(ROSARY_QUOTES[0])
+
   const navigate = useNavigate()
+  const { user, isAdmin, loading: authLoading } = useAuth()
 
   useEffect(() => {
     // Losowanie cytatu przy załadowaniu komponentu
     const randomQuote = ROSARY_QUOTES[Math.floor(Math.random() * ROSARY_QUOTES.length)]
     setQuote(randomQuote)
-
-    // Sprawdzenie czy użytkownik ma już aktywną sesję
-    const checkSession = async () => {
-      // Używamy getUser() zamiast getSession(), aby upewnić się, że token jest ważny po stronie serwera
-      // To zapobiega problemom z "fantomowymi" sesjami po wylogowaniu
-      const { data: { user } } = await supabase.auth.getUser()
-      if (user) {
-        checkRoleAndRedirect(user.id)
-      }
-    }
-    checkSession()
   }, [])
 
-  // Funkcja sprawdzająca rolę użytkownika i przekierowująca na odpowiedni dashboard
-  const checkRoleAndRedirect = async (userId: string) => {
-    const { data: profile } = await supabase.from('profiles').select('role').eq('id', userId).single()
-    if (profile?.role === 'admin') navigate("/admin", { replace: true })
-    else navigate("/dashboard", { replace: true })
-  }
+  useEffect(() => {
+    if (!authLoading && user) {
+      if (isAdmin) navigate("/admin", { replace: true })
+      else navigate("/dashboard", { replace: true })
+    }
+  }, [authLoading, user, isAdmin, navigate])
 
   // Obsługa procesu logowania
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
-    setLoading(true)
-    
-    const { data, error } = await supabase.auth.signInWithPassword({ email, password })
-    
+    setInternalLoading(true)
+
+    const { error } = await supabase.auth.signInWithPassword({ email, password })
+
     if (error) {
       console.error("Login Error:", error.message)
       toast.error("Błąd logowania", {
         description: "Sprawdź poprawność adresu email i hasła."
       })
-      setLoading(false)
-    } else if (data.user) {
-      toast.success("Zalogowano pomyślnie", {
-        description: "Witamy z powrotem!",
-        duration: 1000,
-      })
-      await checkRoleAndRedirect(data.user.id)
+      setInternalLoading(false)
+    } else {
+      // Redirect handled by useEffect
+      toast.success("Zalogowano pomyślnie")
     }
   }
 
   return (
     <main className="login-container min-h-screen flex flex-col items-center justify-center p-10 bg-background relative">
       <HeaderControls className="absolute top-4 right-4" />
-      
+
       {/* LOGO / NAGŁÓWEK */}
       <div className="mb-8 text-center space-y-2 flex flex-col items-center">
-        <img 
-          src="/roseb.svg" 
-          alt="Logo" 
-          className="w-24 h-24 mb-2" 
+        <img
+          src="/roseb.svg"
+          alt="Logo"
+          className="w-24 h-24 mb-2"
           fetchPriority="high"
         />
         <h1 className="text-3xl font-bold tracking-tight text-primary">Róża Różańcowa</h1>
@@ -114,7 +103,7 @@ export default function LoginPage() {
                   className="pl-9"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  disabled={loading}
+                  disabled={internalLoading || authLoading}
                 />
               </div>
             </div>
@@ -132,7 +121,7 @@ export default function LoginPage() {
                   className="pl-9 pr-10"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  disabled={loading}
+                  disabled={internalLoading || authLoading}
                 />
                 <button
                   type="button"
@@ -145,8 +134,8 @@ export default function LoginPage() {
                 </button>
               </div>
             </div>
-            <Button className="w-full" disabled={loading}>
-              {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+            <Button className="w-full" disabled={internalLoading || authLoading}>
+              {(internalLoading || authLoading) && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               Zaloguj się
             </Button>
           </form>
