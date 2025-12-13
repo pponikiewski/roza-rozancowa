@@ -33,8 +33,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
             setSession(session)
             setUser(session?.user ?? null)
-            if (session?.user) checkAdminRole(session.user.id)
-            else {
+            if (session?.user) {
+                setLoading(true) // Ensure loading is true while checking role
+                checkAdminRole(session.user.id)
+            } else {
                 setIsAdmin(false)
                 setLoading(false)
             }

@@ -6,12 +6,16 @@ import { useAuth } from "@/context/AuthContext"
 
 export function useDashboardData() {
   const navigate = useNavigate()
-  const { user, loading: authLoading } = useAuth()
+  const { user, loading: authLoading, isAdmin } = useAuth()
   const queryClient = useQueryClient()
 
-  // Redirect if not authenticated (handled by ProtectedRoute generally, but good as backup)
+  // Redirect if not authenticated or if Admin
   if (!authLoading && !user) {
      navigate("/login")
+  }
+  
+  if (!authLoading && isAdmin) {
+     navigate("/admin")
   }
 
   // 1. Fetch Profile
