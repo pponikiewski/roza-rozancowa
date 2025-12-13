@@ -62,10 +62,23 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
 
     const signOut = async () => {
-        await supabase.auth.signOut()
-        setUser(null)
-        setSession(null)
-        setIsAdmin(false)
+        try {
+            await supabase.auth.signOut()
+        } catch (error) {
+            console.error("Error signing out:", error)
+        } finally {
+            // Nuclear option: Explicitly remove Supabase tokens from localStorage
+            // This prevents "ghost" sessions on mobile devices that cache aggressively
+            Object.keys(localStorage).forEach((key) => {
+                if (key.startsWith('sb-') || key.includes('supabase')) {
+                    localStorage.removeItem(key)
+                }
+            })
+
+            setUser(null)
+            setSession(null)
+            setIsAdmin(false)
+        }
     }
 
     const value = {
