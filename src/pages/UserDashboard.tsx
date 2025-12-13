@@ -138,6 +138,7 @@ export default function UserDashboard() {
       </header>
 
       <main className="flex-1 w-full max-w-lg mx-auto p-8 md:p-8 flex flex-col gap-5">
+        {/* KARTA INTENCJI */}
         {intention && (
           <div className="bg-gradient-to-br from-rose-50 to-white dark:from-rose-950/30 dark:to-background border border-rose-100 dark:border-rose-900/50 rounded-xl p-5 shadow-sm">
             <div>
@@ -156,8 +157,9 @@ export default function UserDashboard() {
           </div>
         )}
 
+        {/* KARTA TAJEMNICY */}
         <Card className="overflow-hidden shadow-lg border-border/60">
-          <div className="w-full bg-black/5 dark:bg-black/20 flex items-center justify-center p-4">
+          <div className="w-full bg-black/5 dark:bg-black/20 flex items-center justify-center p-4 relative min-h-[200px]">
             {mystery.image_url ? (
               <img
                 src={getOptimizedImageUrl(mystery.image_url, 800)}
@@ -188,7 +190,9 @@ export default function UserDashboard() {
           </CardHeader>
 
           <CardContent className="pb-2">
-            <div className="relative pl-4 border-l-2 border-primary/20">
+            <div
+              className="relative pl-4 border-l-2 border-primary/20"
+            >
               <ResizableText className="text-muted-foreground text-sm leading-6">
                 {mystery.meditation}
               </ResizableText>
@@ -230,6 +234,7 @@ export default function UserDashboard() {
         </Card>
       </main>
 
+      {/* DIALOG RÓŻY */}
       <Dialog open={isRoseOpen} onOpenChange={setIsRoseOpen}>
         <DialogContent className="max-w-md max-h-[85vh] flex flex-col p-0 gap-0 overflow-hidden">
           <div className="p-6 pb-4 border-b bg-muted/20">

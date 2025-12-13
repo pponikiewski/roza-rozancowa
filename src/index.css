@@ -1,7 +1,7 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
- 
+
 @layer base {
   :root {
     --font-sans: "Inter", "system-ui", "-apple-system", "Segoe UI", "sans-serif";
@@ -26,7 +26,7 @@
     --ring: 346.8 77.2% 49.8%;
     --radius: 0.5rem;
   }
- 
+
   .dark {
     --background: 20 14.3% 4.1%;
     --foreground: 0 0% 95%;
@@ -50,12 +50,15 @@
   }
 
   .senior-mode {
-    font-size: 125%; /* Zwiększenie bazowego rozmiaru czcionki */
-    --radius: 0.75rem; /* Większe zaokrąglenia */
+    font-size: 125%;
+    /* Zwiększenie bazowego rozmiaru czcionki */
+    --radius: 0.75rem;
+    /* Większe zaokrąglenia */
   }
-  
+
   .senior-mode body {
-    line-height: 1.8; /* Większy odstęp między liniami */
+    line-height: 1.8;
+    /* Większy odstęp między liniami */
   }
 
   html.light.ultra-senior-mode {
@@ -120,28 +123,34 @@
     color: hsl(var(--foreground)) !important;
     border-color: hsl(var(--border)) !important;
   }
-  
+
   html.ultra-senior-mode img {
-    filter: contrast(1.2) brightness(1.1); /* Enhance image visibility */
+    filter: contrast(1.2) brightness(1.1);
+    /* Enhance image visibility */
   }
 
   /* Dodatkowe zasady dostępności dla Ultra Senior Mode */
   html.ultra-senior-mode body {
-    font-size: 20px; /* Minimalna wielkość fontu: 18-20px */
-    font-weight: 500; /* Brak cienkich fontów - minimum medium */
-    line-height: 2; /* Duże odstępy między liniami */
+    font-size: 20px;
+    /* Minimalna wielkość fontu: 18-20px */
+    font-weight: 500;
+    /* Brak cienkich fontów - minimum medium */
+    line-height: 2;
+    /* Duże odstępy między liniami */
   }
 
   /* Enforce minimum font size for small text utilities in Ultra Mode */
   html.ultra-senior-mode .text-xs,
   html.ultra-senior-mode .text-\[10px\],
   html.ultra-senior-mode .text-sm {
-    font-size: 1rem !important; /* Minimum 16px */
+    font-size: 1rem !important;
+    /* Minimum 16px */
     line-height: 1.6 !important;
   }
 
   html.ultra-senior-mode a {
-    text-decoration: underline !important; /* Podkreślane linki */
+    text-decoration: underline !important;
+    /* Podkreślane linki */
     text-underline-offset: 4px;
     font-weight: 600;
   }
@@ -151,10 +160,11 @@
   html.ultra-senior-mode input,
   html.ultra-senior-mode select,
   html.ultra-senior-mode textarea {
-    min-width: 44px; /* Przyciski minimum 44x44 px */
+    min-width: 44px;
+    /* Przyciski minimum 44x44 px */
     min-height: 44px;
   }
-  
+
   html.ultra-senior-mode strong,
   html.ultra-senior-mode b,
   html.ultra-senior-mode h1,
@@ -163,13 +173,15 @@
   html.ultra-senior-mode h4,
   html.ultra-senior-mode h5,
   html.ultra-senior-mode h6 {
-    font-weight: 700; /* Zachowanie hierarchii dla nagłówków */
+    font-weight: 700;
+    /* Zachowanie hierarchii dla nagłówków */
   }
 
   /* Zwiększenie odstępów w kontenerach */
-  html.ultra-senior-mode .space-y-2 > *,
-  html.ultra-senior-mode .space-y-4 > * {
-    gap: 1.5rem; /* Większe odstępy między elementami */
+  html.ultra-senior-mode .space-y-2>*,
+  html.ultra-senior-mode .space-y-4>* {
+    gap: 1.5rem;
+    /* Większe odstępy między elementami */
   }
 
   /* Ultra Senior Mode Header Layout Fixes */
@@ -187,6 +199,7 @@
   }
 
   @media (max-width: 768px) {
+
     /* Login Page Mobile Fix (All Modes) */
     .login-container {
       justify-content: flex-start !important;
@@ -199,7 +212,8 @@
       right: auto !important;
       width: 100% !important;
       justify-content: flex-end !important;
-      margin-bottom: 3rem !important; /* Duży odstęp od loga */
+      margin-bottom: 3rem !important;
+      /* Duży odstęp od loga */
     }
 
     /* Fix Dialog Margins in Senior & Ultra Mode on Mobile */
@@ -207,7 +221,8 @@
       width: calc(100% - 2rem) !important;
       max-width: calc(100% - 2rem) !important;
       border-radius: 0.75rem !important;
-      border: 2px solid hsl(var(--border)) !important; /* Restore border if removed */
+      border: 2px solid hsl(var(--border)) !important;
+      /* Restore border if removed */
       overflow-x: hidden !important;
       word-break: break-word !important;
       overflow-wrap: anywhere !important;
@@ -230,7 +245,7 @@
     justify-content: flex-end !important;
     gap: 1rem !important;
   }
-  
+
   html.ultra-senior-mode .app-header .header-user-info img {
     width: 3rem !important;
     height: 3rem !important;
@@ -242,7 +257,8 @@
     align-items: center !important;
     justify-content: center !important;
     padding: 0 !important;
-    top: 1rem !important; /* Align with header text baseline approx */
+    top: 1rem !important;
+    /* Align with header text baseline approx */
     right: 1rem !important;
     width: 2.25rem !important;
     height: 2.25rem !important;
@@ -251,9 +267,10 @@
     opacity: 1 !important;
     border: 2px solid hsl(var(--border));
     z-index: 60;
-    border-radius: 0.5rem; /* Make it slightly rounded square */
+    border-radius: 0.5rem;
+    /* Make it slightly rounded square */
   }
-  
+
   html.ultra-senior-mode .ultra-senior-close svg {
     width: 1.25rem !important;
     height: 1.25rem !important;
@@ -265,22 +282,25 @@
   }
 
   html.ultra-senior-mode [role="dialog"] h2 {
-    padding-right: 3rem !important; /* More space for the bigger button */
+    padding-right: 3rem !important;
+    /* More space for the bigger button */
     line-height: 1.3 !important;
-    margin-top: 0.25rem !important; /* Push text down slightly to align with button center if needed */
+    margin-top: 0.25rem !important;
+    /* Push text down slightly to align with button center if needed */
   }
 
   * {
     @apply border-border;
   }
+
   body {
     @apply bg-background text-foreground font-sans;
   }
 
   /* Override browser autofill styles to prevent background color change */
   input:-webkit-autofill,
-  input:-webkit-autofill:hover, 
-  input:-webkit-autofill:focus, 
+  input:-webkit-autofill:hover,
+  input:-webkit-autofill:focus,
   input:-webkit-autofill:active {
     -webkit-text-fill-color: hsl(var(--foreground));
     transition: background-color 5000s ease-in-out 0s;

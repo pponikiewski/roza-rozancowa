@@ -9,15 +9,15 @@ interface ResizableTextProps extends React.HTMLAttributes<HTMLElement> {
 // Używamy tailwind-merge w cn(), więc te klasy nadpiszą text-sm z className
 const sizeClasses = {
   0: "",
-  1: "text-base leading-relaxed font-medium", 
+  1: "text-base leading-relaxed font-medium",
   2: "text-lg leading-loose font-semibold"
 }
 
-export function ResizableText({ 
-  children, 
-  className, 
+export function ResizableText({
+  children,
+  className,
   as: Component = "p",
-  ...props 
+  ...props
 }: ResizableTextProps) {
   const [level, setLevel] = useState(0)
 
