@@ -19,7 +19,7 @@ export function useDashboardData() {
   }
 
   // 1. Fetch Profile
-  const { data: profile } = useQuery({
+  const { data: profile, isLoading: profileLoading } = useQuery({
      queryKey: ['profile', user?.id],
      queryFn: async () => {
         if (!user) return null
@@ -34,7 +34,7 @@ export function useDashboardData() {
   })
 
   // 2. Fetch Intention
-  const { data: intention } = useQuery({
+  const { data: intention, isLoading: intentionLoading } = useQuery({
      queryKey: ['intention'],
      queryFn: async () => {
          const date = new Date()
@@ -49,7 +49,7 @@ export function useDashboardData() {
   })
 
   // 3. Fetch Mystery with logic
-  const { data: mystery } = useQuery({
+  const { data: mystery, isLoading: mysteryLoading } = useQuery({
       queryKey: ['mystery', user?.id],
       queryFn: async () => {
           if (!user) return null
@@ -67,7 +67,7 @@ export function useDashboardData() {
   })
 
   // 4. Check Acknowledgment
-  const { data: isAcknowledged } = useQuery({
+  const { data: isAcknowledged, isLoading: ackLoading } = useQuery({
       queryKey: ['acknowledgment', user?.id, mystery?.id],
       queryFn: async () => {
           if (!user || !mystery) return false
@@ -103,7 +103,11 @@ export function useDashboardData() {
   })
 
   // Consolidated loading state
-  const isLoading = authLoading || (!profile && !mystery && !intention && !isAcknowledged === undefined)
+  // We wait until ALL potential data sources are determined.
+  // Note: We don't strictly wait for 'intention' if we want to show partial UI, 
+  // but for a smooth experience it's better to wait or handle it gracefully.
+  // Given the user wants NO flash, we wait for everything critical.
+  const isLoading = authLoading || profileLoading || mysteryLoading || ackLoading || intentionLoading
 
   return {
     loading: isLoading,
