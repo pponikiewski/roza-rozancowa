@@ -132,6 +132,14 @@
     line-height: 2; /* Duże odstępy między liniami */
   }
 
+  /* Enforce minimum font size for small text utilities in Ultra Mode */
+  html.ultra-senior-mode .text-xs,
+  html.ultra-senior-mode .text-\[10px\],
+  html.ultra-senior-mode .text-sm {
+    font-size: 1rem !important; /* Minimum 16px */
+    line-height: 1.6 !important;
+  }
+
   html.ultra-senior-mode a {
     text-decoration: underline !important; /* Podkreślane linki */
     text-underline-offset: 4px;
@@ -179,19 +187,41 @@
   }
 
   @media (max-width: 768px) {
-    /* Login Page Mobile Ultra Senior Mode Fix */
-    html.ultra-senior-mode .login-container {
+    /* Login Page Mobile Fix (All Modes) */
+    .login-container {
       justify-content: flex-start !important;
       padding-top: 2rem !important;
     }
 
-    html.ultra-senior-mode .login-container .header-controls {
+    .login-container .header-controls {
       position: relative !important;
       top: auto !important;
       right: auto !important;
       width: 100% !important;
       justify-content: flex-end !important;
       margin-bottom: 3rem !important; /* Duży odstęp od loga */
+    }
+
+    /* Fix Dialog Margins in Senior & Ultra Mode on Mobile */
+    html.senior-mode [role="dialog"] {
+      width: calc(100% - 2rem) !important;
+      max-width: calc(100% - 2rem) !important;
+      border-radius: 0.75rem !important;
+      border: 2px solid hsl(var(--border)) !important; /* Restore border if removed */
+      overflow-x: hidden !important;
+      word-break: break-word !important;
+      overflow-wrap: anywhere !important;
+    }
+
+    /* Stack grid columns in dialogs for Senior/Ultra Mode to prevent overflow */
+    html.senior-mode [role="dialog"] .grid-cols-2 {
+      grid-template-columns: 1fr !important;
+    }
+
+    /* Stack flex controls vertically in dialogs for better touch targets and fit */
+    html.senior-mode [role="dialog"] .space-y-4 .flex.gap-2 {
+      flex-direction: column !important;
+      align-items: stretch !important;
     }
   }
 

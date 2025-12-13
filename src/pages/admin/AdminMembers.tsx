@@ -9,7 +9,7 @@ import { Badge } from "@/components/ui/badge"
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Separator } from "@/components/ui/separator"
-import { UserPlus, Search, Trash2, Users, RefreshCcw, ScrollText, User, CheckCircle2, Circle, AlertCircle, CalendarClock, Mail, Eye, EyeOff } from "lucide-react"
+import { UserPlus, Search, Trash2, Users, RefreshCcw, ScrollText, CheckCircle2, Circle, AlertCircle, CalendarClock, Mail, Eye, EyeOff } from "lucide-react"
 import { toast } from "sonner"
 
 interface Group { id: number; name: string }
@@ -24,6 +24,45 @@ interface Member {
   groups: { id: number, name: string } | null
   acknowledgments: { created_at: string; mystery_id: number }[]
   current_mystery_id: number | null
+}
+
+const MembersList = ({ list, onSelect, getMysteryName }: { list: Member[], onSelect: (m: Member) => void, getMysteryName: (id: number | null) => string }) => {
+  if (list.length === 0) return <div className="p-8 text-center text-sm text-muted-foreground bg-muted/10 rounded-lg border border-dashed">Brak członków w tej grupie.</div>
+  return (
+    <div className="w-full">
+      <div className="grid grid-cols-1 gap-3 sm:hidden">
+        {list.map(member => {
+           const hasAck = member.acknowledgments.length > 0
+           return (
+            <div key={member.id} onClick={() => onSelect(member)} className="relative overflow-hidden flex items-center justify-between p-4 bg-card border rounded-xl shadow-sm active:scale-[0.98] transition-all cursor-pointer">
+              <div className={`absolute left-0 top-0 bottom-0 w-1 ${hasAck ? 'bg-green-500' : 'bg-muted'}`} />
+              <div className="flex items-center gap-3 pl-2">
+                 <div><div className="font-semibold text-sm">{member.full_name}</div><div className="text-xs text-muted-foreground line-clamp-1 flex items-center gap-1"><ScrollText className="h-3 w-3" />{getMysteryName(member.current_mystery_id)}</div></div>
+              </div>
+              <div className="flex flex-col items-end">{hasAck ? <CheckCircle2 className="h-5 w-5 text-green-600" /> : <Circle className="h-5 w-5 text-muted-foreground/30" />}</div>
+            </div>
+           )
+        })}
+      </div>
+      <div className="hidden sm:block border rounded-md overflow-hidden">
+        <Table>
+          <TableHeader className="bg-muted/50"><TableRow className="hover:bg-transparent"><TableHead className="pl-6 w-[40%]">Członek</TableHead><TableHead className="w-[45%]">Tajemnica</TableHead><TableHead className="text-right pr-6">Status</TableHead></TableRow></TableHeader>
+          <TableBody>
+            {list.map(member => {
+              const hasAck = member.acknowledgments.length > 0
+              return (
+                <TableRow key={member.id} className="cursor-pointer hover:bg-muted/50 transition-colors" onClick={() => onSelect(member)}>
+                  <TableCell className="pl-6"><div className="flex items-center gap-2"><span className="font-medium">{member.full_name}</span>{member.role === 'admin' && <Badge variant="secondary" className="text-[10px] px-1 h-5">Admin</Badge>}</div></TableCell>
+                  <TableCell className="text-muted-foreground text-sm">{getMysteryName(member.current_mystery_id)}</TableCell>
+                  <TableCell className="text-right pr-6">{hasAck ? <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400"><CheckCircle2 className="h-3 w-3" /> Potwierdzone</div> : <span className="text-xs text-muted-foreground">Oczekuje</span>}</TableCell>
+                </TableRow>
+              )
+            })}
+          </TableBody>
+        </Table>
+      </div>
+    </div>
+  )
 }
 
 export default function AdminMembers() {
@@ -148,43 +187,9 @@ export default function AdminMembers() {
     ), { duration: Infinity })
   }
 
-  const MembersList = ({ list }: { list: Member[] }) => {
-    if (list.length === 0) return <div className="p-8 text-center text-sm text-muted-foreground bg-muted/10 rounded-lg border border-dashed">Brak członków w tej grupie.</div>
-    return (
-      <div className="w-full">
-        <div className="grid grid-cols-1 gap-3 sm:hidden">
-          {list.map(member => {
-             const hasAck = member.acknowledgments.length > 0
-             return (
-              <div key={member.id} onClick={() => { setSelectedMember(member); setEditGroupId(member.groups?.id.toString() || "unassigned") }} className="relative overflow-hidden flex items-center justify-between p-4 bg-card border rounded-xl shadow-sm active:scale-[0.98] transition-all cursor-pointer">
-                <div className={`absolute left-0 top-0 bottom-0 w-1 ${hasAck ? 'bg-green-500' : 'bg-muted'}`} />
-                <div className="flex items-center gap-3 pl-2">
-                   <div><div className="font-semibold text-sm">{member.full_name}</div><div className="text-xs text-muted-foreground line-clamp-1 flex items-center gap-1"><ScrollText className="h-3 w-3" />{getMysteryName(member.current_mystery_id)}</div></div>
-                </div>
-                <div className="flex flex-col items-end">{hasAck ? <CheckCircle2 className="h-5 w-5 text-green-600" /> : <Circle className="h-5 w-5 text-muted-foreground/30" />}</div>
-              </div>
-             )
-          })}
-        </div>
-        <div className="hidden sm:block border rounded-md overflow-hidden">
-          <Table>
-            <TableHeader className="bg-muted/50"><TableRow className="hover:bg-transparent"><TableHead className="pl-6 w-[40%]">Członek</TableHead><TableHead className="w-[45%]">Tajemnica</TableHead><TableHead className="text-right pr-6">Status</TableHead></TableRow></TableHeader>
-            <TableBody>
-              {list.map(member => {
-                const hasAck = member.acknowledgments.length > 0
-                return (
-                  <TableRow key={member.id} className="cursor-pointer hover:bg-muted/50 transition-colors" onClick={() => { setSelectedMember(member); setEditGroupId(member.groups?.id.toString() || "unassigned") }}>
-                    <TableCell className="pl-6"><div className="flex items-center gap-2"><span className="font-medium">{member.full_name}</span>{member.role === 'admin' && <Badge variant="secondary" className="text-[10px] px-1 h-5">Admin</Badge>}</div></TableCell>
-                    <TableCell className="text-muted-foreground text-sm">{getMysteryName(member.current_mystery_id)}</TableCell>
-                    <TableCell className="text-right pr-6">{hasAck ? <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400"><CheckCircle2 className="h-3 w-3" /> Potwierdzone</div> : <span className="text-xs text-muted-foreground">Oczekuje</span>}</TableCell>
-                  </TableRow>
-                )
-              })}
-            </TableBody>
-          </Table>
-        </div>
-      </div>
-    )
+  const handleSelectMember = (member: Member) => {
+    setSelectedMember(member)
+    setEditGroupId(member.groups?.id.toString() || "unassigned")
   }
 
   const filteredAllMembers = members.filter(m => m.full_name.toLowerCase().includes(search.toLowerCase()))
@@ -216,16 +221,20 @@ export default function AdminMembers() {
               <AccordionTrigger className="hover:no-underline px-4 py-4 hover:bg-muted/50 transition-colors">
                 <div className="flex flex-col sm:flex-row sm:items-center w-full gap-2 sm:gap-4 text-left justify-between pr-4">
                   <div className="flex items-center gap-3"><div className="bg-primary/10 p-2 rounded-lg"><Users className="h-5 w-5 text-primary" /></div><div><span className="font-semibold text-lg block leading-none mb-1">{group.name}</span><div className="text-xs text-muted-foreground flex items-center gap-2"><span>{count}/20 członków</span></div></div></div>
-                  <div className="flex items-center gap-3 bg-muted/30 px-3 py-1.5 rounded-full border"><div className="text-xs font-medium text-muted-foreground">Zapoznanie się z tajemnicą:</div><div className="text-sm font-bold flex items-center gap-1"><span className={completed === count && count > 0 ? "text-green-600" : ""}>{completed}</span><span className="text-muted-foreground/50">/</span><span>{count}</span></div></div>
+                  <div className="flex items-center gap-3 bg-muted/30 px-4 py-2 rounded-xl border h-auto"><div className="text-xs font-medium text-muted-foreground">Zapoznanie się z tajemnicą:</div><div className="text-sm font-bold flex items-center gap-1"><span className={completed === count && count > 0 ? "text-green-600" : ""}>{completed}</span><span className="text-muted-foreground/50">/</span><span>{count}</span></div></div>
                 </div>
               </AccordionTrigger>
-              <AccordionContent className="px-4 pb-4 pt-2 border-t border-dashed"><MembersList list={groupMembers} /></AccordionContent>
+              <AccordionContent className="px-4 pb-4 pt-2 border-t border-dashed">
+                <MembersList list={groupMembers} onSelect={handleSelectMember} getMysteryName={getMysteryName} />
+              </AccordionContent>
             </AccordionItem>
           )
         })}
         <AccordionItem value="unassigned" className="border rounded-xl bg-muted/20 border-dashed px-1">
           <AccordionTrigger className="hover:no-underline px-4 py-4"><div className="flex items-center gap-3 text-muted-foreground"><div className="bg-muted p-2 rounded-lg"><AlertCircle className="h-5 w-5" /></div><span className="font-semibold">Osoby nieprzypisane</span><Badge variant="secondary" className="ml-2">{groupedData.unassigned.length}</Badge></div></AccordionTrigger>
-          <AccordionContent className="px-4 pb-4 pt-2 border-t border-dashed"><MembersList list={groupedData.unassigned} /></AccordionContent>
+          <AccordionContent className="px-4 pb-4 pt-2 border-t border-dashed">
+            <MembersList list={groupedData.unassigned} onSelect={handleSelectMember} getMysteryName={getMysteryName} />
+          </AccordionContent>
         </AccordionItem>
       </Accordion>
 
@@ -253,9 +262,15 @@ export default function AdminMembers() {
         <DialogContent className="sm:max-w-lg p-0 gap-0 overflow-hidden border-0">
            <div className="p-6 pb-6 bg-muted/30 border-b">
               <DialogHeader>
-                <DialogTitle className="text-xl flex items-center gap-4">
-                  <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center text-primary border border-primary/20 shadow-sm"><User className="h-6 w-6" /></div>
-                  <div className="flex flex-col gap-1"><span className="text-lg font-bold leading-none">{selectedMember?.full_name}</span><div className="flex items-center gap-2 text-xs text-muted-foreground"><Badge variant={selectedMember?.role === 'admin' ? "default" : "secondary"} className="h-5 px-1.5 font-normal">{selectedMember?.role === 'admin' ? 'Administrator' : 'Użytkownik'}</Badge><span className="w-1 h-1 rounded-full bg-muted-foreground/40" /><span className="font-medium text-foreground/80">{selectedMember?.groups ? selectedMember.groups.name : "Brak grupy"}</span></div></div>
+                <DialogTitle className="text-xl flex flex-col gap-2 items-start">
+                  <span className="text-lg font-bold leading-none">{selectedMember?.full_name}</span>
+                  <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
+                    <Badge variant={selectedMember?.role === 'admin' ? "default" : "secondary"} className="px-2 py-0.5 font-normal h-auto">
+                      {selectedMember?.role === 'admin' ? 'Administrator' : 'Użytkownik'}
+                    </Badge>
+                    <span className="hidden sm:inline-block w-1 h-1 rounded-full bg-muted-foreground/40" />
+                    <span className="font-medium text-foreground/80">{selectedMember?.groups ? selectedMember.groups.name : "Brak grupy"}</span>
+                  </div>
                 </DialogTitle>
                 <DialogDescription className="sr-only">Szczegóły profilu użytkownika</DialogDescription>
               </DialogHeader>
