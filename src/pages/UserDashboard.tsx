@@ -14,11 +14,13 @@ import { ResizableText } from "@/components/resizable-text"
 // Hooks & Types
 import { useDashboardData } from "@/hooks/useDashboardData"
 import { useMysteryChangeTimer } from "@/hooks/useMysteryChangeTimer"
+import { useAuth } from "@/context/AuthContext"
 import type { RoseMember } from "@/types"
 
 /** Główny komponent panelu użytkownika - wyświetla przydzieloną tajemnicę, intencję oraz podgląd Róży */
 export default function UserDashboard() {
   const navigate = useNavigate()
+  const { signOut } = useAuth()
 
   // Custom hooks
   const {
@@ -76,8 +78,13 @@ export default function UserDashboard() {
   }
 
   const handleLogout = async () => {
-    await supabase.auth.signOut()
-    navigate("/login")
+    try {
+      await signOut()
+      navigate("/login")
+    } catch (e) {
+      console.error("Logout error", e)
+      navigate("/login")
+    }
   }
 
   if (loading) return (

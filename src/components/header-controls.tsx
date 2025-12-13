@@ -1,11 +1,11 @@
 import { useLocation, useNavigate } from "react-router-dom"
 import { LogOut } from "lucide-react"
-import { supabase } from "@/lib/supabase"
 import { ModeToggle } from "@/components/mode-toggle"
 import { SeniorModeToggle } from "@/components/senior-mode-toggle"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 import { useTheme } from "@/components/theme-provider"
+import { useAuth } from "@/context/AuthContext"
 
 interface HeaderControlsProps {
   className?: string
@@ -15,12 +15,19 @@ export function HeaderControls({ className }: HeaderControlsProps) {
   const location = useLocation()
   const navigate = useNavigate()
   const { seniorMode } = useTheme()
+  const { signOut } = useAuth()
   const isUltra = seniorMode === "ultra"
   const isLoginPage = location.pathname === "/" || location.pathname === "/login"
 
   const handleLogout = async () => {
-    await supabase.auth.signOut()
-    navigate("/login", { replace: true })
+    try {
+      await signOut()
+      navigate("/login", { replace: true })
+    } catch (error) {
+      console.error("Logout failed:", error)
+      // Force navigation even if error
+      navigate("/login", { replace: true })
+    }
   }
 
   return (
@@ -28,10 +35,10 @@ export function HeaderControls({ className }: HeaderControlsProps) {
       <SeniorModeToggle className={isUltra ? "flex-1" : ""} />
       <ModeToggle className={isUltra ? "flex-1" : ""} />
       {!isLoginPage && (
-        <Button 
-          variant="outline" 
-          size={isUltra ? "default" : "icon"} 
-          onClick={handleLogout} 
+        <Button
+          variant="outline"
+          size={isUltra ? "default" : "icon"}
+          onClick={handleLogout}
           title="Wyloguj się"
           className={cn(
             "bg-background/80 backdrop-blur-sm border-border shadow-sm hover:bg-destructive hover:text-white transition-colors",
