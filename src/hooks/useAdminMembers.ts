@@ -2,6 +2,11 @@ import { useState, useEffect, useCallback } from "react"
 import { supabase } from "@/lib/supabase"
 import { toast } from "sonner"
 import type { AdminMember, Group, Mystery } from "@/types"
+import { getErrorMessage } from "@/lib/utils"
+
+interface RawMember extends Omit<AdminMember, 'current_mystery_id'> {
+    acknowledgments: { created_at: string; mystery_id: number }[]
+}
 
 export function useAdminMembers() {
   const [loading, setLoading] = useState(false)
@@ -17,7 +22,7 @@ export function useAdminMembers() {
 
     // 2. Fetch Mysteries
     const { data: m } = await supabase.from('mysteries').select('id, name')
-    if (m) setMysteries(m as any) // Partial select
+    if (m) setMysteries(m as unknown as Mystery[]) // Partial select, still need casting but safer
 
     // 3. Fetch Members with their related data
     const { data: allMembers, error } = await supabase.from('profiles')
@@ -35,11 +40,11 @@ export function useAdminMembers() {
 
     if (allMembers) {
       // Process members to calculate current mystery
-      const processed = await Promise.all(allMembers.map(async (m: any) => {
+      const processed = await Promise.all((allMembers as unknown as RawMember[]).map(async (m) => {
         const { data: calcId } = await supabase.rpc('get_mystery_id_for_user', { p_user_id: m.id })
         const currentMysteryId = calcId || null
         const relevantAcks = currentMysteryId 
-            ? m.acknowledgments.filter((a: any) => Number(a.mystery_id) === Number(currentMysteryId)) 
+            ? m.acknowledgments.filter((a) => Number(a.mystery_id) === Number(currentMysteryId)) 
             : []
         
         return { 
@@ -56,7 +61,7 @@ export function useAdminMembers() {
     fetchData()
   }, [fetchData])
 
-  const createUser = async (formData: any) => {
+  const createUser = async (formData: { email: string, password: string, fullName: string, groupId: string }) => {
     setLoading(true)
     try {
       const { data, error } = await supabase.functions.invoke('create-user', {
@@ -70,8 +75,8 @@ export function useAdminMembers() {
       toast.success("Sukces!", { description: `Dodano użytkownika: ${formData.fullName}` })
       fetchData()
       return true
-    } catch (err: any) { 
-       toast.error("Błąd tworzenia", { description: err.message })
+    } catch (err: unknown) { 
+       toast.error("Błąd tworzenia", { description: getErrorMessage(err) })
        return false
     } finally { 
        setLoading(false) 
@@ -89,8 +94,8 @@ export function useAdminMembers() {
       await fetchData()
       toast.success("Zaktualizowano", { description: "Przypisanie do grupy zostało zmienione." })
       return true
-    } catch (err: any) { 
-        toast.error("Błąd aktualizacji", { description: err.message })
+    } catch (err: unknown) { 
+        toast.error("Błąd aktualizacji", { description: getErrorMessage(err) })
         return false
     } finally { 
         setActionLoading(false) 
@@ -110,8 +115,8 @@ export function useAdminMembers() {
          if (error || data?.error) throw new Error(error?.message || data?.error)
          toast.success("Hasło zmienione")
          return true
-     } catch (err: any) { 
-         toast.error("Błąd zmiany hasła", { description: err.message })
+     } catch (err: unknown) { 
+         toast.error("Błąd zmiany hasła", { description: getErrorMessage(err) })
          return false
      } finally { 
          setActionLoading(false) 
@@ -126,8 +131,8 @@ export function useAdminMembers() {
         toast.success("Użytkownik usunięty")
         fetchData()
         return true
-    } catch (err: any) { 
-        toast.error("Błąd usuwania", { description: err.message })
+    } catch (err: unknown) { 
+        toast.error("Błąd usuwania", { description: getErrorMessage(err) })
         return false
     } finally { 
         setActionLoading(false) 
