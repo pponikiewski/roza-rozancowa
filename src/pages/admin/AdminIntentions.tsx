@@ -1,5 +1,4 @@
-import { useEffect, useState } from "react"
-import { supabase } from "@/lib/supabase"
+import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Label } from "@/components/ui/label"
@@ -7,60 +6,28 @@ import { Textarea } from "@/components/ui/textarea"
 import { Input } from "@/components/ui/input"
 import { Save, CalendarHeart, Check, History, HandHeart } from "lucide-react"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { toast } from "sonner"
-
-interface Intention {
-  month: number
-  year: number
-  title: string
-  content: string
-}
+import { useAdminIntentions } from "@/hooks/useAdminIntentions"
 
 export default function AdminIntentions() {
-  const [loading, setLoading] = useState(false)
+  const {
+    loading,
+    history,
+    saved,
+    saveIntention
+  } = useAdminIntentions()
+
   const [title, setTitle] = useState("")
   const [content, setContent] = useState("")
-  const [saved, setSaved] = useState(false)
-  const [history, setHistory] = useState<Intention[]>([])
 
   const date = new Date()
-  const currentMonth = date.getMonth() + 1
   const currentYear = date.getFullYear()
   const monthName = date.toLocaleString('pl-PL', { month: 'long' })
 
-  useEffect(() => { fetchHistory() }, [])
-
-  /** Pobiera historię intencji z bazy danych */
-  const fetchHistory = async () => {
-    const { data } = await supabase.from('intentions').select('*').order('year', { ascending: false }).order('month', { ascending: false })
-    if (data) setHistory(data)
-  }
-
-  /** Zapisuje intencję na bieżący miesiąc */
-  const handleSave = async () => {
-    if (!title.trim() || !content.trim()) return toast.error("Wypełnij wszystkie pola")
-    
-    setLoading(true)
-    setSaved(false)
-
-    const { error } = await supabase.from('intentions').upsert({ 
-        month: currentMonth, 
-        year: currentYear, 
-        title: title,
-        content: content 
-      }, { onConflict: 'month, year' })
-
-    setLoading(false)
-
-    if (error) {
-      toast.error("Błąd zapisu", { description: error.message })
-    } else {
-      setSaved(true)
+  const handleSaveWrapper = async () => {
+    const success = await saveIntention(title, content)
+    if (success) {
       setTitle("")
       setContent("")
-      fetchHistory()
-      toast.success("Zapisano intencję")
-      setTimeout(() => setSaved(false), 3000)
     }
   }
 
@@ -76,20 +43,20 @@ export default function AdminIntentions() {
       <Card>
         <CardHeader>
           <div className="flex items-center gap-2">
-             <div className="p-2 bg-rose-100 dark:bg-rose-900/20 rounded-full text-rose-600"><CalendarHeart className="h-6 w-6" /></div>
-             <div><CardTitle>Intencja Miesięczna</CardTitle><CardDescription className="capitalize">Na {monthName} {currentYear}</CardDescription></div>
+            <div className="p-2 bg-rose-100 dark:bg-rose-900/20 rounded-full text-rose-600"><CalendarHeart className="h-6 w-6" /></div>
+            <div><CardTitle>Intencja Miesięczna</CardTitle><CardDescription className="capitalize">Na {monthName} {currentYear}</CardDescription></div>
           </div>
         </CardHeader>
         <CardContent className="space-y-6">
           <div className="space-y-2">
             <Label htmlFor="title">Nagłówek</Label>
-            <Input id="title" value={title} onChange={(e) => setTitle(e.target.value)} className="font-semibold"/>
+            <Input id="title" value={title} onChange={(e) => setTitle(e.target.value)} className="font-semibold" />
           </div>
           <div className="space-y-2">
             <Label htmlFor="content">Treść modlitwy</Label>
             <Textarea id="content" className="min-h-[120px] text-base leading-relaxed" value={content} onChange={(e) => setContent(e.target.value)} />
           </div>
-          <Button onClick={handleSave} disabled={loading} className="w-full sm:w-auto min-w-[150px]">
+          <Button onClick={handleSaveWrapper} disabled={loading} className="w-full sm:w-auto min-w-[150px]">
             {loading ? "Zapisywanie..." : saved ? <><Check className="mr-2 h-4 w-4" /> Zapisano</> : <><Save className="mr-2 h-4 w-4" /> Zapisz Intencję</>}
           </Button>
         </CardContent>
