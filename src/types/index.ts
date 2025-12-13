@@ -9,6 +9,7 @@ export interface Mystery {
 export interface Group {
   id: number
   name: string
+  created_at?: string
 }
 
 export interface Profile {
@@ -24,9 +25,21 @@ export interface Intention {
   content: string
 }
 
+export interface IntentionHistory extends Intention {
+  month: number
+  year: number
+}
+
 export interface RoseMember {
   id: string
   full_name: string
   rose_pos: number | null
   current_mystery_name: string
+}
+
+export interface AdminMember extends Profile {
+  email?: string
+  created_at: string
+  acknowledgments: { created_at: string; mystery_id: number }[]
+  current_mystery_id: number | null
 }
