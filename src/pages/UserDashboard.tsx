@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react"
+import { useState } from "react"
 import { useNavigate } from "react-router-dom"
 import { CheckCircle2, AlertCircle, LogOut, Timer, ChevronRight, Loader2, Users, Rose, ScrollText } from "lucide-react"
 import { supabase } from "@/lib/supabase"
@@ -13,13 +13,14 @@ import { HeaderControls } from "@/components/header-controls"
 import { ResizableText } from "@/components/resizable-text"
 // Hooks & Types
 import { useDashboardData } from "@/hooks/useDashboardData"
+import { useMysteryChangeTimer } from "@/hooks/useMysteryChangeTimer"
 import type { RoseMember } from "@/types"
 
 /** Główny komponent panelu użytkownika - wyświetla przydzieloną tajemnicę, intencję oraz podgląd Róży */
 export default function UserDashboard() {
   const navigate = useNavigate()
 
-  // Custom hook handling main data logic
+  // Custom hooks
   const {
     loading,
     actionLoading,
@@ -30,34 +31,11 @@ export default function UserDashboard() {
     acknowledgeMystery
   } = useDashboardData()
 
-  const [timeLeft, setTimeLeft] = useState({ days: 0, hours: 0, minutes: 0, seconds: 0 })
+  const { timeLeft } = useMysteryChangeTimer()
+
   const [isRoseOpen, setIsRoseOpen] = useState(false)
   const [roseMembers, setRoseMembers] = useState<RoseMember[]>([])
   const [roseLoading, setRoseLoading] = useState(false)
-
-  // Timer effect
-  useEffect(() => {
-    const calculateTimeLeft = () => {
-      const now = new Date()
-      let nextMonth = new Date(now.getFullYear(), now.getMonth() + 1, 1)
-      let dayOfWeek = nextMonth.getDay()
-      let daysUntilSunday = (7 - dayOfWeek) % 7
-      nextMonth.setDate(nextMonth.getDate() + daysUntilSunday)
-      nextMonth.setHours(0, 0, 0, 0)
-      const difference = nextMonth.getTime() - now.getTime()
-      if (difference > 0) {
-        setTimeLeft({
-          days: Math.floor(difference / (1000 * 60 * 60 * 24)),
-          hours: Math.floor((difference / (1000 * 60 * 60)) % 24),
-          minutes: Math.floor((difference / 1000 / 60) % 60),
-          seconds: Math.floor((difference / 1000) % 60),
-        })
-      }
-    }
-    calculateTimeLeft()
-    const timer = setInterval(calculateTimeLeft, 1000)
-    return () => clearInterval(timer)
-  }, [])
 
   /** Pobiera listę członków róży i ich tajemnice */
   const handleOpenRose = async () => {
