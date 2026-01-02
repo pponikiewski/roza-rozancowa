@@ -26,6 +26,7 @@ export interface Intention {
 }
 
 export interface IntentionHistory extends Intention {
+  id: number
   month: number
   year: number
 }
