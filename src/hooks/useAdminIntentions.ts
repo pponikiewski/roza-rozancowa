@@ -47,12 +47,48 @@ export function useAdminIntentions() {
       onError: (err) => toast.error("Błąd zapisu", { description: getErrorMessage(err) })
   })
 
+  const updateIntentionMutation = useMutation({
+      mutationFn: async ({ id, title, content }: { id: number, title: string, content: string }) => {
+          if (!title.trim() || !content.trim()) throw new Error("Wypełnij wszystkie pola")
+          
+          const { error } = await supabase
+            .from('intentions')
+            .update({ title, content })
+            .eq('id', id)
+
+          if (error) throw error
+      },
+      onSuccess: () => {
+          toast.success("Zaktualizowano intencję")
+          queryClient.invalidateQueries({ queryKey: ['admin_intentions_history'] })
+      },
+      onError: (err) => toast.error("Błąd aktualizacji", { description: getErrorMessage(err) })
+  })
+
+  const deleteIntentionMutation = useMutation({
+      mutationFn: async (id: number) => {
+          const { error } = await supabase
+            .from('intentions')
+            .delete()
+            .eq('id', id)
+
+          if (error) throw error
+      },
+      onSuccess: () => {
+          toast.success("Usunięto intencję")
+          queryClient.invalidateQueries({ queryKey: ['admin_intentions_history'] })
+      },
+      onError: (err) => toast.error("Błąd usuwania", { description: getErrorMessage(err) })
+  })
+
 
   return {
     loading: isLoading || saveIntentionMutation.isPending,
     history: history || [],
     saved,
     fetchHistory: () => queryClient.invalidateQueries({ queryKey: ['admin_intentions_history'] }),
-    saveIntention: async (title: string, content: string) => { try { await saveIntentionMutation.mutateAsync({ title, content }); return true } catch { return false } }
+    saveIntention: async (title: string, content: string) => { try { await saveIntentionMutation.mutateAsync({ title, content }); return true } catch { return false } },
+    updateIntention: async (id: number, title: string, content: string) => { try { await updateIntentionMutation.mutateAsync({ id, title, content }); return true } catch { return false } },
+    deleteIntention: async (id: number) => { try { await deleteIntentionMutation.mutateAsync(id); return true } catch { return false } }
   }
 }
