@@ -36,31 +36,31 @@ DECLARE
 BEGIN
 
     -- RADOSNE
-    UPDATE public.mysteries SET image_url = base_url || 'radosna_zwiastowanie.jpg' WHERE id = 1;
-    UPDATE public.mysteries SET image_url = base_url || 'radosna_nawiedzenie.jpg' WHERE id = 2;
-    UPDATE public.mysteries SET image_url = base_url || 'radosna_narodzenie.jpg' WHERE id = 3;
-    UPDATE public.mysteries SET image_url = base_url || 'radosna_ofiarowanie.jpg' WHERE id = 4;
-    UPDATE public.mysteries SET image_url = base_url || 'radosna_odnalezienie.jpg' WHERE id = 5;
+    UPDATE public.mysteries SET image_url = base_url || 'radosna_zwiastowanie.webp' WHERE id = 1;
+    UPDATE public.mysteries SET image_url = base_url || 'radosna_nawiedzenie.webp' WHERE id = 2;
+    UPDATE public.mysteries SET image_url = base_url || 'radosna_narodzenie.webp' WHERE id = 3;
+    UPDATE public.mysteries SET image_url = base_url || 'radosna_ofiarowanie.webp' WHERE id = 4;
+    UPDATE public.mysteries SET image_url = base_url || 'radosna_odnalezienie.webp' WHERE id = 5;
 
     -- ŚWIATŁA
-    UPDATE public.mysteries SET image_url = base_url || 'swiatla_chrzest.jpg' WHERE id = 6;
-    UPDATE public.mysteries SET image_url = base_url || 'swiatla_kana.jpg' WHERE id = 7;
-    UPDATE public.mysteries SET image_url = base_url || 'swiatla_gloszenie.jpg' WHERE id = 8;
-    UPDATE public.mysteries SET image_url = base_url || 'swiatla_przemienienie.jpg' WHERE id = 9;
-    UPDATE public.mysteries SET image_url = base_url || 'swiatla_eucharystia.jpg' WHERE id = 10;
+    UPDATE public.mysteries SET image_url = base_url || 'swiatla_chrzest.webp' WHERE id = 6;
+    UPDATE public.mysteries SET image_url = base_url || 'swiatla_kana.webp' WHERE id = 7;
+    UPDATE public.mysteries SET image_url = base_url || 'swiatla_nauczanie.webp' WHERE id = 8;
+    UPDATE public.mysteries SET image_url = base_url || 'swiatla_przemienienie.webp' WHERE id = 9;
+    UPDATE public.mysteries SET image_url = base_url || 'swiatla_eucharystia.webp' WHERE id = 10;
 
     -- BOLESNE
-    UPDATE public.mysteries SET image_url = base_url || 'bolesna_ogrojec.jpg' WHERE id = 11;
-    UPDATE public.mysteries SET image_url = base_url || 'bolesna_biczowanie.jpg' WHERE id = 12;
-    UPDATE public.mysteries SET image_url = base_url || 'bolesna_ukoronowanie.jpg' WHERE id = 13;
-    UPDATE public.mysteries SET image_url = base_url || 'bolesna_krzyz.jpg' WHERE id = 14;
-    UPDATE public.mysteries SET image_url = base_url || 'bolesna_ukrzyzowanie.jpg' WHERE id = 15;
+    UPDATE public.mysteries SET image_url = base_url || 'bolesna_ogrojec.webp' WHERE id = 11;
+    UPDATE public.mysteries SET image_url = base_url || 'bolesna_biczowanie.webp' WHERE id = 12;
+    UPDATE public.mysteries SET image_url = base_url || 'bolesna_ukoronowanie.webp' WHERE id = 13;
+    UPDATE public.mysteries SET image_url = base_url || 'bolesna_krzyz.webp' WHERE id = 14;
+    UPDATE public.mysteries SET image_url = base_url || 'bolesna_ukrzyzowanie.webp' WHERE id = 15;
 
     -- CHWALEBNE
-    UPDATE public.mysteries SET image_url = base_url || 'chwalebna_zmartwychwstanie.jpg' WHERE id = 16;
-    UPDATE public.mysteries SET image_url = base_url || 'chwalebna_wniebowstapienie.jpg' WHERE id = 17;
-    UPDATE public.mysteries SET image_url = base_url || 'chwalebna_zeslanie.jpg' WHERE id = 18;
-    UPDATE public.mysteries SET image_url = base_url || 'chwalebna_wniebowziecie.jpg' WHERE id = 19;
-    UPDATE public.mysteries SET image_url = base_url || 'chwalebna_ukoronowanie.jpg' WHERE id = 20;
+    UPDATE public.mysteries SET image_url = base_url || 'chwalebna_zmartwychwstanie.webp' WHERE id = 16;
+    UPDATE public.mysteries SET image_url = base_url || 'chwalebna_wniebowstapienie.webp' WHERE id = 17;
+    UPDATE public.mysteries SET image_url = base_url || 'chwalebna_zeslanie.webp' WHERE id = 18;
+    UPDATE public.mysteries SET image_url = base_url || 'chwalebna_wniebowziecie.webp' WHERE id = 19;
+    UPDATE public.mysteries SET image_url = base_url || 'chwalebna_ukoronowanie.webp' WHERE id = 20;
 
 END $$;
