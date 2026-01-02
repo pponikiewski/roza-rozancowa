@@ -76,7 +76,7 @@ export function useDashboardData() {
             .select('*')
             .eq('user_id', user.id)
             .eq('mystery_id', mystery.id)
-            .single()
+            .maybeSingle()
           return !!data
       },
       enabled: !!user && !!mystery
