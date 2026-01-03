@@ -2,7 +2,7 @@ import type { Mystery } from '@/features/mysteries/types/mystery.types'
 import type { Profile } from '@/features/auth/types/auth.types'
 
 /**
- * Typy dla dashboardu użytkownika
+ * Typy dla panelu użytkownika
  */
 
 export interface Intention {
@@ -17,7 +17,7 @@ export interface RoseMember {
   current_mystery_name: string
 }
 
-export interface DashboardData {
+export interface UserData {
   profile: Profile | null
   mystery: Mystery | null
   intention: Intention | null

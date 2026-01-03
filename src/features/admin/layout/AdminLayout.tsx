@@ -4,7 +4,7 @@ import { Sheet, SheetContent, SheetTrigger } from "@/shared/components/ui/sheet"
 import { Users, HandHeart, LayoutDashboard, Menu, Rose, Timer } from "lucide-react"
 import { useState } from "react"
 import { HeaderControls } from "@/shared/components/common/header-controls"
-import { useMysteryChangeTimer } from "@/features/dashboard/hooks/useMysteryChangeTimer"
+import { useMysteryChangeTimer } from "@/features/user/hooks/useMysteryChangeTimer"
 import { ROUTES } from "@/shared/lib/constants"
 
 // Główny komponent układu panelu administratora, zarządzający stanem nawigacji i licznikiem czasu

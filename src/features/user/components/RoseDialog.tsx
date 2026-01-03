@@ -2,7 +2,7 @@ import { memo } from "react"
 import { Rose, Loader2, ScrollText } from "lucide-react"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/shared/components/ui/dialog"
 import { Badge } from "@/shared/components/ui/badge"
-import type { RoseMember } from "@/features/dashboard/types/dashboard.types"
+import type { RoseMember } from "@/features/user/types/user.types"
 
 interface RoseDialogProps {
   open: boolean
