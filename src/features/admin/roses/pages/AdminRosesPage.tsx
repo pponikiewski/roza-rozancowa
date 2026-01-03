@@ -4,8 +4,8 @@ import { Input } from "@/shared/components/ui/input"
 import { Label } from "@/shared/components/ui/label"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogFooter } from "@/shared/components/ui/dialog"
 import { Separator } from "@/shared/components/ui/separator"
-import { toast } from "sonner"
-import { AlertCircle, CalendarClock, ChevronRight, Loader2, Pencil, Plus, Rose, RotateCw, Search, Trash2 } from "lucide-react"
+import { ConfirmationDialog, useConfirmation } from "@/shared/components/feedback"
+import { CalendarClock, ChevronRight, Loader2, Pencil, Plus, Rose, RotateCw, Search, Trash2 } from "lucide-react"
 import { useAdminRoses } from "@/features/admin/roses/hooks/useAdminRoses"
 import type { Group } from "@/features/auth/types/auth.types"
 
@@ -18,6 +18,8 @@ export default function AdminRosesPage() {
     deleteGroup,
     rotateGroup
   } = useAdminRoses()
+
+  const { confirm, dialogProps } = useConfirmation()
 
   const [search, setSearch] = useState("")
   const [isDialogOpen, setIsDialogOpen] = useState(false)
@@ -40,47 +42,24 @@ export default function AdminRosesPage() {
   }
 
   const handleDeleteWrapper = (group: Group) => {
-    toast.custom((t) => (
-      <div className="bg-background border border-border p-4 rounded-xl shadow-xl flex flex-col gap-3 w-full max-w-[340px]">
-        <div className="flex items-start gap-3">
-          <div className="bg-red-100 dark:bg-red-900/30 p-2 rounded-full shrink-0">
-            <AlertCircle className="h-5 w-5 text-red-600 dark:text-red-500" />
-          </div>
-          <div className="space-y-1">
-            <h3 className="font-semibold text-sm leading-none pt-1">Usunąć Różę?</h3>
-            <p className="text-xs text-muted-foreground leading-relaxed">Czy na pewno chcesz trwale usunąć Różę <b>{group.name}</b>?</p>
-          </div>
-        </div>
-        <div className="flex justify-end gap-2 mt-2">
-          <Button variant="outline" size="sm" onClick={() => toast.dismiss(t)} className="h-8 text-xs">Anuluj</Button>
-          <Button variant="destructive" size="sm" className="h-8 text-xs shadow-sm" onClick={async () => {
-            toast.dismiss(t)
-            await deleteGroup(group.id)
-          }}>Potwierdź usunięcie</Button>
-        </div>
-      </div>
-    ), { duration: Infinity })
+    confirm({
+      title: "Usunąć Różę?",
+      description: <>Czy na pewno chcesz trwale usunąć Różę <b>{group.name}</b>?</>,
+      confirmText: "Potwierdź usunięcie",
+      variant: "danger",
+      onConfirm: () => deleteGroup(group.id),
+    })
   }
 
   const handleRotateWrapper = (group: Group) => {
-    toast.custom((t) => (
-      <div className="bg-background border border-border p-4 rounded-xl shadow-xl flex flex-col gap-3 w-full max-w-[340px]">
-        <div className="flex items-start gap-3">
-          <div className="bg-primary/10 p-2 rounded-full shrink-0"><RotateCw className="h-5 w-5 text-primary" /></div>
-          <div className="space-y-1">
-            <h3 className="font-semibold text-sm leading-none pt-1">Rotacja tajemnic</h3>
-            <p className="text-xs text-muted-foreground leading-relaxed">Przesunąć tajemnice w Róży <b>{group.name}</b>?</p>
-          </div>
-        </div>
-        <div className="flex justify-end gap-2 mt-2">
-          <Button variant="outline" size="sm" onClick={() => toast.dismiss(t)} className="h-8 text-xs">Anuluj</Button>
-          <Button size="sm" className="h-8 text-xs shadow-sm" onClick={async () => {
-            toast.dismiss(t)
-            await rotateGroup(group.id)
-          }}>Potwierdź rotację</Button>
-        </div>
-      </div>
-    ), { duration: Infinity })
+    confirm({
+      title: "Rotacja tajemnic",
+      description: <>Przesunąć tajemnice w Róży <b>{group.name}</b>?</>,
+      confirmText: "Potwierdź rotację",
+      variant: "info",
+      icon: RotateCw,
+      onConfirm: () => rotateGroup(group.id),
+    })
   }
 
   const filteredGroups = groups.filter(g => g.name.toLowerCase().includes(search.toLowerCase()))
@@ -180,6 +159,8 @@ export default function AdminRosesPage() {
           </form>
         </DialogContent>
       </Dialog>
+
+      <ConfirmationDialog {...dialogProps} />
     </div>
   )
 }
