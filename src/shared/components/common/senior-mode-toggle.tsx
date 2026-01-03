@@ -1,7 +1,7 @@
 import { Glasses } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { useTheme } from "@/components/theme-provider"
-import { cn } from "@/lib/utils"
+import { Button } from "@/shared/components/ui/button"
+import { useTheme } from "@/shared/components/common/theme-provider"
+import { cn } from "@/shared/lib/utils"
 
 export function SeniorModeToggle({ className }: { className?: string }) {
   const { seniorMode, toggleSeniorMode } = useTheme()
