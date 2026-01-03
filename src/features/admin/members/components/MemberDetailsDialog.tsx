@@ -40,12 +40,16 @@ export function MemberDetailsDialog({
   const [editGroupId, setEditGroupId] = useState<string>("")
   const [newPassword, setNewPassword] = useState("")
   const [showPassword, setShowPassword] = useState(false)
+  const [passwordError, setPasswordError] = useState<string | null>(null)
+
+  const MIN_PASSWORD_LENGTH = 6
 
   useEffect(() => {
     if (!member) {
       setNewPassword("")
       setShowPassword(false)
       setEditGroupId("")
+      setPasswordError(null)
     } else {
       setEditGroupId(member.groups?.id?.toString() || "unassigned")
     }
@@ -61,7 +65,15 @@ export function MemberDetailsDialog({
 
   const handleChangePassword = async () => {
     if (!member) return
-    await onChangePassword(member.id, newPassword)
+    
+    const trimmedPassword = newPassword.trim()
+    if (trimmedPassword.length < MIN_PASSWORD_LENGTH) {
+      setPasswordError(`Hasło musi mieć minimum ${MIN_PASSWORD_LENGTH} znaków`)
+      return
+    }
+    
+    setPasswordError(null)
+    await onChangePassword(member.id, trimmedPassword)
     setNewPassword("")
   }
 
@@ -191,23 +203,36 @@ export function MemberDetailsDialog({
                 <div className="relative w-full">
                   <Input
                     type={showPassword ? "text" : "password"}
-                    placeholder="Wpisz nowe hasło..."
+                    placeholder="Wpisz nowe hasło (min. 6 znaków)..."
                     value={newPassword}
-                    onChange={(e) => setNewPassword(e.target.value)}
-                    className="pr-10 h-9"
+                    onChange={(e) => {
+                      setNewPassword(e.target.value)
+                      if (passwordError) setPasswordError(null)
+                    }}
+                    className={`pr-10 h-9 ${passwordError ? 'border-destructive' : ''}`}
                   />
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
                     className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground p-1"
+                    aria-label={showPassword ? "Ukryj hasło" : "Pokaż hasło"}
                   >
                     {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                   </button>
                 </div>
-                <Button onClick={handleChangePassword} disabled={actionLoading || !newPassword} size="sm" variant="outline" className="shrink-0">
+                <Button 
+                  onClick={handleChangePassword} 
+                  disabled={actionLoading || !newPassword.trim()} 
+                  size="sm" 
+                  variant="outline" 
+                  className="shrink-0"
+                >
                   Zapisz
                 </Button>
               </div>
+              {passwordError && (
+                <p className="text-xs text-destructive">{passwordError}</p>
+              )}
             </div>
           </div>
 
