@@ -1,5 +1,6 @@
 import { supabase } from '@/shared/lib/supabase'
 import { mysteriesService } from '@/features/mysteries/api/mysteries.service'
+import { groupsService } from '@/shared/api'
 import type { Group } from '@/shared/types/domain.types'
 
 /**
@@ -8,16 +9,9 @@ import type { Group } from '@/shared/types/domain.types'
 export const rosesService = {
   /**
    * Pobranie wszystkich grup (róż)
+   * @deprecated Użyj groupsService.getAll() bezpośrednio
    */
-  async getAllGroups(): Promise<Group[]> {
-    const { data, error } = await supabase
-      .from('groups')
-      .select('*')
-      .order('id', { ascending: true })
-
-    if (error) throw error
-    return data || []
-  },
+  getAllGroups: (): Promise<Group[]> => groupsService.getAll(),
 
   /**
    * Utworzenie nowej grupy

@@ -306,3 +306,29 @@
     transition: background-color 5000s ease-in-out 0s;
   }
 }
+
+@layer components {
+  /**
+   * Reużywalna klasa dla subtelnego scrollbara
+   * Używana w dialogach i panelach z przewijaną treścią
+   */
+  .scrollbar-subtle {
+    @apply overflow-y-auto;
+  }
+
+  .scrollbar-subtle::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  .scrollbar-subtle::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .scrollbar-subtle::-webkit-scrollbar-thumb {
+    @apply bg-muted-foreground/20 rounded-full;
+  }
+
+  .scrollbar-subtle::-webkit-scrollbar-thumb:hover {
+    @apply bg-muted-foreground/30;
+  }
+}

@@ -38,15 +38,7 @@ export const RoseDialog = memo(function RoseDialog({
           </DialogHeader>
         </div>
 
-        <div
-          className="
-            flex-1 overflow-y-auto min-h-0
-            [&::-webkit-scrollbar]:w-1.5
-            [&::-webkit-scrollbar-track]:bg-transparent
-            [&::-webkit-scrollbar-thumb]:bg-muted-foreground/20
-            [&::-webkit-scrollbar-thumb]:rounded-full
-          "
-        >
+        <div className="flex-1 min-h-0 scrollbar-subtle">
           {loading ? (
             <div className="flex flex-col items-center justify-center p-12 gap-3 text-muted-foreground">
               <Loader2 className="h-6 w-6 animate-spin text-primary" />

@@ -3,6 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/shared/components/ui
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/shared/components/ui/table"
 import { ConfirmationDialog, useConfirmation } from "@/shared/components/feedback"
 import { History, Pencil, Trash2 } from "lucide-react"
+import { getMonthName } from "@/shared/lib/formatters"
 import type { IntentionHistory as IntentionHistoryType } from "@/features/admin/intentions/types/intention.types"
 
 interface IntentionHistoryProps {
@@ -16,9 +17,6 @@ interface IntentionHistoryProps {
  */
 export function IntentionHistory({ history, onEdit, onDelete }: IntentionHistoryProps) {
   const { confirm, dialogProps } = useConfirmation()
-
-  const getMonthName = (m: number) => 
-    new Date(0, m - 1).toLocaleString('pl-PL', { month: 'long' })
 
   const handleDelete = (id: number, title: string) => {
     confirm({

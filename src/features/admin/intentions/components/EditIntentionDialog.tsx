@@ -6,6 +6,7 @@ import { FormDialog } from "@/shared/components/feedback"
 import { Label } from "@/shared/components/ui/label"
 import { Textarea } from "@/shared/components/ui/textarea"
 import { Input } from "@/shared/components/ui/input"
+import { getMonthName } from "@/shared/lib/formatters"
 import type { IntentionHistory } from "@/features/admin/intentions/types/intention.types"
 
 interface EditIntentionDialogProps {
@@ -43,9 +44,6 @@ export function EditIntentionDialog({
       setValue("content", intention.content)
     }
   }, [intention, open, setValue])
-
-  const getMonthName = (m: number) =>
-    new Date(0, m - 1).toLocaleString('pl-PL', { month: 'long' })
 
   const onSubmit = async () => {
     await handleSubmit(async (data: IntentionFormData) => {

@@ -1,5 +1,6 @@
 import { supabase } from '@/shared/lib/supabase'
 import { mysteriesService } from '@/features/mysteries/api/mysteries.service'
+import { groupsService } from '@/shared/api'
 import type { AdminMember, CreateMemberDTO } from '@/features/admin/members/types/member.types'
 import type { Group } from '@/shared/types/domain.types'
 
@@ -50,16 +51,9 @@ export const membersService = {
 
   /**
    * Pobranie wszystkich grup
+   * @deprecated Użyj groupsService.getAll() bezpośrednio
    */
-  async getAllGroups(): Promise<Group[]> {
-    const { data, error } = await supabase
-      .from('groups')
-      .select('*')
-      .order('id')
-
-    if (error) throw error
-    return data || []
-  },
+  getAllGroups: (): Promise<Group[]> => groupsService.getAll(),
 
   /**
    * Utworzenie nowego członka

@@ -1,10 +1,7 @@
-import { useNavigate } from "react-router-dom"
 import { AlertCircle, LogOut } from "lucide-react"
 import { Button } from "@/shared/components/ui/button"
 import { Card, CardContent, CardFooter, CardHeader } from "@/shared/components/ui/card"
-import { useAuth } from "@/features/auth/context/AuthContext"
-import { ROUTES } from "@/shared/lib/constants"
-import { toast } from "sonner"
+import { useLogout } from "@/features/auth"
 import type { Profile } from "@/shared/types/domain.types"
 
 interface NoAssignmentCardProps {
@@ -15,18 +12,7 @@ interface NoAssignmentCardProps {
  * Karta wyświetlana gdy użytkownik nie ma przypisanej tajemnicy/grupy
  */
 export function NoAssignmentCard({ profile }: NoAssignmentCardProps) {
-  const navigate = useNavigate()
-  const { signOut } = useAuth()
-
-  const handleLogout = async () => {
-    try {
-      await signOut()
-      navigate(ROUTES.LOGIN)
-    } catch {
-      toast.error("Błąd wylogowania")
-      navigate(ROUTES.LOGIN)
-    }
-  }
+  const handleLogout = useLogout()
 
   return (
     <div className="flex flex-col min-h-screen bg-muted/30 p-6 items-center justify-center text-center">
