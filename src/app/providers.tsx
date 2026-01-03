@@ -1,5 +1,5 @@
 import type { ReactNode } from "react"
-import { ThemeProvider } from "@/shared/components/common/ThemeProvider"
+import { ThemeProvider } from "@/shared/context/ThemeContext"
 import { AuthProvider } from "@/features/auth/context/AuthContext"
 import { Toaster } from "@/shared/components/ui/sonner"
 import { QueryClientProvider } from "@tanstack/react-query"

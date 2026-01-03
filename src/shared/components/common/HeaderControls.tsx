@@ -5,7 +5,7 @@ import { ModeToggle } from "@/shared/components/common/ModeToggle"
 import { SeniorModeToggle } from "@/shared/components/common/SeniorModeToggle"
 import { Button } from "@/shared/components/ui/button"
 import { cn } from "@/shared/lib/utils"
-import { useTheme } from "@/shared/components/common/ThemeProvider"
+import { useTheme } from "@/shared/context/ThemeContext"
 import { useAuth } from "@/features/auth/context/AuthContext"
 
 interface HeaderControlsProps {

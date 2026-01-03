@@ -1,11 +1,11 @@
-import { userService } from "@/features/user/api/user.service"
+import { dashboardService } from "@/features/dashboard/api/dashboard.service"
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 import { useAuth } from "@/features/auth/context/AuthContext"
 import { QUERY_KEYS } from "@/shared/lib/constants"
 import { toast } from "sonner"
 
 /**
- * Hook do pobierania danych dla panelu użytkownika
+ * Hook do pobierania danych dla panelu użytkownika (dashboard)
  * 
  * Pobiera:
  * - Profil użytkownika
@@ -13,36 +13,36 @@ import { toast } from "sonner"
  * - Przydzieloną tajemnicę
  * - Status potwierdzenia tajemnicy
  * 
- * @returns User data
+ * @returns Dashboard data
  */
-export function useUserData() {
+export function useDashboardData() {
   const { user, loading: authLoading } = useAuth()
   const queryClient = useQueryClient()
 
   // 1. Fetch Profile
   const { data: profile, isLoading: profileLoading } = useQuery({
      queryKey: QUERY_KEYS.PROFILE(user?.id || ''),
-     queryFn: () => userService.getProfile(user!.id),
+     queryFn: () => dashboardService.getProfile(user!.id),
      enabled: !!user
   })
 
   // 2. Fetch Intention
   const { data: intention, isLoading: intentionLoading } = useQuery({
      queryKey: QUERY_KEYS.INTENTION,
-     queryFn: () => userService.getCurrentIntention()
+     queryFn: () => dashboardService.getCurrentIntention()
   })
 
   // 3. Fetch Mystery with logic
   const { data: mystery, isLoading: mysteryLoading } = useQuery({
       queryKey: QUERY_KEYS.MYSTERY(user?.id || ''),
-      queryFn: () => userService.getUserMystery(user!.id),
+      queryFn: () => dashboardService.getUserMystery(user!.id),
       enabled: !!user
   })
 
   // 4. Check Acknowledgment
   const { data: isAcknowledged, isLoading: ackLoading } = useQuery({
       queryKey: QUERY_KEYS.ACKNOWLEDGMENT(user?.id || '', mystery?.id || 0),
-      queryFn: () => userService.checkAcknowledgment(user!.id, mystery!.id),
+      queryFn: () => dashboardService.checkAcknowledgment(user!.id, mystery!.id),
       enabled: !!user && !!mystery
   })
 
@@ -52,7 +52,7 @@ export function useUserData() {
           if (!user || !mystery) return
           // Artificial delay for better UX
           await new Promise(resolve => setTimeout(resolve, 300))
-          await userService.acknowledgeMystery(user.id, mystery.id)
+          await dashboardService.acknowledgeMystery(user.id, mystery.id)
       },
       onSuccess: () => {
           // Invalidate acknowledgment query to refetch and update UI to "true"

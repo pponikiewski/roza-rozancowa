@@ -1,6 +1,8 @@
 // Admin Members feature - public exports
 export { default as AdminMembersPage } from './pages/AdminMembersPage'
 export { MembersList } from './components/MembersList'
+export { MemberCard } from './components/MemberCard'
+export { MembersTable } from './components/MembersTable'
 export { MemberDetailsDialog } from './components/MemberDetailsDialog'
 export { CreateUserDialog } from './components/CreateUserDialog'
 export { useAdminMembers } from './hooks/useAdminMembers'
