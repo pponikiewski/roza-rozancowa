@@ -10,7 +10,7 @@ interface MutationConfig<TData, TVariables> {
   /** Wiadomość błędu wyświetlana w toast */
   errorMessage?: string
   /** Klucze query do invalidacji po sukcesie */
-  invalidateKeys?: readonly unknown[][]
+  invalidateKeys?: readonly (readonly unknown[])[]
   /** Callback wywoływany po sukcesie */
   onSuccessCallback?: (data: TData) => void
   /** Callback wywoływany po błędzie */

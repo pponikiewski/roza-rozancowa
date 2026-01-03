@@ -168,7 +168,7 @@ export function MemberDetailsDialog({
 
             {/* Change Group */}
             <div className="grid gap-2">
-              <Label className="text-xs">Przypisanie do grupy</Label>
+              <Label className="text-xs">Przypisanie do róży</Label>
               <div className="flex gap-2">
                 <GroupSelect
                   value={editGroupId}
