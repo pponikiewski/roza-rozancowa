@@ -1,15 +1,14 @@
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import { QueryClientProvider } from '@tanstack/react-query'
 import { injectSpeedInsights } from '@vercel/speed-insights'
+import { queryClient } from '@/lib/queryClient'
 import './index.css'
 import App from './App.tsx'
 import { ErrorBoundary } from './components/ErrorBoundary.tsx';
 
 // Initialize Vercel Speed Insights (client-side only)
 injectSpeedInsights()
-
-const queryClient = new QueryClient()
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
