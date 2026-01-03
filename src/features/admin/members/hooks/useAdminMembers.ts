@@ -77,5 +77,3 @@ export function useAdminMembers() {
     deleteUser: (userId: string) => deleteMutation.mutateAsync(userId)
   }
 }
-  }
-}

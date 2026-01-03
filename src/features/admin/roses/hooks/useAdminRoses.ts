@@ -1,6 +1,5 @@
 import { rosesService } from "@/features/admin/roses/api/roses.service"
 import { toast } from "sonner"
-import { getErrorMessage } from "@/shared/lib/utils"
 import { useQuery, useQueryClient } from "@tanstack/react-query"
 import { useTypedMutation } from "@/shared/hooks"
 import { QUERY_KEYS } from "@/shared/lib/constants"
@@ -56,5 +55,4 @@ export function useAdminRoses() {
     deleteGroup: (id: number) => deleteGroupMutation.execute(id),
     rotateGroup: (id: number) => rotateGroupMutation.execute(id)
   }
-}
 }
