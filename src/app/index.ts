@@ -3,5 +3,5 @@
  */
 
 export { default as App } from "./App"
-export { AppProviders } from "./providers"
+export { Providers } from "./providers"
 export { AppRoutes } from "./routes"
