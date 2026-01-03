@@ -5,9 +5,10 @@ import { Input } from "@/shared/components/ui/input"
 import { Label } from "@/shared/components/ui/label"
 import { Badge } from "@/shared/components/ui/badge"
 import { Separator } from "@/shared/components/ui/separator"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/shared/components/ui/select"
+import { GroupSelect } from "./GroupSelect"
 import { CheckCircle2, Circle, ScrollText, Mail, CalendarClock, RefreshCcw, Trash2, Eye, EyeOff } from "lucide-react"
 import type { AdminMember } from "@/features/admin/members/types/member.types"
+import type { Group } from "@/shared/types/domain.types"
 
 interface MemberDetailsDialogProps {
   member: AdminMember | null
@@ -17,7 +18,7 @@ interface MemberDetailsDialogProps {
   onChangePassword: (userId: string, newPassword: string) => Promise<void>
   onDeleteUser: (userId: string, fullName: string) => void
   getMysteryName: (id: number | null) => string
-  groups: Array<{ id: number; name: string }>
+  groups: Group[]
   actionLoading: boolean
 }
 
@@ -90,7 +91,7 @@ export function MemberDetailsDialog({
           </DialogHeader>
         </div>
 
-        <div className="p-6 space-y-6 bg-card max-h-[80vh] overflow-y-auto [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-muted-foreground/20 [&::-webkit-scrollbar-thumb]:rounded-full">
+        <div className="p-6 space-y-6 bg-card max-h-[80vh] scrollbar-subtle">
           {/* Basic Info */}
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-1.5">
@@ -169,19 +170,14 @@ export function MemberDetailsDialog({
             <div className="grid gap-2">
               <Label className="text-xs">Przypisanie do grupy</Label>
               <div className="flex gap-2">
-                <Select value={editGroupId} onValueChange={setEditGroupId}>
-                  <SelectTrigger className="h-9 w-full text-sm">
-                    <SelectValue placeholder="-- Wybierz (lub usuń z grupy) --" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="unassigned">-- Bez grupy (usuń) --</SelectItem>
-                    {groups.map((g) => (
-                      <SelectItem key={g.id} value={g.id.toString()}>
-                        {g.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <GroupSelect
+                  value={editGroupId}
+                  onValueChange={setEditGroupId}
+                  groups={groups}
+                  placeholder="-- Wybierz (lub usuń z grupy) --"
+                  unassignedLabel="-- Bez grupy (usuń) --"
+                  triggerClassName="h-9 w-full text-sm"
+                />
                 <Button onClick={handleUpdateGroup} disabled={actionLoading} size="sm" variant="secondary" className="shrink-0">
                   <RefreshCcw className="h-3.5 w-3.5 mr-2" /> Zmień
                 </Button>

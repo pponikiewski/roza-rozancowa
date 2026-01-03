@@ -2,14 +2,15 @@ import { useState } from "react"
 import { FormDialog } from "@/shared/components/feedback"
 import { Input } from "@/shared/components/ui/input"
 import { Label } from "@/shared/components/ui/label"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/shared/components/ui/select"
+import { GroupSelect } from "./GroupSelect"
 import type { CreateUserFormData } from "@/shared/validation/member.schema"
+import type { Group } from "@/shared/types/domain.types"
 
 interface CreateUserDialogProps {
   open: boolean
   onOpenChange: (open: boolean) => void
   onSubmit: (data: CreateUserFormData) => Promise<void>
-  groups: Array<{ id: number; name: string }>
+  groups: Group[]
   loading: boolean
 }
 
@@ -75,19 +76,11 @@ export function CreateUserDialog({ open, onOpenChange, onSubmit, groups, loading
       </div>
       <div className="space-y-2">
         <Label>Grupa</Label>
-        <Select value={formData.groupId} onValueChange={(val) => setFormData({ ...formData, groupId: val })}>
-          <SelectTrigger className="h-10 w-full text-sm">
-            <SelectValue placeholder="-- Bez grupy --" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="unassigned">-- Bez grupy --</SelectItem>
-            {groups.map((g) => (
-              <SelectItem key={g.id} value={g.id.toString()}>
-                {g.name}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+        <GroupSelect
+          value={formData.groupId}
+          onValueChange={(val) => setFormData({ ...formData, groupId: val })}
+          groups={groups}
+        />
       </div>
     </FormDialog>
   )

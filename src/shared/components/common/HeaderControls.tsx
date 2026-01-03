@@ -1,12 +1,11 @@
-import { useLocation, useNavigate } from "react-router-dom"
+import { useLocation } from "react-router-dom"
 import { LogOut } from "lucide-react"
-import { toast } from "sonner"
 import { ModeToggle } from "@/shared/components/common/ModeToggle"
 import { SeniorModeToggle } from "@/shared/components/common/SeniorModeToggle"
 import { Button } from "@/shared/components/ui/button"
 import { cn } from "@/shared/lib/utils"
 import { useTheme } from "@/shared/context/ThemeContext"
-import { useAuth } from "@/features/auth/context/AuthContext"
+import { useLogout } from "@/features/auth"
 
 interface HeaderControlsProps {
   className?: string
@@ -14,22 +13,10 @@ interface HeaderControlsProps {
 
 export function HeaderControls({ className }: HeaderControlsProps) {
   const location = useLocation()
-  const navigate = useNavigate()
   const { seniorMode } = useTheme()
-  const { signOut } = useAuth()
+  const handleLogout = useLogout()
   const isUltra = seniorMode === "ultra"
   const isLoginPage = location.pathname === "/" || location.pathname === "/login"
-
-  const handleLogout = async () => {
-    try {
-      await signOut()
-      navigate("/login", { replace: true })
-    } catch (error) {
-      toast.error("Błąd wylogowania")
-      // Force navigation even if error
-      navigate("/login", { replace: true })
-    }
-  }
 
   return (
     <div className={cn("header-controls flex items-center gap-2", className)}>

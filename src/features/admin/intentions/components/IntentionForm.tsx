@@ -7,6 +7,7 @@ import { Label } from "@/shared/components/ui/label"
 import { Textarea } from "@/shared/components/ui/textarea"
 import { Input } from "@/shared/components/ui/input"
 import { Save, CalendarHeart, Check } from "lucide-react"
+import { getCurrentMonthName, getCurrentYear } from "@/shared/lib/formatters"
 
 interface IntentionFormProps {
   loading: boolean
@@ -27,9 +28,8 @@ export function IntentionForm({ loading, saved, onSave }: IntentionFormProps) {
     resolver: zodResolver(intentionSchema),
   })
 
-  const date = new Date()
-  const currentYear = date.getFullYear()
-  const monthName = date.toLocaleString('pl-PL', { month: 'long' })
+  const currentYear = getCurrentYear()
+  const monthName = getCurrentMonthName()
 
   const onSubmit = async (data: IntentionFormData) => {
     const success = await onSave(data.title, data.content)
