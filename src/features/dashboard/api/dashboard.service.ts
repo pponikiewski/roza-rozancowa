@@ -3,6 +3,16 @@ import { mysteriesService } from '@/features/mysteries/api/mysteries.service'
 import type { Profile, Intention, RoseMember, Mystery } from '@/shared/types/domain.types'
 
 /**
+ * Typ odpowiedzi z Supabase dla profilu z relacją groups
+ */
+interface ProfileResponse {
+  id: string
+  full_name: string
+  rose_pos: number | null
+  groups: { id: number; name: string } | null
+}
+
+/**
  * Serwis obsługujący panel użytkownika (dashboard)
  */
 export const dashboardService = {
@@ -16,7 +26,11 @@ export const dashboardService = {
       .eq('id', userId)
       .single()
 
-    return (data as any as Profile) || null
+    if (!data) return null
+    
+    // Type assertion do zdefiniowanego interfejsu zamiast any
+    const profileData = data as unknown as ProfileResponse
+    return profileData as Profile
   },
 
   /**

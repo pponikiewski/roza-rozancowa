@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useState } from "react"
+import { createContext, useContext, useEffect, useState, useCallback } from "react"
 import type { ReactNode } from "react"
 import { supabase } from "@/shared/lib/supabase"
 import { authService } from "@/features/auth/api/auth.service"
@@ -22,32 +22,42 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const [isAdmin, setIsAdmin] = useState(false)
 
     /**
+     * Sprawdzenie roli admina dla użytkownika
+     */
+    const checkAdminRole = useCallback(async (userId: string, isMounted: () => boolean) => {
+        try {
+            const role = await authService.checkUserRole(userId)
+            if (isMounted()) {
+                setIsAdmin(role === 'admin')
+            }
+        } catch (e) {
+            console.error("Error checking role", e)
+        } finally {
+            if (isMounted()) {
+                setLoading(false)
+            }
+        }
+    }, [])
+
+    /**
      * Centralna funkcja do obsługi sesji - deduplikuje logikę używaną
      * przez getSession() i onAuthStateChange()
+     * @param isMounted - funkcja sprawdzająca czy komponent jest zamontowany
      */
-    const handleSession = async (session: Session | null) => {
+    const handleSession = useCallback(async (session: Session | null, isMounted: () => boolean) => {
+        if (!isMounted()) return
+        
         setSession(session)
         setUser(session?.user ?? null)
 
         if (session?.user) {
             setLoading(true)
-            await checkAdminRole(session.user.id)
+            await checkAdminRole(session.user.id, isMounted)
         } else {
             setIsAdmin(false)
             setLoading(false)
         }
-    }
-
-    const checkAdminRole = async (userId: string) => {
-        try {
-            const role = await authService.checkUserRole(userId)
-            setIsAdmin(role === 'admin')
-        } catch (e) {
-            console.error("Error checking role", e)
-        } finally {
-            setLoading(false)
-        }
-    }
+    }, [checkAdminRole])
 
     /**
      * Czyści Supabase tokens z localStorage - fix dla "ghost sessions" na mobile
@@ -61,19 +71,24 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
 
     useEffect(() => {
+        let mounted = true
+        const isMounted = () => mounted
+
         // Check active session on mount
         supabase.auth.getSession().then(({ data: { session } }) => {
-            handleSession(session)
+            handleSession(session, isMounted)
         })
 
         // Listen for changes on auth state (logged in, signed out, etc.)
         const { data: { subscription } } = authService.onAuthStateChange((_event, session) => {
-            handleSession(session)
+            handleSession(session, isMounted)
         })
 
-        return () => subscription.unsubscribe()
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, []) // handleSession is stable, no need to include
+        return () => {
+            mounted = false
+            subscription.unsubscribe()
+        }
+    }, [handleSession])
 
     const signOut = async () => {
         try {
