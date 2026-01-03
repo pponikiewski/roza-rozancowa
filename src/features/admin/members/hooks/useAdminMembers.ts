@@ -1,14 +1,11 @@
 import { membersService } from "@/features/admin/members/api/members.service"
 import { mysteriesService } from "@/features/mysteries/api/mysteries.service"
-import { toast } from "sonner"
 import type { CreateUserFormData } from "@/shared/validation/member.schema"
-import { getErrorMessage } from "@/shared/lib/utils"
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
+import { useQuery } from "@tanstack/react-query"
+import { useTypedMutation } from "@/shared/hooks"
 import { QUERY_KEYS } from "@/shared/lib/constants"
 
 export function useAdminMembers() {
-  const queryClient = useQueryClient()
-
   // Query for all data
   const { data, isLoading } = useQuery({
     queryKey: QUERY_KEYS.ADMIN_MEMBERS,
@@ -23,7 +20,7 @@ export function useAdminMembers() {
   })
 
   // Mutations
-  const createMutation = useMutation({
+  const createMutation = useTypedMutation({
     mutationFn: async (formData: CreateUserFormData) => {
       await membersService.createMember({
         email: formData.email,
@@ -33,75 +30,40 @@ export function useAdminMembers() {
       })
       return formData.fullName
     },
-    onSuccess: (fullName) => {
-      toast.success("Sukces!", { description: `Dodano użytkownika: ${fullName}` })
-      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.ADMIN_MEMBERS })
-    },
-    onError: (err) => toast.error("Błąd tworzenia", { description: getErrorMessage(err) })
+    successMessage: (fullName) => `Dodano użytkownika: ${fullName}`,
+    errorMessage: "Błąd tworzenia",
+    invalidateKeys: [QUERY_KEYS.ADMIN_MEMBERS]
   })
 
-  const updateGroupMutation = useMutation({
+  const updateGroupMutation = useTypedMutation({
     mutationFn: async ({ userId, groupId }: { userId: string; groupId: string }) => {
       await membersService.updateMemberGroup(
         userId,
         groupId !== "unassigned" ? parseInt(groupId) : null
       )
     },
-    onSuccess: () => {
-      toast.success("Zaktualizowano", { description: "Przypisanie do grupy zostało zmienione." })
-      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.ADMIN_MEMBERS })
-    },
-    onError: (err) => toast.error("Błąd aktualizacji", { description: getErrorMessage(err) })
+    successMessage: "Przypisanie do grupy zostało zmienione",
+    errorMessage: "Błąd aktualizacji",
+    invalidateKeys: [QUERY_KEYS.ADMIN_MEMBERS]
   })
 
-  const changePasswordMutation = useMutation({
+  const changePasswordMutation = useTypedMutation({
     mutationFn: async ({ userId, newPassword }: { userId: string; newPassword: string }) => {
       if (!newPassword || newPassword.length < 6) {
         throw new Error("Hasło za krótkie (min. 6 znaków)")
       }
       await membersService.changeMemberPassword(userId, newPassword)
     },
-    onSuccess: () => toast.success("Hasło zmienione"),
-    onError: (err) => toast.error("Błąd zmiany hasła", { description: getErrorMessage(err) })
+    successMessage: "Hasło zmienione",
+    errorMessage: "Błąd zmiany hasła"
   })
 
-  const deleteMutation = useMutation({
-    mutationFn: async (userId: string) => {
-      await membersService.deleteMember(userId)
-    },
-    onSuccess: () => {
-      toast.success("Usunięto", { description: "Użytkownik został usunięty." })
-      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.ADMIN_MEMBERS })
-    },
-    onError: (err) => toast.error("Błąd usuwania", { description: getErrorMessage(err) })
+  const deleteMutation = useTypedMutation({
+    mutationFn: (userId: string) => membersService.deleteMember(userId),
+    successMessage: "Użytkownik został usunięty",
+    errorMessage: "Błąd usuwania",
+    invalidateKeys: [QUERY_KEYS.ADMIN_MEMBERS]
   })
-
-  // Public API
-  const createUser = async (formData: CreateUserFormData) => {
-    try {
-      await createMutation.mutateAsync(formData)
-      return true
-    } catch {
-      return false
-    }
-  }
-
-  const updateGroup = async (userId: string, groupId: string) => {
-    try {
-      await updateGroupMutation.mutateAsync({ userId, groupId })
-      return true
-    } catch {
-      return false
-    }
-  }
-
-  const changePassword = async (userId: string, newPassword: string) => {
-    await changePasswordMutation.mutateAsync({ userId, newPassword })
-  }
-
-  const deleteUser = async (userId: string) => {
-    await deleteMutation.mutateAsync(userId)
-  }
 
   return {
     loading: isLoading,
@@ -109,9 +71,11 @@ export function useAdminMembers() {
     groups: data?.groups || [],
     mysteries: data?.mysteries || [],
     members: data?.members || [],
-    createUser,
-    updateGroup,
-    changePassword,
-    deleteUser
+    createUser: (formData: CreateUserFormData) => createMutation.execute(formData),
+    updateGroup: (userId: string, groupId: string) => updateGroupMutation.execute({ userId, groupId }),
+    changePassword: (userId: string, newPassword: string) => changePasswordMutation.mutateAsync({ userId, newPassword }),
+    deleteUser: (userId: string) => deleteMutation.mutateAsync(userId)
+  }
+}
   }
 }

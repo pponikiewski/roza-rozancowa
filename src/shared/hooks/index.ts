@@ -1,0 +1,1 @@
+export { useTypedMutation } from './useTypedMutation'

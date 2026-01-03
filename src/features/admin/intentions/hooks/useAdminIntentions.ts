@@ -1,12 +1,10 @@
 import { useState } from "react"
 import { intentionsService } from "@/features/admin/intentions/api/intentions.service"
-import { toast } from "sonner"
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
-import { getErrorMessage } from "@/shared/lib/utils"
+import { useQuery } from "@tanstack/react-query"
+import { useTypedMutation } from "@/shared/hooks"
 import { QUERY_KEYS } from "@/shared/lib/constants"
 
 export function useAdminIntentions() {
-  const queryClient = useQueryClient()
   const [saved, setSaved] = useState(false)
 
   const { data: history, isLoading } = useQuery({
@@ -14,74 +12,41 @@ export function useAdminIntentions() {
     queryFn: () => intentionsService.getIntentionsHistory()
   })
 
-  const saveMutation = useMutation({
-    mutationFn: async ({ title, content }: { title: string; content: string }) => {
-      await intentionsService.saveIntention(title, content)
-    },
-    onSuccess: () => {
+  const saveMutation = useTypedMutation({
+    mutationFn: ({ title, content }: { title: string; content: string }) =>
+      intentionsService.saveIntention(title, content),
+    successMessage: "Intencja zapisana",
+    errorMessage: "Błąd zapisu",
+    invalidateKeys: [QUERY_KEYS.ADMIN_INTENTIONS_HISTORY],
+    onSuccessCallback: () => {
       setSaved(true)
       setTimeout(() => setSaved(false), 2000)
-      toast.success("Intencja zapisana")
-      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.ADMIN_INTENTIONS_HISTORY })
-    },
-    onError: (err) => toast.error("Błąd zapisu", { description: getErrorMessage(err) })
+    }
   })
 
-  const updateMutation = useMutation({
-    mutationFn: async ({ id, title, content }: { id: number; title: string; content: string }) => {
-      await intentionsService.updateIntention(id, title, content)
-    },
-    onSuccess: () => {
-      toast.success("Intencja zaktualizowana")
-      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.ADMIN_INTENTIONS_HISTORY })
-    },
-    onError: (err) => toast.error("Błąd aktualizacji", { description: getErrorMessage(err) })
+  const updateMutation = useTypedMutation({
+    mutationFn: ({ id, title, content }: { id: number; title: string; content: string }) =>
+      intentionsService.updateIntention(id, title, content),
+    successMessage: "Intencja zaktualizowana",
+    errorMessage: "Błąd aktualizacji",
+    invalidateKeys: [QUERY_KEYS.ADMIN_INTENTIONS_HISTORY]
   })
 
-  const deleteMutation = useMutation({
-    mutationFn: async (id: number) => {
-      await intentionsService.deleteIntention(id)
-    },
-    onSuccess: () => {
-      toast.success("Intencja usunięta")
-      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.ADMIN_INTENTIONS_HISTORY })
-    },
-    onError: (err) => toast.error("Błąd usuwania", { description: getErrorMessage(err) })
+  const deleteMutation = useTypedMutation({
+    mutationFn: (id: number) => intentionsService.deleteIntention(id),
+    successMessage: "Intencja usunięta",
+    errorMessage: "Błąd usuwania",
+    invalidateKeys: [QUERY_KEYS.ADMIN_INTENTIONS_HISTORY]
   })
-
-  const saveIntention = async (title: string, content: string) => {
-    try {
-      await saveMutation.mutateAsync({ title, content })
-      return true
-    } catch {
-      return false
-    }
-  }
-
-  const updateIntention = async (id: number, title: string, content: string) => {
-    try {
-      await updateMutation.mutateAsync({ id, title, content })
-      return true
-    } catch {
-      return false
-    }
-  }
-
-  const deleteIntention = async (id: number) => {
-    try {
-      await deleteMutation.mutateAsync(id)
-      return true
-    } catch {
-      return false
-    }
-  }
 
   return {
     loading: isLoading,
     history: history || [],
     saved,
-    saveIntention,
-    updateIntention,
-    deleteIntention
+    saveIntention: (title: string, content: string) => saveMutation.execute({ title, content }),
+    updateIntention: (id: number, title: string, content: string) => updateMutation.execute({ id, title, content }),
+    deleteIntention: (id: number) => deleteMutation.execute(id)
+  }
+}
   }
 }
