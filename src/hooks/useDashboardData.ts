@@ -1,22 +1,22 @@
-import { useNavigate } from "react-router-dom"
 import { supabase } from "@/lib/supabase"
 import type { Profile, Mystery, Intention } from "@/types"
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 import { useAuth } from "@/context/AuthContext"
 
+/**
+ * Hook do pobierania danych dla panelu użytkownika
+ * 
+ * Pobiera:
+ * - Profil użytkownika
+ * - Intencję na ten miesiąc
+ * - Przydzieloną tajemnicę
+ * - Status potwierdzenia tajemnicy
+ * 
+ * @returns Dashboard data
+ */
 export function useDashboardData() {
-  const navigate = useNavigate()
-  const { user, loading: authLoading, isAdmin } = useAuth()
+  const { user, loading: authLoading } = useAuth()
   const queryClient = useQueryClient()
-
-  // Redirect if not authenticated or if Admin
-  if (!authLoading && !user) {
-     navigate("/login")
-  }
-  
-  if (!authLoading && isAdmin) {
-     navigate("/admin")
-  }
 
   // 1. Fetch Profile
   const { data: profile, isLoading: profileLoading } = useQuery({
