@@ -1,12 +1,12 @@
 import { useState, useEffect } from "react"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/shared/components/ui/dialog"
 import { Button } from "@/shared/components/ui/button"
-import { Input } from "@/shared/components/ui/input"
 import { Label } from "@/shared/components/ui/label"
 import { Badge } from "@/shared/components/ui/badge"
 import { Separator } from "@/shared/components/ui/separator"
 import { GroupSelect } from "./GroupSelect"
-import { CheckCircle2, Circle, ScrollText, Mail, CalendarClock, RefreshCcw, Trash2, Eye, EyeOff } from "lucide-react"
+import { PasswordInput } from "@/shared/components/common"
+import { CheckCircle2, Circle, ScrollText, Mail, CalendarClock, RefreshCcw, Trash2 } from "lucide-react"
 import type { AdminMember } from "@/features/admin/members/types/member.types"
 import type { Group } from "@/shared/types/domain.types"
 
@@ -39,7 +39,6 @@ export function MemberDetailsDialog({
 }: MemberDetailsDialogProps) {
   const [editGroupId, setEditGroupId] = useState<string>("")
   const [newPassword, setNewPassword] = useState("")
-  const [showPassword, setShowPassword] = useState(false)
   const [passwordError, setPasswordError] = useState<string | null>(null)
 
   const MIN_PASSWORD_LENGTH = 6
@@ -47,7 +46,6 @@ export function MemberDetailsDialog({
   useEffect(() => {
     if (!member) {
       setNewPassword("")
-      setShowPassword(false)
       setEditGroupId("")
       setPasswordError(null)
     } else {
@@ -200,26 +198,16 @@ export function MemberDetailsDialog({
             <div className="grid gap-2">
               <Label className="text-xs">Zmiana hasła</Label>
               <div className="flex gap-2">
-                <div className="relative w-full">
-                  <Input
-                    type={showPassword ? "text" : "password"}
-                    placeholder="Wpisz nowe hasło (min. 6 znaków)..."
-                    value={newPassword}
-                    onChange={(e) => {
-                      setNewPassword(e.target.value)
-                      if (passwordError) setPasswordError(null)
-                    }}
-                    className={`pr-10 h-9 ${passwordError ? 'border-destructive' : ''}`}
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground p-1"
-                    aria-label={showPassword ? "Ukryj hasło" : "Pokaż hasło"}
-                  >
-                    {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                  </button>
-                </div>
+                <PasswordInput
+                  placeholder="Wpisz nowe hasło (min. 6 znaków)..."
+                  value={newPassword}
+                  onChange={(e) => {
+                    setNewPassword(e.target.value)
+                    if (passwordError) setPasswordError(null)
+                  }}
+                  hasError={!!passwordError}
+                  className="h-9"
+                />
                 <Button 
                   onClick={handleChangePassword} 
                   disabled={actionLoading || !newPassword.trim()} 

@@ -7,16 +7,15 @@ import { Button } from "@/shared/components/ui/button"
 import { Input } from "@/shared/components/ui/input"
 import { Label } from "@/shared/components/ui/label"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/shared/components/ui/card"
-import { Loader2, Lock, Mail, Eye, EyeOff } from "lucide-react"
+import { Loader2, Lock, Mail } from "lucide-react"
 import { toast } from "sonner"
-import { HeaderControls } from "@/shared/components/common/HeaderControls"
+import { HeaderControls, PasswordInput } from "@/shared/components/common"
 import { useAuth } from "@/features/auth/context/AuthContext"
 import { ROSARY_QUOTES } from "@/shared/lib/constants"
 
 // Komponent strony logowania
 // Obsługuje uwierzytelnianie użytkowników i przekierowanie w zależności od roli (admin/user)
 export default function LoginPage() {
-  const [showPassword, setShowPassword] = useState(false)
   const [internalLoading, setInternalLoading] = useState(false)
   const [quote, setQuote] = useState<typeof ROSARY_QUOTES[number]>(ROSARY_QUOTES[0])
 
@@ -101,25 +100,16 @@ export default function LoginPage() {
                 <Label htmlFor="password">Hasło</Label>
               </div>
               <div className="relative">
-                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                <Input
+                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground z-10" />
+                <PasswordInput
                   id="password"
-                  type={showPassword ? "text" : "password"}
                   placeholder="••••••••"
                   autoComplete="current-password"
-                  className="pl-9 pr-10"
+                  className="pl-9"
                   {...register("password")}
                   disabled={internalLoading || authLoading}
+                  hasError={!!errors.password}
                 />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground focus:outline-none"
-                  tabIndex={-1}
-                  aria-label={showPassword ? "Ukryj hasło" : "Pokaż hasło"}
-                >
-                  {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                </button>
               </div>
               {errors.password && (
                 <p className="text-sm text-destructive">{errors.password.message}</p>
