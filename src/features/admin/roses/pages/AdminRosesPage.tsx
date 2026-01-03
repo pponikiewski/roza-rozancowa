@@ -7,7 +7,7 @@ import { Separator } from "@/shared/components/ui/separator"
 import { ConfirmationDialog, useConfirmation } from "@/shared/components/feedback"
 import { CalendarClock, ChevronRight, Loader2, Pencil, Plus, Rose, RotateCw, Search, Trash2 } from "lucide-react"
 import { useAdminRoses } from "@/features/admin/roses/hooks/useAdminRoses"
-import type { Group } from "@/features/auth/types/auth.types"
+import type { Group } from "@/shared/types/domain.types"
 
 export default function AdminRosesPage() {
   const {

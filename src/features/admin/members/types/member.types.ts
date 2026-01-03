@@ -1,4 +1,4 @@
-import type { Profile } from '@/features/auth/types/auth.types'
+import type { Profile } from '@/shared/types/domain.types'
 
 /**
  * Typy dla zarządzania członkami (admin)

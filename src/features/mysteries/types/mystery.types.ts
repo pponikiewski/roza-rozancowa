@@ -1,10 +1,7 @@
 /**
  * Typy związane z tajemnicami różańca
+ * 
+ * Re-eksport z centralnych typów domenowych dla zachowania kompatybilności wstecznej.
+ * Preferuj import bezpośrednio z '@/shared/types/domain.types'
  */
-export interface Mystery {
-  id: number
-  part: string
-  name: string
-  meditation: string
-  image_url: string
-}
+export type { Mystery, RosaryPart } from '@/shared/types/domain.types'

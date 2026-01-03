@@ -1,13 +1,7 @@
 /**
  * Typy dla zarządzania intencjami (admin)
+ * 
+ * Re-eksport z centralnych typów domenowych dla zachowania kompatybilności wstecznej.
+ * Preferuj import bezpośrednio z '@/shared/types/domain.types'
  */
-export interface Intention {
-  title: string
-  content: string
-}
-
-export interface IntentionHistory extends Intention {
-  id: number
-  month: number
-  year: number
-}
+export type { Intention, IntentionHistory } from '@/shared/types/domain.types'

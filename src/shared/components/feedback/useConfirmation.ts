@@ -10,7 +10,7 @@ interface ConfirmationState {
   cancelText: string
   variant: ConfirmationVariant
   icon?: LucideIcon
-  onConfirm: () => void | Promise<void>
+  onConfirm: () => void | Promise<unknown>
 }
 
 interface ConfirmOptions {
@@ -20,7 +20,7 @@ interface ConfirmOptions {
   cancelText?: string
   variant?: ConfirmationVariant
   icon?: LucideIcon
-  onConfirm: () => void | Promise<void>
+  onConfirm: () => void | Promise<unknown>
 }
 
 const initialState: ConfirmationState = {
