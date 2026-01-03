@@ -1,5 +1,6 @@
 import { useLocation, useNavigate } from "react-router-dom"
 import { LogOut } from "lucide-react"
+import { toast } from "sonner"
 import { ModeToggle } from "@/components/mode-toggle"
 import { SeniorModeToggle } from "@/components/senior-mode-toggle"
 import { Button } from "@/components/ui/button"
@@ -24,7 +25,7 @@ export function HeaderControls({ className }: HeaderControlsProps) {
       await signOut()
       navigate("/login", { replace: true })
     } catch (error) {
-      console.error("Logout failed:", error)
+      toast.error("Błąd wylogowania")
       // Force navigation even if error
       navigate("/login", { replace: true })
     }

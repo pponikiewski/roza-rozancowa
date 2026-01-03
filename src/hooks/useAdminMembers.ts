@@ -1,6 +1,7 @@
 import { supabase } from "@/lib/supabase"
 import { toast } from "sonner"
 import type { AdminMember, Mystery } from "@/types"
+import type { CreateUserFormData } from "@/lib/schemas"
 import { getErrorMessage } from "@/lib/utils"
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 
@@ -122,7 +123,7 @@ export function useAdminMembers() {
     mysteries: data?.mysteries || [],
     members: data?.members || [],
     fetchData: () => queryClient.invalidateQueries({ queryKey: ['admin_members_data'] }),
-    createUser: async (v: any) => { try { await createMutation.mutateAsync(v); return true } catch { return false } },
+    createUser: async (v: CreateUserFormData) => { try { await createMutation.mutateAsync(v); return true } catch { return false } },
     updateGroup: async (u: string, g: string) => { try { await updateGroupMutation.mutateAsync({ userId: u, groupId: g }); return true } catch { return false } },
     changePassword: async (u: string, p: string) => { try { await changePasswordMutation.mutateAsync({ userId: u, newPassword: p }); return true } catch { return false } },
     deleteUser: async (u: string) => { try { await deleteUserMutation.mutateAsync(u); return true } catch { return false } }

@@ -85,7 +85,7 @@ export default function UserDashboard() {
       await signOut()
       navigate("/login")
     } catch (e) {
-      console.error("Logout error", e)
+      toast.error("Błąd wylogowania")
       navigate("/login")
     }
   }

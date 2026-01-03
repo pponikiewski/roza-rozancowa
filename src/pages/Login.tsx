@@ -56,9 +56,8 @@ export default function LoginPage() {
     })
 
     if (error) {
-      console.error("Login Error:", error.message)
       toast.error("Błąd logowania", {
-        description: "Sprawdź poprawność adresu email i hasła."
+        description: error.message || "Sprawdź poprawność adresu email i hasła."
       })
       setInternalLoading(false)
     } else {
