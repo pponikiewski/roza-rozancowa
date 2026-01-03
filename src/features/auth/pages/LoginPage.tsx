@@ -18,7 +18,7 @@ import { ROSARY_QUOTES } from "@/shared/lib/constants"
 export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false)
   const [internalLoading, setInternalLoading] = useState(false)
-  const [quote, setQuote] = useState(ROSARY_QUOTES[0])
+  const [quote, setQuote] = useState<typeof ROSARY_QUOTES[number]>(ROSARY_QUOTES[0])
 
   const { loading: authLoading } = useAuth()
 

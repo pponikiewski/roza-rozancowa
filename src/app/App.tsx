@@ -1,5 +1,5 @@
 import { BrowserRouter } from "react-router-dom"
-import { AppProviders } from "./providers"
+import { Providers } from "./providers"
 import { AppRoutes } from "./routes"
 import { ErrorBoundary } from "@/shared/components/layout/ErrorBoundary"
 import "@/App.css"
@@ -17,9 +17,9 @@ function App() {
   return (
     <BrowserRouter>
       <ErrorBoundary>
-        <AppProviders>
+        <Providers>
           <AppRoutes />
-        </AppProviders>
+        </Providers>
       </ErrorBoundary>
     </BrowserRouter>
   )
