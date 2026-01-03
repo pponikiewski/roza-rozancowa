@@ -1,6 +1,7 @@
 import { useState } from "react"
 import { useNavigate } from "react-router-dom"
 import { CheckCircle2, AlertCircle, LogOut, Timer, ChevronRight, Loader2, Users, Rose, ScrollText } from "lucide-react"
+import { toast } from "sonner"
 import { supabase } from "@/lib/supabase"
 import { getErrorMessage, getOptimizedImageUrl } from "@/lib/utils"
 // UI Components
@@ -71,7 +72,9 @@ export default function UserDashboard() {
         setRoseMembers(processed)
       }
     } catch (err) {
-      console.error("Błąd pobierania róży:", getErrorMessage(err))
+      toast.error("Nie udało się pobrać danych Róży", {
+        description: getErrorMessage(err)
+      })
     } finally {
       setRoseLoading(false)
     }
