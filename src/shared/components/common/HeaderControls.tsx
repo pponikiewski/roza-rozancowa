@@ -1,11 +1,11 @@
 import { useLocation, useNavigate } from "react-router-dom"
 import { LogOut } from "lucide-react"
 import { toast } from "sonner"
-import { ModeToggle } from "@/shared/components/common/mode-toggle"
-import { SeniorModeToggle } from "@/shared/components/common/senior-mode-toggle"
+import { ModeToggle } from "@/shared/components/common/ModeToggle"
+import { SeniorModeToggle } from "@/shared/components/common/SeniorModeToggle"
 import { Button } from "@/shared/components/ui/button"
 import { cn } from "@/shared/lib/utils"
-import { useTheme } from "@/shared/components/common/theme-provider"
+import { useTheme } from "@/shared/components/common/ThemeProvider"
 import { useAuth } from "@/features/auth/context/AuthContext"
 
 interface HeaderControlsProps {

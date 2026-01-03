@@ -1,29 +1,21 @@
 import { useState } from "react"
-import { useNavigate } from "react-router-dom"
-import { AlertCircle, LogOut, Users } from "lucide-react"
 // UI Components
-import { Button } from "@/shared/components/ui/button"
-import { Card, CardContent, CardFooter, CardHeader } from "@/shared/components/ui/card"
-import { HeaderControls } from "@/shared/components/common/header-controls"
 import { LoadingScreen } from "@/shared/components/feedback"
 import { IntentionCard } from "@/features/user/components/IntentionCard"
 import { MysteryCard } from "@/features/user/components/MysteryCard"
 import { RoseDialog } from "@/features/user/components/RoseDialog"
+import { DashboardHeader } from "@/features/user/components/DashboardHeader"
+import { NoAssignmentCard } from "@/features/user/components/NoAssignmentCard"
 // Hooks & Utils
 import { useUserData } from "@/features/user/hooks/useUserData"
 import { useMysteryChangeTimer } from "@/features/user/hooks/useMysteryChangeTimer"
-import { useAuth } from "@/features/auth/context/AuthContext"
 import { userService } from "@/features/user/api/user.service"
 import { getErrorMessage } from "@/shared/lib/utils"
-import { ROUTES } from "@/shared/lib/constants"
 import { toast } from "sonner"
 import type { RoseMember } from "@/features/user/types/user.types"
 
 /** Główny komponent panelu użytkownika - wyświetla przydzieloną tajemnicę, intencję oraz podgląd Róży */
 export default function UserPage() {
-  const navigate = useNavigate()
-  const { signOut } = useAuth()
-
   // Custom hooks
   const {
     loading,
@@ -59,67 +51,17 @@ export default function UserPage() {
     }
   }
 
-  const handleLogout = async () => {
-    try {
-      await signOut()
-      navigate(ROUTES.LOGIN)
-    } catch (e) {
-      toast.error("Błąd wylogowania")
-      navigate(ROUTES.LOGIN)
-    }
+  if (loading) {
+    return <LoadingScreen fullScreen text="Ładowanie..." className="bg-muted/30" />
   }
 
-  if (loading) return (
-    <LoadingScreen fullScreen text="Ładowanie..." className="bg-muted/30" />
-  )
-
-  if (!mystery) return (
-    <div className="flex flex-col min-h-screen bg-muted/30 p-6 items-center justify-center text-center">
-      <Card className="w-full max-w-sm border-dashed border-2 shadow-none bg-transparent">
-        <CardHeader className="items-center pb-2">
-          <div className="bg-amber-100 dark:bg-amber-900/30 p-4 rounded-full mb-2">
-            <AlertCircle className="h-8 w-8 text-amber-600 dark:text-amber-500" />
-          </div>
-          <h2 className="text-xl font-semibold tracking-tight">Brak przydziału</h2>
-        </CardHeader>
-        <CardContent>
-          <p className="text-sm text-muted-foreground leading-relaxed">
-            Witaj, <span className="font-medium text-foreground">{profile?.full_name}</span>.<br />
-            Wygląda na to, że nie należysz jeszcze do żadnej Róży lub administrator nie aktywował Twojego konta.
-          </p>
-        </CardContent>
-        <CardFooter className="justify-center pt-2">
-          <Button variant="outline" onClick={handleLogout} className="gap-2">
-            <LogOut className="h-4 w-4" /> Wyloguj się
-          </Button>
-        </CardFooter>
-      </Card>
-    </div>
-  )
+  if (!mystery) {
+    return <NoAssignmentCard profile={profile} />
+  }
 
   return (
     <div className="min-h-screen w-full bg-muted/20 flex flex-col pb-safe">
-      <header className="app-header sticky top-0 z-10 bg-background/80 backdrop-blur-md border-b px-4 py-3 flex items-center gap-2 shadow-sm">
-        <div
-          className="header-user-info flex items-center gap-3 cursor-pointer p-1.5 -ml-1.5 rounded-lg hover:bg-muted/60 transition-colors group select-none min-w-0 flex-1"
-          onClick={handleOpenRose}
-          title="Kliknij, aby zobaczyć swoją Różę"
-        >
-          <div className="h-9 w-9 rounded-full overflow-hidden border-2 border-primary/10 group-hover:border-primary/40 transition-colors flex items-center justify-center bg-primary/5 flex-shrink-0">
-            <img src="/roseb.svg" alt="Logo" className="h-6 w-6 object-contain" />
-          </div>
-          <div className="flex flex-col min-w-0">
-            <span className="text-sm font-semibold leading-none flex items-center gap-1.5 truncate">
-              <span className="truncate">{profile?.full_name}</span>
-              <Users className="h-3 w-3 text-muted-foreground/50 group-hover:text-primary transition-colors flex-shrink-0" />
-            </span>
-            <span className="text-[11px] text-muted-foreground mt-0.5 font-medium group-hover:text-foreground transition-colors truncate">
-              {profile?.groups?.name || "Brak grupy"}
-            </span>
-          </div>
-        </div>
-        <HeaderControls className="flex-shrink-0" />
-      </header>
+      <DashboardHeader profile={profile} onOpenRose={handleOpenRose} />
 
       <main className="flex-1 w-full max-w-lg mx-auto p-8 md:p-8 flex flex-col gap-5">
         {/* KARTA INTENCJI */}
