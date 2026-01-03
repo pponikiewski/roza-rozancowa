@@ -5,15 +5,17 @@ import { Toaster } from "@/components/ui/sonner"
 import { ProtectedRoute, AdminRoute } from "@/components/ProtectedRoute"
 import { AuthProvider } from "@/context/AuthContext"
 import { useNavigateOnAuthChange } from "@/hooks/useNavigateOnAuthChange"
-import { lazy, Suspense } from "react"
+import { ErrorBoundary } from "@/components/ErrorBoundary"
+import { lazyWithRetry } from "@/lib/lazyWithRetry"
+import { Suspense } from "react"
 
-// Lazy loading stron
-const AdminLayout = lazy(() => import("@/layouts/AdminLayout"))
-const LoginPage = lazy(() => import("@/pages/Login"))
-const UserDashboard = lazy(() => import("@/pages/UserDashboard"))
-const AdminMembers = lazy(() => import("@/pages/admin/AdminMembers"))
-const AdminIntentions = lazy(() => import("@/pages/admin/AdminIntentions"))
-const AdminRoses = lazy(() => import("@/pages/admin/AdminRoses"))
+// Lazy loading stron z retry logic (obsługa "Failed to fetch" przy nowej wersji app)
+const AdminLayout = lazyWithRetry(() => import("@/layouts/AdminLayout"))
+const LoginPage = lazyWithRetry(() => import("@/pages/Login"))
+const UserDashboard = lazyWithRetry(() => import("@/pages/UserDashboard"))
+const AdminMembers = lazyWithRetry(() => import("@/pages/admin/AdminMembers"))
+const AdminIntentions = lazyWithRetry(() => import("@/pages/admin/AdminIntentions"))
+const AdminRoses = lazyWithRetry(() => import("@/pages/admin/AdminRoses"))
 
 /** Główny komponent aplikacji zarządzający routingiem */
 function AppRoutes() {
@@ -48,14 +50,16 @@ function AppRoutes() {
 /** Wrapper dla AuthProvider - potrzebny aby useNavigateOnAuthChange miał dostęp do AuthContext */
 function App() {
   return (
-    <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
-      <AuthProvider>
-        <BrowserRouter>
-          <Toaster position="top-center" richColors />
-          <AppRoutes />
-        </BrowserRouter>
-      </AuthProvider>
-    </ThemeProvider>
+    <ErrorBoundary>
+      <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
+        <AuthProvider>
+          <BrowserRouter>
+            <Toaster position="top-center" richColors />
+            <AppRoutes />
+          </BrowserRouter>
+        </AuthProvider>
+      </ThemeProvider>
+    </ErrorBoundary>
   )
 }
 
