@@ -1,16 +1,7 @@
 /**
  * Typy związane z autentykacją i profilami użytkowników
+ * 
+ * Re-eksport z centralnych typów domenowych dla zachowania kompatybilności wstecznej.
+ * Preferuj import bezpośrednio z '@/shared/types/domain.types'
  */
-export interface Group {
-  id: number
-  name: string
-  created_at?: string
-}
-
-export interface Profile {
-  id: string
-  full_name: string
-  rose_pos: number | null
-  groups: Group | null
-  role?: string
-}
+export type { Group, Profile } from '@/shared/types/domain.types'

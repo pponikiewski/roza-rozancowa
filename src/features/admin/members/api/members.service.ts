@@ -1,7 +1,7 @@
 import { supabase } from '@/shared/lib/supabase'
 import { mysteriesService } from '@/features/mysteries/api/mysteries.service'
 import type { AdminMember, CreateMemberDTO } from '@/features/admin/members/types/member.types'
-import type { Group } from '@/features/auth/types/auth.types'
+import type { Group } from '@/shared/types/domain.types'
 
 interface RawMember extends Omit<AdminMember, 'current_mystery_id'> {
   acknowledgments: { created_at: string; mystery_id: number }[]

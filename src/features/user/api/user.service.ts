@@ -1,8 +1,6 @@
 import { supabase } from '@/shared/lib/supabase'
 import { mysteriesService } from '@/features/mysteries/api/mysteries.service'
-import type { Profile } from '@/features/auth/types/auth.types'
-import type { Intention, RoseMember } from '@/features/user/types/user.types'
-import type { Mystery } from '@/features/mysteries/types/mystery.types'
+import type { Profile, Intention, RoseMember, Mystery } from '@/shared/types/domain.types'
 
 /**
  * Serwis obsługujący panel użytkownika

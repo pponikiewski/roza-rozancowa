@@ -15,7 +15,7 @@ export type ConfirmationVariant = "danger" | "warning" | "info"
 export interface ConfirmationDialogProps {
   open: boolean
   onOpenChange: (open: boolean) => void
-  onConfirm: () => void | Promise<void>
+  onConfirm: () => void | Promise<unknown>
   title: string
   description: ReactNode
   confirmText?: string
