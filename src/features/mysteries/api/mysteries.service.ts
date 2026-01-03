@@ -82,4 +82,30 @@ export const mysteriesService = {
 
     return !!data
   },
+
+  /**
+   * Batch: Obliczenie ID tajemnic dla wielu użytkowników naraz (eliminuje N+1)
+   * @param userIds - tablica UUID użytkowników
+   * @returns Mapa user_id -> mystery_id
+   */
+  async getMysteryIdsForUsers(userIds: string[]): Promise<Map<string, number | null>> {
+    if (userIds.length === 0) return new Map()
+
+    const { data, error } = await supabase.rpc('get_mystery_ids_for_users', {
+      p_user_ids: userIds
+    })
+
+    if (error) {
+      console.error('Error calling get_mystery_ids_for_users:', error)
+      return new Map()
+    }
+
+    const resultMap = new Map<string, number | null>()
+    if (data) {
+      for (const row of data as Array<{ user_id: string; mystery_id: number | null }>) {
+        resultMap.set(row.user_id, row.mystery_id)
+      }
+    }
+    return resultMap
+  },
 }
