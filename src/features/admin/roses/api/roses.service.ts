@@ -68,7 +68,7 @@ export const rosesService = {
 
   /**
    * Pobranie szczegółów róży (członków z ich tajemnicami)
-   * Zoptymalizowane - używa batch query
+   * Używa enrichUsersWithMysteries + custom logika acknowledgments
    */
   async getRoseDetails(groupId: number) {
     const { data: members, error } = await supabase
@@ -80,26 +80,20 @@ export const rosesService = {
     if (error) throw error
     if (!members || members.length === 0) return []
 
-    // Batch: pobierz wszystkie mystery_id w jednym zapytaniu
-    const userIds = members.map(m => m.id)
-    const mysteryIdsMap = await mysteriesService.getMysteryIdsForUsers(userIds)
-    
-    const mysteries = await mysteriesService.getAllMysteries()
-    const mysteriesMap = new Map(mysteries.map(m => [m.id, m.name]))
+    // Wzbogać o tajemnice używając wspólnej funkcji
+    const enriched = await mysteriesService.enrichUsersWithMysteries(members, { includeName: true })
 
-    return members.map((m) => {
-      const currentMysteryId = mysteryIdsMap.get(m.id) ?? null
-      const mysteryName = mysteriesMap.get(currentMysteryId ?? 0) || 'Brak przydziału'
-      const hasAcknowledged = currentMysteryId
-        ? m.acknowledgments.some((ack) => ack.mystery_id === currentMysteryId)
+    return enriched.map((m) => {
+      const hasAcknowledged = m.current_mystery_id
+        ? m.acknowledgments.some((ack) => ack.mystery_id === m.current_mystery_id)
         : false
 
       return {
         id: m.id,
         full_name: m.full_name,
         rose_pos: m.rose_pos,
-        current_mystery_id: currentMysteryId,
-        current_mystery_name: mysteryName,
+        current_mystery_id: m.current_mystery_id,
+        current_mystery_name: m.current_mystery_name!,
         has_acknowledged: hasAcknowledged
       }
     })

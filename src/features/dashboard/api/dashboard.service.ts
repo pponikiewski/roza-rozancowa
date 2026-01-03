@@ -57,7 +57,7 @@ export const dashboardService = {
 
   /**
    * Pobranie członków róży wraz z ich tajemnicami
-   * Zoptymalizowane - używa batch query zamiast N+1
+   * Zoptymalizowane - używa enrichUsersWithMysteries
    */
   async getRoseMembers(groupId: number): Promise<RoseMember[]> {
     const { data: members, error } = await supabase
@@ -69,22 +69,14 @@ export const dashboardService = {
     if (error) throw error
     if (!members || members.length === 0) return []
 
-    // Batch: pobierz wszystkie mystery_id w jednym zapytaniu
-    const userIds = members.map(m => m.id)
-    const mysteryIdsMap = await mysteriesService.getMysteryIdsForUsers(userIds)
+    // Użyj wspólnej funkcji do wzbogacenia o tajemnice
+    const enriched = await mysteriesService.enrichUsersWithMysteries(members, { includeName: true })
 
-    // Pobierz nazwy tajemnic
-    const { data: allMysteries } = await supabase
-      .from('mysteries')
-      .select('id, name')
-
-    const mysteriesMap = new Map(allMysteries?.map(m => [m.id, m.name]) || [])
-
-    return members.map(m => ({
+    return enriched.map(m => ({
       id: m.id,
       full_name: m.full_name,
       rose_pos: m.rose_pos,
-      current_mystery_name: mysteriesMap.get(mysteryIdsMap.get(m.id) ?? 0) || "Brak przydziału"
+      current_mystery_name: m.current_mystery_name!
     }))
   },
 }

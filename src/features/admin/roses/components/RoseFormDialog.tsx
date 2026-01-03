@@ -1,15 +1,6 @@
-import { Button } from "@/shared/components/ui/button"
+import { FormDialog } from "@/shared/components/feedback"
 import { Input } from "@/shared/components/ui/input"
 import { Label } from "@/shared/components/ui/label"
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/shared/components/ui/dialog"
-import { Loader2 } from "lucide-react"
 import type { Group } from "@/shared/types/domain.types"
 
 interface RoseFormDialogProps {
@@ -37,43 +28,23 @@ export function RoseFormDialog({
   const isEditing = !!editingGroup
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-md">
-        <DialogHeader>
-          <DialogTitle>
-            {isEditing ? "Edytuj Różę" : "Utwórz Nową Różę"}
-          </DialogTitle>
-          <DialogDescription>
-            {isEditing
-              ? "Zmień nazwę istniejącej grupy."
-              : "Dodaj nową grupę modlitewną."}
-          </DialogDescription>
-        </DialogHeader>
-        <form onSubmit={onSubmit} className="space-y-4 py-2">
-          <div className="space-y-2">
-            <Label>Nazwa Róży</Label>
-            <Input
-              placeholder="np. Róża pw. Św. Rity"
-              value={groupName}
-              onChange={(e) => onGroupNameChange(e.target.value)}
-              autoFocus
-            />
-          </div>
-          <DialogFooter>
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => onOpenChange(false)}
-            >
-              Anuluj
-            </Button>
-            <Button type="submit" disabled={loading}>
-              {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              Zapisz
-            </Button>
-          </DialogFooter>
-        </form>
-      </DialogContent>
-    </Dialog>
+    <FormDialog
+      open={open}
+      onOpenChange={onOpenChange}
+      title={isEditing ? "Edytuj Różę" : "Utwórz Nową Różę"}
+      description={isEditing ? "Zmień nazwę istniejącej grupy." : "Dodaj nową grupę modlitewną."}
+      onSubmit={onSubmit}
+      loading={loading}
+    >
+      <div className="space-y-2">
+        <Label>Nazwa Róży</Label>
+        <Input
+          placeholder="np. Róża pw. Św. Rity"
+          value={groupName}
+          onChange={(e) => onGroupNameChange(e.target.value)}
+          autoFocus
+        />
+      </div>
+    </FormDialog>
   )
 }

@@ -108,4 +108,46 @@ export const mysteriesService = {
     }
     return resultMap
   },
+
+  /**
+   * Wzbogaca listę użytkowników o dane tajemnic (current_mystery_id i opcjonalnie current_mystery_name)
+   * Eliminuje duplikację kodu w membersService, rosesService i dashboardService
+   * 
+   * @param users - tablica obiektów z polem `id` (user_id)
+   * @param options.includeName - czy dołączyć nazwę tajemnicy
+   * @returns Tablica użytkowników z dodanymi polami mystery
+   * 
+   * @example
+   * const enrichedMembers = await mysteriesService.enrichUsersWithMysteries(members)
+   * // => [{ ...member, current_mystery_id: 5 }, ...]
+   * 
+   * const withNames = await mysteriesService.enrichUsersWithMysteries(members, { includeName: true })
+   * // => [{ ...member, current_mystery_id: 5, current_mystery_name: "Zwiastowanie" }, ...]
+   */
+  async enrichUsersWithMysteries<T extends { id: string }>(
+    users: T[],
+    options: { includeName?: boolean } = {}
+  ): Promise<(T & { current_mystery_id: number | null; current_mystery_name?: string })[]> {
+    if (users.length === 0) return []
+
+    const userIds = users.map(u => u.id)
+    const mysteryIdsMap = await this.getMysteryIdsForUsers(userIds)
+
+    let mysteriesMap: Map<number, string> | undefined
+    if (options.includeName) {
+      const mysteries = await this.getAllMysteries()
+      mysteriesMap = new Map(mysteries.map(m => [m.id, m.name]))
+    }
+
+    return users.map(user => {
+      const mysteryId = mysteryIdsMap.get(user.id) ?? null
+      return {
+        ...user,
+        current_mystery_id: mysteryId,
+        ...(options.includeName && {
+          current_mystery_name: mysteriesMap?.get(mysteryId ?? 0) || 'Brak przydziału'
+        })
+      }
+    })
+  },
 }

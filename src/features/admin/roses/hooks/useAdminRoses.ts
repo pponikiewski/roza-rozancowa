@@ -1,7 +1,8 @@
 import { rosesService } from "@/features/admin/roses/api/roses.service"
 import { toast } from "sonner"
 import { getErrorMessage } from "@/shared/lib/utils"
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
+import { useQuery, useQueryClient } from "@tanstack/react-query"
+import { useTypedMutation } from "@/shared/hooks"
 import { QUERY_KEYS } from "@/shared/lib/constants"
 
 export function useAdminRoses() {
@@ -12,40 +13,38 @@ export function useAdminRoses() {
     queryFn: () => rosesService.getAllGroups()
   })
 
-  const saveGroupMutation = useMutation({
+  const saveGroupMutation = useTypedMutation({
     mutationFn: async ({ name, id }: { name: string; id?: number }) => {
       if (id) {
         await rosesService.updateGroup(id, name)
-        return true
+        return true // isEdit
       } else {
         await rosesService.createGroup(name)
-        return false
+        return false // isEdit
       }
     },
-    onSuccess: (isEdit) => {
-      toast.success(isEdit ? "Zaktualizowano nazwę Róży" : "Utworzono nową Różę")
-      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.ADMIN_ROSES })
-    },
-    onError: (err) => toast.error("Wystąpił błąd", { description: getErrorMessage(err) })
+    successMessage: (isEdit) => isEdit ? "Zaktualizowano nazwę Róży" : "Utworzono nową Różę",
+    errorMessage: "Wystąpił błąd",
+    invalidateKeys: [QUERY_KEYS.ADMIN_ROSES]
   })
 
-  const deleteGroupMutation = useMutation({
+  const deleteGroupMutation = useTypedMutation({
     mutationFn: (id: number) => rosesService.deleteGroup(id),
-    onSuccess: () => {
-      toast.success("Róża usunięta")
-      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.ADMIN_ROSES })
-    },
-    onError: (err: unknown) => {
+    successMessage: "Róża usunięta",
+    errorMessage: "Błąd usuwania",
+    invalidateKeys: [QUERY_KEYS.ADMIN_ROSES],
+    onErrorCallback: (err: unknown) => {
       const error = err as { code?: string; message?: string }
-      const msg = error.code === '23503' ? "Nie można usunąć (grupa ma członków)" : "Błąd usuwania"
-      toast.error(msg, { description: error.message })
+      if (error.code === '23503') {
+        toast.error("Nie można usunąć (grupa ma członków)", { description: error.message })
+      }
     }
   })
 
-  const rotateGroupMutation = useMutation({
+  const rotateGroupMutation = useTypedMutation({
     mutationFn: (id: number) => rosesService.rotateGroup(id),
-    onSuccess: () => toast.success("Rotacja zakończona pomyślnie!"),
-    onError: (err) => toast.error("Błąd rotacji", { description: getErrorMessage(err) })
+    successMessage: "Rotacja zakończona pomyślnie!",
+    errorMessage: "Błąd rotacji"
   })
 
   return {
@@ -53,29 +52,9 @@ export function useAdminRoses() {
     actionLoading: saveGroupMutation.isPending || deleteGroupMutation.isPending || rotateGroupMutation.isPending,
     groups: groups || [],
     fetchGroups: () => queryClient.invalidateQueries({ queryKey: QUERY_KEYS.ADMIN_ROSES }),
-    saveGroup: async (name: string, id?: number) => {
-      try {
-        await saveGroupMutation.mutateAsync({ name, id })
-        return true
-      } catch {
-        return false
-      }
-    },
-    deleteGroup: async (id: number) => {
-      try {
-        await deleteGroupMutation.mutateAsync(id)
-        return true
-      } catch {
-        return false
-      }
-    },
-    rotateGroup: async (id: number) => {
-      try {
-        await rotateGroupMutation.mutateAsync(id)
-        return true
-      } catch {
-        return false
-      }
-    }
+    saveGroup: (name: string, id?: number) => saveGroupMutation.execute({ name, id }),
+    deleteGroup: (id: number) => deleteGroupMutation.execute(id),
+    rotateGroup: (id: number) => rotateGroupMutation.execute(id)
   }
+}
 }
