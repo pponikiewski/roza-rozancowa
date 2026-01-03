@@ -3,6 +3,9 @@
 // Components
 export * from './components'
 
+// Context
+export * from './context'
+
 // Lib utilities
 export { queryClient } from './lib/queryClient'
 export { supabase } from './lib/supabase'

@@ -1,6 +1,6 @@
 import { Moon, Sun } from "lucide-react"
 import { Button } from "@/shared/components/ui/button"
-import { useTheme } from "@/shared/components/common/ThemeProvider"
+import { useTheme } from "@/shared/context/ThemeContext"
 import { cn } from "@/shared/lib/utils"
 
 // Komponent przycisku do przełączania motywu aplikacji (jasny/ciemny)

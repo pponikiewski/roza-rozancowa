@@ -3,9 +3,9 @@ import { mysteriesService } from '@/features/mysteries/api/mysteries.service'
 import type { Profile, Intention, RoseMember, Mystery } from '@/shared/types/domain.types'
 
 /**
- * Serwis obsługujący panel użytkownika
+ * Serwis obsługujący panel użytkownika (dashboard)
  */
-export const userService = {
+export const dashboardService = {
   /**
    * Pobranie profilu użytkownika
    */

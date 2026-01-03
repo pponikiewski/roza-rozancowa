@@ -1,5 +1,5 @@
 /**
- * Typy dla panelu użytkownika
+ * Typy dla panelu użytkownika (dashboard)
  * 
  * Re-eksport z centralnych typów domenowych dla zachowania kompatybilności wstecznej.
  * Preferuj import bezpośrednio z '@/shared/types/domain.types'

@@ -1,11 +1,11 @@
-// User feature - public exports
-export { default as UserPage } from './pages/UserPage'
+// Dashboard feature - public exports
+export { default as DashboardPage } from './pages/DashboardPage'
 export { IntentionCard } from './components/IntentionCard'
 export { MysteryCard } from './components/MysteryCard'
 export { RoseDialog } from './components/RoseDialog'
 export { DashboardHeader } from './components/DashboardHeader'
 export { NoAssignmentCard } from './components/NoAssignmentCard'
-export { useUserData } from './hooks/useUserData'
+export { useDashboardData } from './hooks/useDashboardData'
 export { useMysteryChangeTimer } from './hooks/useMysteryChangeTimer'
-export { userService } from './api/user.service'
-export type * from './types/user.types'
+export { dashboardService } from './api/dashboard.service'
+export type * from './types/dashboard.types'

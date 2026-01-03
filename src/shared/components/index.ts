@@ -20,7 +20,9 @@ export { HeaderControls } from './common/HeaderControls'
 export { ModeToggle } from './common/ModeToggle'
 export { ResizableText } from './common/ResizableText'
 export { SeniorModeToggle } from './common/SeniorModeToggle'
-export { ThemeProvider, useTheme } from './common/ThemeProvider'
+
+// Re-export ThemeProvider from context
+export { ThemeProvider, useTheme } from '@/shared/context/ThemeContext'
 
 // Feedback components
 export { ConfirmationDialog, useConfirmation } from './feedback'
