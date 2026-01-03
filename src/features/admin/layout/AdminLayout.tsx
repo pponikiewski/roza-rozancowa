@@ -48,7 +48,7 @@ export default function AdminLayout() {
             <span>Do zmiany tajemnic:</span>
           </div>
           <div className="text-sm font-mono font-semibold tabular-nums pl-5">
-            {timeLeft.days}d {timeLeft.hours}h {timeLeft.minutes}m {timeLeft.seconds}s
+            {timeLeft.days}d {timeLeft.hours}h {timeLeft.minutes}m
           </div>
           {targetDate && (
             <div className="text-[10px] text-muted-foreground pl-5 pt-1">

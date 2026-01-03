@@ -1,6 +1,7 @@
 // Common components - public exports
 export { HeaderControls } from './HeaderControls'
 export { ModeToggle } from './ModeToggle'
+export { PasswordInput, type PasswordInputProps } from './PasswordInput'
 export { ResizableText } from './ResizableText'
 export { SeniorModeToggle } from './SeniorModeToggle'
 

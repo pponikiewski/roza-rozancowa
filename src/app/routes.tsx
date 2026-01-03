@@ -1,6 +1,7 @@
 import { Routes, Route, Navigate } from "react-router-dom"
 import { ProtectedRoute, AdminRoute } from "@/features/auth/components/ProtectedRoute"
 import { useNavigateOnAuthChange } from "@/features/auth/hooks/useNavigateOnAuthChange"
+import { FeatureErrorBoundary } from "@/shared/components/layout/FeatureErrorBoundary"
 import { ROUTES } from "@/shared/lib/constants"
 
 // Pages
@@ -26,16 +27,32 @@ export function AppRoutes() {
 
       {/* Protected user routes */}
       <Route element={<ProtectedRoute />}>
-        <Route path={ROUTES.DASHBOARD} element={<DashboardPage />} />
+        <Route path={ROUTES.DASHBOARD} element={
+          <FeatureErrorBoundary featureName="Panel użytkownika">
+            <DashboardPage />
+          </FeatureErrorBoundary>
+        } />
       </Route>
 
       {/* Protected admin routes */}
       <Route path={ROUTES.ADMIN.ROOT} element={<AdminRoute />}>
         <Route element={<AdminLayout />}>
           <Route index element={<Navigate to="members" replace />} />
-          <Route path="members" element={<AdminMembersPage />} />
-          <Route path="intentions" element={<AdminIntentionsPage />} />
-          <Route path="roses" element={<AdminRosesPage />} />
+          <Route path="members" element={
+            <FeatureErrorBoundary featureName="Użytkownicy">
+              <AdminMembersPage />
+            </FeatureErrorBoundary>
+          } />
+          <Route path="intentions" element={
+            <FeatureErrorBoundary featureName="Intencje">
+              <AdminIntentionsPage />
+            </FeatureErrorBoundary>
+          } />
+          <Route path="roses" element={
+            <FeatureErrorBoundary featureName="Róże">
+              <AdminRosesPage />
+            </FeatureErrorBoundary>
+          } />
         </Route>
       </Route>
 
