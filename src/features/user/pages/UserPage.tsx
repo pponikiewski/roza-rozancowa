@@ -1,10 +1,11 @@
 import { useState } from "react"
 import { useNavigate } from "react-router-dom"
-import { AlertCircle, LogOut, Loader2, Users } from "lucide-react"
+import { AlertCircle, LogOut, Users } from "lucide-react"
 // UI Components
 import { Button } from "@/shared/components/ui/button"
 import { Card, CardContent, CardFooter, CardHeader } from "@/shared/components/ui/card"
 import { HeaderControls } from "@/shared/components/common/header-controls"
+import { LoadingScreen } from "@/shared/components/feedback"
 import { IntentionCard } from "@/features/user/components/IntentionCard"
 import { MysteryCard } from "@/features/user/components/MysteryCard"
 import { RoseDialog } from "@/features/user/components/RoseDialog"
@@ -69,12 +70,7 @@ export default function UserPage() {
   }
 
   if (loading) return (
-    <div className="flex h-screen w-full items-center justify-center bg-muted/30">
-      <div className="flex flex-col items-center gap-4">
-        <Loader2 className="h-8 w-8 animate-spin text-primary/80" />
-        <p className="text-sm text-muted-foreground font-medium animate-pulse">Ładowanie...</p>
-      </div>
-    </div>
+    <LoadingScreen fullScreen text="Ładowanie..." className="bg-muted/30" />
   )
 
   if (!mystery) return (

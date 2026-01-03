@@ -2,8 +2,8 @@ import { createContext, useContext, useEffect, useState } from "react"
 import type { ReactNode } from "react"
 import { supabase } from "@/shared/lib/supabase"
 import { authService } from "@/features/auth/api/auth.service"
+import { LoadingScreen } from "@/shared/components/feedback"
 import type { User, Session } from "@supabase/supabase-js"
-import { Loader2 } from "lucide-react"
 
 interface AuthContextType {
     user: User | null
@@ -98,9 +98,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return (
         <AuthContext.Provider value={value}>
             {loading ? (
-                <div className="flex h-screen w-full items-center justify-center">
-                    <Loader2 className="h-8 w-8 animate-spin text-primary" />
-                </div>
+                <LoadingScreen fullScreen />
             ) : (
                 children
             )}
