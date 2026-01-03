@@ -13,6 +13,7 @@ interface RawMember extends Omit<AdminMember, 'current_mystery_id'> {
 export const membersService = {
   /**
    * Pobranie wszystkich członków wraz z grupami i potwierdzeniami
+   * Zoptymalizowane - używa batch query zamiast N+1
    */
   async getAllMembers(): Promise<AdminMember[]> {
     const { data: allMembers, error } = await supabase
@@ -25,22 +26,24 @@ export const membersService = {
       .order('full_name', { ascending: true })
 
     if (error) throw error
-    if (!allMembers) return []
+    if (!allMembers || allMembers.length === 0) return []
 
-    const members = await Promise.all(
-      (allMembers as unknown as RawMember[]).map(async (m) => {
-        const currentMysteryId = await mysteriesService.getMysteryIdForUser(m.id)
-        const relevantAcks = currentMysteryId
-          ? m.acknowledgments.filter((a) => Number(a.mystery_id) === Number(currentMysteryId))
-          : []
+    // Batch: pobierz wszystkie mystery_id w jednym zapytaniu
+    const userIds = (allMembers as unknown as RawMember[]).map(m => m.id)
+    const mysteryIdsMap = await mysteriesService.getMysteryIdsForUsers(userIds)
 
-        return {
-          ...m,
-          current_mystery_id: currentMysteryId,
-          acknowledgments: relevantAcks
-        } as AdminMember
-      })
-    )
+    const members = (allMembers as unknown as RawMember[]).map((m) => {
+      const currentMysteryId = mysteryIdsMap.get(m.id) ?? null
+      const relevantAcks = currentMysteryId
+        ? m.acknowledgments.filter((a) => Number(a.mystery_id) === Number(currentMysteryId))
+        : []
+
+      return {
+        ...m,
+        current_mystery_id: currentMysteryId,
+        acknowledgments: relevantAcks
+      } as AdminMember
+    })
 
     return members
   },

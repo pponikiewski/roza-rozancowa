@@ -57,6 +57,7 @@ export const dashboardService = {
 
   /**
    * Pobranie członków róży wraz z ich tajemnicami
+   * Zoptymalizowane - używa batch query zamiast N+1
    */
   async getRoseMembers(groupId: number): Promise<RoseMember[]> {
     const { data: members, error } = await supabase
@@ -66,26 +67,24 @@ export const dashboardService = {
       .order('rose_pos', { ascending: true })
 
     if (error) throw error
-    if (!members) return []
+    if (!members || members.length === 0) return []
 
+    // Batch: pobierz wszystkie mystery_id w jednym zapytaniu
+    const userIds = members.map(m => m.id)
+    const mysteryIdsMap = await mysteriesService.getMysteryIdsForUsers(userIds)
+
+    // Pobierz nazwy tajemnic
     const { data: allMysteries } = await supabase
       .from('mysteries')
       .select('id, name')
 
-    const processed = await Promise.all(
-      members.map(async (m) => {
-        const mysteryId = await mysteriesService.getMysteryIdForUser(m.id)
-        const mysteryName = allMysteries?.find(mys => mys.id === mysteryId)?.name || "Brak przydziału"
+    const mysteriesMap = new Map(allMysteries?.map(m => [m.id, m.name]) || [])
 
-        return {
-          id: m.id,
-          full_name: m.full_name,
-          rose_pos: m.rose_pos,
-          current_mystery_name: mysteryName
-        }
-      })
-    )
-
-    return processed
+    return members.map(m => ({
+      id: m.id,
+      full_name: m.full_name,
+      rose_pos: m.rose_pos,
+      current_mystery_name: mysteriesMap.get(mysteryIdsMap.get(m.id) ?? 0) || "Brak przydziału"
+    }))
   },
 }
