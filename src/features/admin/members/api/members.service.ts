@@ -83,7 +83,7 @@ export const membersService = {
   async updateMemberGroup(userId: string, groupId: number | null): Promise<void> {
     const { error } = await supabase.rpc('move_user_to_group', {
       p_user_id: userId,
-      p_group_id: groupId
+      p_group_id: groupId as number // RPC przyjmuje bigint, null jest obsługiwany w SQL
     })
 
     if (error) throw error

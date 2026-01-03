@@ -25,7 +25,7 @@ export default function UserPage() {
     intention,
     isAcknowledged,
     acknowledgeMystery
-  } = useUserData()
+  } = useDashboardData()
 
   const { timeLeft } = useMysteryChangeTimer()
 
@@ -40,7 +40,7 @@ export default function UserPage() {
 
     setRoseLoading(true)
     try {
-      const members = await userService.getRoseMembers(profile.groups.id)
+      const members = await dashboardService.getRoseMembers(profile.groups.id)
       setRoseMembers(members)
     } catch (err) {
       toast.error("Nie udało się pobrać danych Róży", {
