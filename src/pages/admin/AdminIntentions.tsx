@@ -1,4 +1,7 @@
 import { useState } from "react"
+import { useForm } from "react-hook-form"
+import { zodResolver } from "@hookform/resolvers/zod"
+import { intentionSchema, type IntentionFormData } from "@/lib/schemas"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Label } from "@/components/ui/label"
@@ -27,40 +30,55 @@ export default function AdminIntentions() {
     deleteIntention
   } = useAdminIntentions()
 
-  const [title, setTitle] = useState("")
-  const [content, setContent] = useState("")
   const [editDialogOpen, setEditDialogOpen] = useState(false)
   const [editingIntention, setEditingIntention] = useState<IntentionHistory | null>(null)
-  const [editTitle, setEditTitle] = useState("")
-  const [editContent, setEditContent] = useState("")
+
+  // Formularz główny (nowa intencja)
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+    reset,
+  } = useForm<IntentionFormData>({
+    resolver: zodResolver(intentionSchema),
+  })
+
+  // Formularz edycji
+  const {
+    register: registerEdit,
+    handleSubmit: handleSubmitEdit,
+    formState: { errors: errorsEdit },
+    setValue: setValueEdit,
+    reset: resetEdit,
+  } = useForm<IntentionFormData>({
+    resolver: zodResolver(intentionSchema),
+  })
 
   const date = new Date()
   const currentYear = date.getFullYear()
   const monthName = date.toLocaleString('pl-PL', { month: 'long' })
 
-  const handleSaveWrapper = async () => {
-    const success = await saveIntention(title, content)
+  const onSubmit = async (data: IntentionFormData) => {
+    const success = await saveIntention(data.title, data.content)
     if (success) {
-      setTitle("")
-      setContent("")
+      reset()
     }
   }
 
   const handleEdit = (intention: IntentionHistory) => {
     setEditingIntention(intention)
-    setEditTitle(intention.title)
-    setEditContent(intention.content)
+    setValueEdit("title", intention.title)
+    setValueEdit("content", intention.content)
     setEditDialogOpen(true)
   }
 
-  const handleUpdate = async () => {
+  const onSubmitEdit = async (data: IntentionFormData) => {
     if (editingIntention) {
-      const success = await updateIntention(editingIntention.id, editTitle, editContent)
+      const success = await updateIntention(editingIntention.id, data.title, data.content)
       if (success) {
         setEditDialogOpen(false)
         setEditingIntention(null)
-        setEditTitle("")
-        setEditContent("")
+        resetEdit()
       }
     }
   }
@@ -88,17 +106,25 @@ export default function AdminIntentions() {
           </div>
         </CardHeader>
         <CardContent className="space-y-6">
-          <div className="space-y-2">
-            <Label htmlFor="title">Nagłówek</Label>
-            <Input id="title" value={title} onChange={(e) => setTitle(e.target.value)} className="font-semibold" />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="content">Treść modlitwy</Label>
-            <Textarea id="content" className="min-h-[120px] text-base leading-relaxed" value={content} onChange={(e) => setContent(e.target.value)} />
-          </div>
-          <Button onClick={handleSaveWrapper} disabled={loading} className="w-full sm:w-auto min-w-[150px]">
-            {loading ? "Zapisywanie..." : saved ? <><Check className="mr-2 h-4 w-4" /> Zapisano</> : <><Save className="mr-2 h-4 w-4" /> Zapisz Intencję</>}
-          </Button>
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+            <div className="space-y-2">
+              <Label htmlFor="title">Nagłówek</Label>
+              <Input id="title" {...register("title")} className="font-semibold" />
+              {errors.title && (
+                <p className="text-sm text-destructive">{errors.title.message}</p>
+              )}
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="content">Treść modlitwy</Label>
+              <Textarea id="content" className="min-h-[120px] text-base leading-relaxed" {...register("content")} />
+              {errors.content && (
+                <p className="text-sm text-destructive">{errors.content.message}</p>
+              )}
+            </div>
+            <Button type="submit" disabled={loading} className="w-full sm:w-auto min-w-[150px]">
+              {loading ? "Zapisywanie..." : saved ? <><Check className="mr-2 h-4 w-4" /> Zapisano</> : <><Save className="mr-2 h-4 w-4" /> Zapisz Intencję</>}
+            </Button>
+          </form>
         </CardContent>
       </Card>
 
@@ -153,34 +179,40 @@ export default function AdminIntentions() {
               {editingIntention && `${getMonthName(editingIntention.month)} ${editingIntention.year}`}
             </DialogDescription>
           </DialogHeader>
-          <div className="space-y-4 py-4">
-            <div className="space-y-2">
-              <Label htmlFor="edit-title">Nagłówek</Label>
-              <Input
-                id="edit-title"
-                value={editTitle}
-                onChange={(e) => setEditTitle(e.target.value)}
-                className="font-semibold"
-              />
+          <form onSubmit={handleSubmitEdit(onSubmitEdit)}>
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <Label htmlFor="edit-title">Nagłówek</Label>
+                <Input
+                  id="edit-title"
+                  {...registerEdit("title")}
+                  className="font-semibold"
+                />
+                {errorsEdit.title && (
+                  <p className="text-sm text-destructive">{errorsEdit.title.message}</p>
+                )}
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="edit-content">Treść modlitwy</Label>
+                <Textarea
+                  id="edit-content"
+                  className="min-h-[120px] text-base leading-relaxed"
+                  {...registerEdit("content")}
+                />
+                {errorsEdit.content && (
+                  <p className="text-sm text-destructive">{errorsEdit.content.message}</p>
+                )}
+              </div>
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="edit-content">Treść modlitwy</Label>
-              <Textarea
-                id="edit-content"
-                className="min-h-[120px] text-base leading-relaxed"
-                value={editContent}
-                onChange={(e) => setEditContent(e.target.value)}
-              />
-            </div>
-          </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setEditDialogOpen(false)}>
-              Anuluj
-            </Button>
-            <Button onClick={handleUpdate} disabled={loading}>
-              {loading ? "Zapisywanie..." : "Zapisz zmiany"}
-            </Button>
-          </DialogFooter>
+            <DialogFooter>
+              <Button type="button" variant="outline" onClick={() => setEditDialogOpen(false)}>
+                Anuluj
+              </Button>
+              <Button type="submit" disabled={loading}>
+                {loading ? "Zapisywanie..." : "Zapisz zmiany"}
+              </Button>
+            </DialogFooter>
+          </form>
         </DialogContent>
       </Dialog>
     </div>

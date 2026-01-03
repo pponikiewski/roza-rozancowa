@@ -1,6 +1,9 @@
 import { useState, useEffect } from "react"
 import { useNavigate } from "react-router-dom"
+import { useForm } from "react-hook-form"
+import { zodResolver } from "@hookform/resolvers/zod"
 import { supabase } from "@/lib/supabase"
+import { loginSchema, type LoginFormData } from "@/lib/schemas"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -24,14 +27,19 @@ const ROSARY_QUOTES = [
 // Komponent strony logowania
 // Obsługuje uwierzytelnianie użytkowników i przekierowanie w zależności od roli (admin/user)
 export default function LoginPage() {
-  const [email, setEmail] = useState("")
-  const [password, setPassword] = useState("")
   const [showPassword, setShowPassword] = useState(false)
   const [internalLoading, setInternalLoading] = useState(false)
   const [quote, setQuote] = useState(ROSARY_QUOTES[0])
 
-  const navigate = useNavigate()
-  const { user, isAdmin, loading: authLoading } = useAuth()
+  const { loading: authLoading } = useAuth()
+
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<LoginFormData>({
+    resolver: zodResolver(loginSchema),
+  })
 
   useEffect(() => {
     // Losowanie cytatu przy załadowaniu komponentu
@@ -39,19 +47,14 @@ export default function LoginPage() {
     setQuote(randomQuote)
   }, [])
 
-  useEffect(() => {
-    if (!authLoading && user) {
-      if (isAdmin) navigate("/admin", { replace: true })
-      else navigate("/dashboard", { replace: true })
-    }
-  }, [authLoading, user, isAdmin, navigate])
-
   // Obsługa procesu logowania
-  const handleLogin = async (e: React.FormEvent) => {
-    e.preventDefault()
+  const onSubmit = async (data: LoginFormData) => {
     setInternalLoading(true)
 
-    const { error } = await supabase.auth.signInWithPassword({ email, password })
+    const { error } = await supabase.auth.signInWithPassword({
+      email: data.email,
+      password: data.password,
+    })
 
     if (error) {
       console.error("Login Error:", error.message)
@@ -60,7 +63,7 @@ export default function LoginPage() {
       })
       setInternalLoading(false)
     } else {
-      // Redirect handled by useEffect
+      // Redirect będzie obsłużony przez useNavigateOnAuthChange w App.tsx
       toast.success("Zalogowano pomyślnie")
     }
   }
@@ -90,7 +93,7 @@ export default function LoginPage() {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <form onSubmit={handleLogin} className="space-y-4">
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="email">Email</Label>
               <div className="relative">
@@ -101,11 +104,13 @@ export default function LoginPage() {
                   type="email"
                   autoComplete="email"
                   className="pl-9"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
+                  {...register("email")}
                   disabled={internalLoading || authLoading}
                 />
               </div>
+              {errors.email && (
+                <p className="text-sm text-destructive">{errors.email.message}</p>
+              )}
             </div>
             <div className="space-y-2">
               <div className="flex items-center justify-between">
@@ -119,8 +124,7 @@ export default function LoginPage() {
                   placeholder="••••••••"
                   autoComplete="current-password"
                   className="pl-9 pr-10"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
+                  {...register("password")}
                   disabled={internalLoading || authLoading}
                 />
                 <button
@@ -133,6 +137,9 @@ export default function LoginPage() {
                   {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                 </button>
               </div>
+              {errors.password && (
+                <p className="text-sm text-destructive">{errors.password.message}</p>
+              )}
             </div>
             <Button className="w-full" disabled={internalLoading || authLoading}>
               {(internalLoading || authLoading) && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
