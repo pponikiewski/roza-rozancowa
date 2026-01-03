@@ -1,13 +1,13 @@
 import { supabase } from '@/shared/lib/supabase'
 import { mysteriesService } from '@/features/mysteries/api/mysteries.service'
 import type { Profile } from '@/features/auth/types/auth.types'
-import type { Intention, RoseMember } from '@/features/dashboard/types/dashboard.types'
+import type { Intention, RoseMember } from '@/features/user/types/user.types'
 import type { Mystery } from '@/features/mysteries/types/mystery.types'
 
 /**
- * Serwis obsługujący dashboard użytkownika
+ * Serwis obsługujący panel użytkownika
  */
-export const dashboardService = {
+export const userService = {
   /**
    * Pobranie profilu użytkownika
    */

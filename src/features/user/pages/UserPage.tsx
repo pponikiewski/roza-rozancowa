@@ -5,21 +5,21 @@ import { AlertCircle, LogOut, Loader2, Users } from "lucide-react"
 import { Button } from "@/shared/components/ui/button"
 import { Card, CardContent, CardFooter, CardHeader } from "@/shared/components/ui/card"
 import { HeaderControls } from "@/shared/components/common/header-controls"
-import { IntentionCard } from "@/features/dashboard/components/IntentionCard"
-import { MysteryCard } from "@/features/dashboard/components/MysteryCard"
-import { RoseDialog } from "@/features/dashboard/components/RoseDialog"
+import { IntentionCard } from "@/features/user/components/IntentionCard"
+import { MysteryCard } from "@/features/user/components/MysteryCard"
+import { RoseDialog } from "@/features/user/components/RoseDialog"
 // Hooks & Utils
-import { useDashboardData } from "@/features/dashboard/hooks/useDashboardData"
-import { useMysteryChangeTimer } from "@/features/dashboard/hooks/useMysteryChangeTimer"
+import { useUserData } from "@/features/user/hooks/useUserData"
+import { useMysteryChangeTimer } from "@/features/user/hooks/useMysteryChangeTimer"
 import { useAuth } from "@/features/auth/context/AuthContext"
-import { dashboardService } from "@/features/dashboard/api/dashboard.service"
+import { userService } from "@/features/user/api/user.service"
 import { getErrorMessage } from "@/shared/lib/utils"
 import { ROUTES } from "@/shared/lib/constants"
 import { toast } from "sonner"
-import type { RoseMember } from "@/features/dashboard/types/dashboard.types"
+import type { RoseMember } from "@/features/user/types/user.types"
 
 /** Główny komponent panelu użytkownika - wyświetla przydzieloną tajemnicę, intencję oraz podgląd Róży */
-export default function UserDashboardPage() {
+export default function UserPage() {
   const navigate = useNavigate()
   const { signOut } = useAuth()
 
@@ -32,7 +32,7 @@ export default function UserDashboardPage() {
     intention,
     isAcknowledged,
     acknowledgeMystery
-  } = useDashboardData()
+  } = useUserData()
 
   const { timeLeft } = useMysteryChangeTimer()
 
@@ -47,7 +47,7 @@ export default function UserDashboardPage() {
 
     setRoseLoading(true)
     try {
-      const members = await dashboardService.getRoseMembers(profile.groups.id)
+      const members = await userService.getRoseMembers(profile.groups.id)
       setRoseMembers(members)
     } catch (err) {
       toast.error("Nie udało się pobrać danych Róży", {

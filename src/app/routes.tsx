@@ -5,7 +5,7 @@ import { ROUTES } from "@/shared/lib/constants"
 
 // Pages
 import LoginPage from "@/features/auth/pages/LoginPage"
-import UserDashboardPage from "@/features/dashboard/pages/UserDashboardPage"
+import UserPage from "@/features/user/pages/UserPage"
 import AdminLayout from "@/features/admin/layout/AdminLayout"
 import AdminMembersPage from "@/features/admin/members/pages/AdminMembersPage"
 import AdminIntentionsPage from "@/features/admin/intentions/pages/AdminIntentionsPage"
@@ -26,7 +26,7 @@ export function AppRoutes() {
 
       {/* Protected user routes */}
       <Route element={<ProtectedRoute />}>
-        <Route path={ROUTES.DASHBOARD} element={<UserDashboardPage />} />
+        <Route path={ROUTES.DASHBOARD} element={<UserPage />} />
       </Route>
 
       {/* Protected admin routes */}
