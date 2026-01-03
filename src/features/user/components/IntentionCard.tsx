@@ -1,5 +1,5 @@
 import { memo } from "react"
-import { ResizableText } from "@/shared/components/common/resizable-text"
+import { ResizableText } from "@/shared/components/common/ResizableText"
 
 interface IntentionCardProps {
   title?: string

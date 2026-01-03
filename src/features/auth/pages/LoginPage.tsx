@@ -9,7 +9,7 @@ import { Label } from "@/shared/components/ui/label"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/shared/components/ui/card"
 import { Loader2, Lock, Mail, Eye, EyeOff } from "lucide-react"
 import { toast } from "sonner"
-import { HeaderControls } from "@/shared/components/common/header-controls"
+import { HeaderControls } from "@/shared/components/common/HeaderControls"
 import { useAuth } from "@/features/auth/context/AuthContext"
 import { ROSARY_QUOTES } from "@/shared/lib/constants"
 

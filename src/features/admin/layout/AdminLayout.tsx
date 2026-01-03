@@ -3,7 +3,7 @@ import { Button } from "@/shared/components/ui/button"
 import { Sheet, SheetContent, SheetTrigger } from "@/shared/components/ui/sheet"
 import { Users, HandHeart, LayoutDashboard, Menu, Rose, Timer } from "lucide-react"
 import { useState } from "react"
-import { HeaderControls } from "@/shared/components/common/header-controls"
+import { HeaderControls } from "@/shared/components/common/HeaderControls"
 import { useMysteryChangeTimer } from "@/features/user/hooks/useMysteryChangeTimer"
 import { ROUTES } from "@/shared/lib/constants"
 

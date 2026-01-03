@@ -4,7 +4,7 @@ import { Button } from "@/shared/components/ui/button"
 import { Card, CardContent, CardFooter, CardHeader } from "@/shared/components/ui/card"
 import { Badge } from "@/shared/components/ui/badge"
 import { Separator } from "@/shared/components/ui/separator"
-import { ResizableText } from "@/shared/components/common/resizable-text"
+import { ResizableText } from "@/shared/components/common/ResizableText"
 import { getOptimizedImageUrl } from "@/shared/lib/utils"
 import type { Mystery } from "@/features/mysteries/types/mystery.types"
 
