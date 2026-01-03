@@ -3,8 +3,8 @@ import { Button } from "@/shared/components/ui/button"
 import { Input } from "@/shared/components/ui/input"
 import { Badge } from "@/shared/components/ui/badge"
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/shared/components/ui/accordion"
+import { ConfirmationDialog, useConfirmation } from "@/shared/components/feedback"
 import { UserPlus, Search, Users, AlertCircle } from "lucide-react"
-import { toast } from "sonner"
 import { useAdminMembers } from "@/features/admin/members/hooks/useAdminMembers"
 import { MembersList } from "@/features/admin/members/components/MembersList"
 import { CreateUserDialog } from "@/features/admin/members/components/CreateUserDialog"
@@ -24,6 +24,8 @@ export default function AdminMembersPage() {
     changePassword,
     deleteUser
   } = useAdminMembers()
+
+  const { confirm, dialogProps } = useConfirmation()
 
   const [search, setSearch] = useState("")
   const [isAddOpen, setIsAddOpen] = useState(false)
@@ -50,40 +52,13 @@ export default function AdminMembersPage() {
   }
 
   const handleDeleteUser = (userId: string, fullName: string) => {
-    toast.custom(
-      (t) => (
-        <div className="bg-background border border-border p-4 rounded-xl shadow-xl flex flex-col gap-3 w-full max-w-[340px]">
-          <div className="flex items-start gap-3">
-            <div className="bg-red-100 dark:bg-red-900/30 p-2 rounded-full shrink-0">
-              <AlertCircle className="h-5 w-5 text-red-600 dark:text-red-500" />
-            </div>
-            <div className="space-y-1">
-              <h3 className="font-semibold text-sm leading-none pt-1">Usunąć użytkownika?</h3>
-              <p className="text-xs text-muted-foreground leading-relaxed">
-                Czy na pewno chcesz trwale usunąć konto <b>{fullName}</b>?
-              </p>
-            </div>
-          </div>
-          <div className="flex justify-end gap-2 mt-2">
-            <Button variant="outline" size="sm" onClick={() => toast.dismiss(t)} className="h-8 text-xs">
-              Anuluj
-            </Button>
-            <Button
-              variant="destructive"
-              size="sm"
-              className="h-8 text-xs shadow-sm"
-              onClick={async () => {
-                toast.dismiss(t)
-                await deleteUser(userId)
-              }}
-            >
-              Potwierdź usunięcie
-            </Button>
-          </div>
-        </div>
-      ),
-      { duration: Infinity }
-    )
+    confirm({
+      title: "Usunąć użytkownika?",
+      description: <>Czy na pewno chcesz trwale usunąć konto <b>{fullName}</b>?</>,
+      confirmText: "Potwierdź usunięcie",
+      variant: "danger",
+      onConfirm: () => deleteUser(userId),
+    })
   }
 
   const handleSelectMember = (member: AdminMember) => {
@@ -191,6 +166,8 @@ export default function AdminMembersPage() {
         groups={groups}
         actionLoading={actionLoading}
       />
+
+      <ConfirmationDialog {...dialogProps} />
     </div>
   )
 }
