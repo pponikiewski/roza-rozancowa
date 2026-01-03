@@ -20,30 +20,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const [loading, setLoading] = useState(true)
     const [isAdmin, setIsAdmin] = useState(false)
 
-    useEffect(() => {
-        // Check active sessions and sets the user
-        supabase.auth.getSession().then(({ data: { session } }) => {
-            setSession(session)
-            setUser(session?.user ?? null)
-            if (session?.user) checkAdminRole(session.user.id)
-            else setLoading(false)
-        })
+    /**
+     * Centralna funkcja do obsługi sesji - deduplikuje logikę używaną
+     * przez getSession() i onAuthStateChange()
+     */
+    const handleSession = async (session: Session | null) => {
+        setSession(session)
+        setUser(session?.user ?? null)
 
-        // Listen for changes on auth state (logged in, signed out, etc.)
-        const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-            setSession(session)
-            setUser(session?.user ?? null)
-            if (session?.user) {
-                setLoading(true) // Ensure loading is true while checking role
-                checkAdminRole(session.user.id)
-            } else {
-                setIsAdmin(false)
-                setLoading(false)
-            }
-        })
-
-        return () => subscription.unsubscribe()
-    }, [])
+        if (session?.user) {
+            setLoading(true)
+            await checkAdminRole(session.user.id)
+        } else {
+            setIsAdmin(false)
+            setLoading(false)
+        }
+    }
 
     const checkAdminRole = async (userId: string) => {
         try {
@@ -61,23 +53,41 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         }
     }
 
+    /**
+     * Czyści Supabase tokens z localStorage - fix dla "ghost sessions" na mobile
+     */
+    const clearSupabaseStorage = () => {
+        Object.keys(localStorage).forEach((key) => {
+            if (key.startsWith('sb-') || key.includes('supabase')) {
+                localStorage.removeItem(key)
+            }
+        })
+    }
+
+    useEffect(() => {
+        // Check active session on mount
+        supabase.auth.getSession().then(({ data: { session } }) => {
+            handleSession(session)
+        })
+
+        // Listen for changes on auth state (logged in, signed out, etc.)
+        const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+            handleSession(session)
+        })
+
+        return () => subscription.unsubscribe()
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []) // handleSession is stable, no need to include
+
     const signOut = async () => {
         try {
             await supabase.auth.signOut()
         } catch (error) {
             console.error("Error signing out:", error)
         } finally {
-            // Nuclear option: Explicitly remove Supabase tokens from localStorage
-            // This prevents "ghost" sessions on mobile devices that cache aggressively
-            Object.keys(localStorage).forEach((key) => {
-                if (key.startsWith('sb-') || key.includes('supabase')) {
-                    localStorage.removeItem(key)
-                }
-            })
-
-            setUser(null)
-            setSession(null)
-            setIsAdmin(false)
+            // Nuclear option for mobile devices with aggressive caching
+            clearSupabaseStorage()
+            // State will be cleared by onAuthStateChange listener
         }
     }
 

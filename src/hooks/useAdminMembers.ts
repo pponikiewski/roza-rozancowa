@@ -1,4 +1,5 @@
 import { supabase } from "@/lib/supabase"
+import { getMysteryIdForUser } from "@/lib/rpcHelpers"
 import { toast } from "sonner"
 import type { AdminMember, Mystery } from "@/types"
 import type { CreateUserFormData } from "@/lib/schemas"
@@ -37,8 +38,7 @@ export function useAdminMembers() {
           let members: AdminMember[] = []
           if (allMembers) {
              members = await Promise.all((allMembers as unknown as RawMember[]).map(async (m) => {
-                const { data: calcId } = await supabase.rpc('get_mystery_id_for_user', { p_user_id: m.id })
-                const currentMysteryId = calcId || null
+                const currentMysteryId = await getMysteryIdForUser(m.id)
                 const relevantAcks = currentMysteryId 
                     ? m.acknowledgments.filter((a) => Number(a.mystery_id) === Number(currentMysteryId)) 
                     : []

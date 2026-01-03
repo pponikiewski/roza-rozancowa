@@ -13,6 +13,7 @@ import { useDashboardData } from "@/hooks/useDashboardData"
 import { useMysteryChangeTimer } from "@/hooks/useMysteryChangeTimer"
 import { useAuth } from "@/context/AuthContext"
 import { supabase } from "@/lib/supabase"
+import { getMysteryIdForUser } from "@/lib/rpcHelpers"
 import { getErrorMessage } from "@/lib/utils"
 import { toast } from "sonner"
 import type { RoseMember } from "@/types"
@@ -58,7 +59,7 @@ export default function UserDashboard() {
 
       if (members && allMysteries) {
         const processed = await Promise.all(members.map(async (m) => {
-          const { data: mysteryId } = await supabase.rpc('get_mystery_id_for_user', { p_user_id: m.id })
+          const mysteryId = await getMysteryIdForUser(m.id)
           const mysteryName = allMysteries.find(mys => mys.id === mysteryId)?.name || "Brak przydziału"
 
           return {

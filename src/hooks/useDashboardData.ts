@@ -1,4 +1,5 @@
 import { supabase } from "@/lib/supabase"
+import { getMysteryIdForUser } from "@/lib/rpcHelpers"
 import type { Profile, Mystery, Intention } from "@/types"
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 import { useAuth } from "@/context/AuthContext"
@@ -54,10 +55,7 @@ export function useDashboardData() {
       queryFn: async () => {
           if (!user) return null
           
-          let currentMysteryId: number | null = null
-          const { data: calculatedId } = await supabase.rpc('get_mystery_id_for_user', { p_user_id: user.id })
-          if (calculatedId) currentMysteryId = calculatedId
-
+          const currentMysteryId = await getMysteryIdForUser(user.id)
           if (!currentMysteryId) return null
 
           const { data } = await supabase.from('mysteries').select('*').eq('id', currentMysteryId).single()
