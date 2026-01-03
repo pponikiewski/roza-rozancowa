@@ -1,6 +1,6 @@
 import { useState } from "react"
-import { cn } from "@/lib/utils"
-import { useTheme } from "@/components/theme-provider"
+import { cn } from "@/shared/lib/utils"
+import { useTheme } from "@/shared/components/common/theme-provider"
 
 interface ResizableTextProps extends React.HTMLAttributes<HTMLElement> {
   as?: React.ElementType
