@@ -46,9 +46,10 @@ export function useAdminRoses() {
           toast.success("Róża usunięta")
           queryClient.invalidateQueries({ queryKey: ['admin_groups'] })
       },
-      onError: (err: any) => {
-          const msg = err.code === '23503' ? "Nie można usunąć (grupa ma członków)" : "Błąd usuwania"
-          toast.error(msg, { description: err.message })
+      onError: (err: unknown) => {
+          const error = err as { code?: string; message?: string }
+          const msg = error.code === '23503' ? "Nie można usunąć (grupa ma członków)" : "Błąd usuwania"
+          toast.error(msg, { description: error.message })
       }
   })
 
