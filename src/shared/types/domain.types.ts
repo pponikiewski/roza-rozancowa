@@ -49,8 +49,8 @@ export interface Mystery {
   id: number
   part: RosaryPart | string
   name: string
-  meditation: string
-  image_url: string
+  meditation: string | null
+  image_url: string | null
 }
 
 // ============================================================================
@@ -83,7 +83,7 @@ export interface IntentionHistory extends Intention {
  */
 export interface RoseMember {
   id: string
-  full_name: string
+  full_name: string | null
   rose_pos: number | null
   current_mystery_name: string
 }
