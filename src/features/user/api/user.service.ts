@@ -13,9 +13,9 @@ interface ProfileResponse {
 }
 
 /**
- * Serwis obsługujący panel użytkownika (dashboard)
+ * Serwis obsługujący panel użytkownika
  */
-export const dashboardService = {
+export const userService = {
   /**
    * Pobranie profilu użytkownika
    */

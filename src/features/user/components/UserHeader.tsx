@@ -2,7 +2,7 @@ import { Users } from "lucide-react"
 import { HeaderControls } from "@/shared/components/common/HeaderControls"
 import type { Profile } from "@/shared/types/domain.types"
 
-interface DashboardHeaderProps {
+interface UserHeaderProps {
   profile: Profile | null
   onOpenRose: () => void
 }
@@ -10,7 +10,7 @@ interface DashboardHeaderProps {
 /**
  * Header panelu użytkownika z informacjami o profilu i kontrolkami
  */
-export function DashboardHeader({ profile, onOpenRose }: DashboardHeaderProps) {
+export function UserHeader({ profile, onOpenRose }: UserHeaderProps) {
   return (
     <header className="app-header sticky top-0 z-10 bg-background/80 backdrop-blur-md border-b px-4 py-3 flex items-center gap-2 shadow-sm">
       <div

@@ -120,7 +120,7 @@ Projekt wykorzystuje architekturę **Feature-Based** (modularną), gdzie kod jes
 │  ┌───────────────────────┐      ┌───────────────────────┐       │
 │  │      FEATURES         │      │       SHARED          │       │
 │  │  ├─ auth/             │      │  ├─ components/ui/    │       │
-│  │  ├─ dashboard/        │      │  ├─ hooks/            │       │
+│  │  ├─ user/             │      │  ├─ hooks/            │       │
 │  │  └─ admin/            │      │  ├─ lib/              │       │
 │  │      ├─ members/      │      │  └─ types/            │       │
 │  │      ├─ roses/        │      │                       │       │
@@ -182,11 +182,11 @@ src/
 │   │   ├── pages/          # LoginPage.tsx
 │   │   └── types/          # auth.types.ts
 │   │
-│   ├── dashboard/          # Panel użytkownika
-│   │   ├── api/            # dashboard.service.ts
+│   ├── user/               # Panel użytkownika
+│   │   ├── api/            # user.service.ts
 │   │   ├── components/     # MysteryCard, IntentionCard, RoseDialog
-│   │   ├── hooks/          # useDashboardData.ts
-│   │   └── pages/          # DashboardPage.tsx, UserPage.tsx
+│   │   ├── hooks/          # useUserData.ts
+│   │   └── pages/          # UserPage.tsx
 │   │
 │   ├── admin/              # Panel administratora
 │   │   ├── layout/         # AdminLayout.tsx
@@ -434,7 +434,7 @@ Projekt nie wymusza Prettiera — formatowanie można dodać według preferencji
 | Element | Konwencja | Przykład |
 |---------|-----------|----------|
 | Komponenty | PascalCase | `MysteryCard.tsx` |
-| Hooki | camelCase + `use` prefix | `useDashboardData.ts` |
+| Hooki | camelCase + `use` prefix | `useUserData.ts` |
 | Funkcje/zmienne | camelCase | `handleSubmit`, `isLoading` |
 | Typy/Interfejsy | PascalCase | `Profile`, `Mystery` |
 | Stałe | SCREAMING_SNAKE_CASE | `QUERY_KEYS`, `ROUTES` |

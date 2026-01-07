@@ -9,7 +9,7 @@ import { ROUTES } from "@/shared/lib/constants"
  * Logika:
  * - Użytkownik niezalogowany na chronionej stronie → /
  * - Admin na user dashboardzie → /admin
- * - User na admin panelu → /dashboard
+ * - User na admin panelu → /user
  * 
  * @example
  * ```typescript
@@ -55,9 +55,9 @@ export function useNavigateOnAuthChange() {
       // User/admin na stronie logowania - redirect do właściwej strony
       if (currentPath === '/' || currentPath === '/login') {
         if (isAdmin) {
-          navigate("/admin", { replace: true })
+          navigate(ROUTES.ADMIN.ROOT, { replace: true })
         } else {
-          navigate("/dashboard", { replace: true })
+          navigate(ROUTES.DASHBOARD, { replace: true })
         }
       }
     }

@@ -6,7 +6,7 @@ import { ROUTES } from "@/shared/lib/constants"
 
 // Pages
 import LoginPage from "@/features/auth/pages/LoginPage"
-import DashboardPage from "@/features/dashboard/pages/DashboardPage"
+import UserPage from "@/features/user/pages/UserPage"
 import AdminLayout from "@/features/admin/layout/AdminLayout"
 import AdminMembersPage from "@/features/admin/members/pages/AdminMembersPage"
 import AdminIntentionsPage from "@/features/admin/intentions/pages/AdminIntentionsPage"
@@ -29,7 +29,7 @@ export function AppRoutes() {
       <Route element={<ProtectedRoute />}>
         <Route path={ROUTES.DASHBOARD} element={
           <FeatureErrorBoundary featureName="Panel użytkownika">
-            <DashboardPage />
+            <UserPage />
           </FeatureErrorBoundary>
         } />
       </Route>

@@ -111,7 +111,7 @@ export const mysteriesService = {
 
   /**
    * Wzbogaca listę użytkowników o dane tajemnic (current_mystery_id i opcjonalnie current_mystery_name)
-   * Eliminuje duplikację kodu w membersService, rosesService i dashboardService
+   * Eliminuje duplikację kodu w membersService, rosesService i userService
    * 
    * @param users - tablica obiektów z polem `id` (user_id)
    * @param options.includeName - czy dołączyć nazwę tajemnicy
