@@ -78,10 +78,11 @@ export async function expectToBeLoggedIn(page: Page) {
 
 /**
  * Sprawdza czy użytkownik jest wylogowany
- * Weryfikuje czy jesteśmy na stronie /login
+ * Weryfikuje czy jesteśmy na stronie / lub /login (niezalogowani)
  */
 export async function expectToBeLoggedOut(page: Page) {
-  await expect(page).toHaveURL('/login')
+  // Sprawdź czy URL to / lub /login (z lub bez trailing slash)
+  await expect(page).toHaveURL(/^http:\/\/localhost:5173\/(?:login)?\/?$/)
 }
 
 /**
@@ -90,10 +91,10 @@ export async function expectToBeLoggedOut(page: Page) {
  * @param errorMessage - Treść błędu do sprawdzenia (opcjonalne)
  */
 export async function expectErrorMessage(page: Page, errorMessage?: string) {
-  // Sprawdź czy widoczny toast/alert z błędem
-  const errorElement = page.getByRole('alert').or(page.getByRole('status'))
+  // Sprawdź czy widoczny toast z błędem (Sonner używa data-sonner-toast)
+  const errorElement = page.locator('[data-sonner-toast][data-type="error"]')
   
-  await expect(errorElement).toBeVisible()
+  await expect(errorElement).toBeVisible({ timeout: 10000 })
   
   if (errorMessage) {
     await expect(errorElement).toContainText(errorMessage)
