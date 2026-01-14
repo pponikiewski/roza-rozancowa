@@ -89,6 +89,7 @@ export default defineConfig({
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),
+      "@tests": path.resolve(__dirname, "./tests"),
     },
   },
   build: {
@@ -119,5 +120,18 @@ export default defineConfig({
     globals: true,
     environment: 'jsdom',
     setupFiles: './tests/setup.ts',
+    exclude: ['**/node_modules/**', '**/e2e/**', '**/tests/e2e/**'],
+    coverage: {
+      provider: 'v8',
+      reporter: ['text', 'json', 'html'],
+      include: ['src/**/*.{ts,tsx}'],
+      exclude: [
+        'src/**/*.d.ts',
+        'src/**/*.test.{ts,tsx}',
+        'src/**/*.spec.{ts,tsx}',
+        'src/main.tsx',
+        'src/vite-env.d.ts',
+      ],
+    },
   }
 })
