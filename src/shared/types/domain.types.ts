@@ -28,6 +28,7 @@ export interface Group {
 export interface Profile {
   id: string
   full_name: string
+  login?: string
   rose_pos: number | null
   groups: Group | null
   role?: 'admin' | 'user'

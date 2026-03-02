@@ -6,6 +6,24 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 }
 
+/**
+ * Generuje login z imienia i nazwiska (format: imie.nazwisko)
+ * Polskie znaki → ASCII, lowercase, spacja → kropka
+ */
+function generateBaseLogin(fullName: string): string {
+  const polishMap: Record<string, string> = {
+    'ą': 'a', 'ć': 'c', 'ę': 'e', 'ł': 'l', 'ń': 'n',
+    'ó': 'o', 'ś': 's', 'ź': 'z', 'ż': 'z',
+  }
+
+  return fullName
+    .toLowerCase()
+    .trim()
+    .replace(/[ąćęłńóśźż]/g, (ch) => polishMap[ch] || ch)
+    .replace(/\s+/g, '.')
+    .replace(/[^a-z0-9.\-]/g, '')
+}
+
 serve(async (req) => {
   // Obsługa CORS
   if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders })
@@ -53,6 +71,25 @@ serve(async (req) => {
     }
     // ------------------------------------------
 
+    // --- GENEROWANIE LOGINU ---
+    const baseLogin = generateBaseLogin(fullName)
+    let login = baseLogin
+    let counter = 2
+
+    // Sprawdź unikalność loginu
+    while (true) {
+      const { data: existing } = await supabaseAdmin
+        .from('profiles')
+        .select('id')
+        .eq('login', login)
+        .maybeSingle()
+
+      if (!existing) break
+      login = baseLogin + counter
+      counter++
+    }
+    // ---------------------------
+
     // Tworzenie usera w Auth
     const { data: userData, error: userError } = await supabaseAdmin.auth.admin.createUser({
       email,
@@ -74,6 +111,7 @@ serve(async (req) => {
           id: userData.user.id,
           full_name: fullName,
           email: email,
+          login: login,
           role: 'user',
           group_id: groupId || null,
           rose_pos: assignedPos
@@ -90,7 +128,8 @@ serve(async (req) => {
     return new Response(JSON.stringify({ 
       user: userData.user, 
       message: "User created",
-      position: assignedPos 
+      position: assignedPos,
+      login: login
     }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       status: 200,

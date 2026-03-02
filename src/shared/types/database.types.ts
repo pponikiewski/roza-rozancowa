@@ -119,6 +119,7 @@ export type Database = {
           full_name: string | null
           group_id: number | null
           id: string
+          login: string | null
           role: string | null
           rose_pos: number | null
         }
@@ -128,6 +129,7 @@ export type Database = {
           full_name?: string | null
           group_id?: number | null
           id: string
+          login?: string | null
           role?: string | null
           rose_pos?: number | null
         }
@@ -137,6 +139,7 @@ export type Database = {
           full_name?: string | null
           group_id?: number | null
           id?: string
+          login?: string | null
           role?: string | null
           rose_pos?: number | null
         }

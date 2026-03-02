@@ -6,7 +6,7 @@ import { Badge } from "@/shared/components/ui/badge"
 import { Separator } from "@/shared/components/ui/separator"
 import { GroupSelect } from "./GroupSelect"
 import { PasswordInput } from "@/shared/components/common"
-import { CheckCircle2, Circle, ScrollText, Mail, CalendarClock, RefreshCcw, Trash2 } from "lucide-react"
+import { CheckCircle2, Circle, ScrollText, Mail, CalendarClock, RefreshCcw, Trash2, User } from "lucide-react"
 import type { AdminMember } from "@/features/admin/members/types/member.types"
 import type { Group } from "@/shared/types/domain.types"
 
@@ -63,13 +63,13 @@ export function MemberDetailsDialog({
 
   const handleChangePassword = async () => {
     if (!member) return
-    
+
     const trimmedPassword = newPassword.trim()
     if (trimmedPassword.length < MIN_PASSWORD_LENGTH) {
       setPasswordError(`Hasło musi mieć minimum ${MIN_PASSWORD_LENGTH} znaków`)
       return
     }
-    
+
     setPasswordError(null)
     await onChangePassword(member.id, trimmedPassword)
     setNewPassword("")
@@ -106,6 +106,17 @@ export function MemberDetailsDialog({
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-1.5">
               <Label className="text-[10px] text-muted-foreground uppercase tracking-wider font-bold flex items-center gap-1.5">
+                <User className="h-3 w-3" /> Login
+              </Label>
+              <div
+                className="font-medium text-sm truncate p-2.5 bg-muted/40 rounded-md border border-transparent hover:border-border transition-colors"
+                title={member.login}
+              >
+                {member.login || <span className="text-muted-foreground italic">Brak</span>}
+              </div>
+            </div>
+            <div className="space-y-1.5">
+              <Label className="text-[10px] text-muted-foreground uppercase tracking-wider font-bold flex items-center gap-1.5">
                 <Mail className="h-3 w-3" /> Email
               </Label>
               <div
@@ -115,6 +126,8 @@ export function MemberDetailsDialog({
                 {member.email || <span className="text-muted-foreground italic">Brak</span>}
               </div>
             </div>
+          </div>
+          <div className="grid grid-cols-2 gap-4">
             <div className="space-y-1.5">
               <Label className="text-[10px] text-muted-foreground uppercase tracking-wider font-bold flex items-center gap-1.5">
                 <CalendarClock className="h-3 w-3" /> Dołączył(a)
@@ -137,11 +150,10 @@ export function MemberDetailsDialog({
 
           {/* Acknowledgment Status */}
           <div
-            className={`rounded-xl border p-4 transition-colors ${
-              member.acknowledgments.length > 0
-                ? "bg-green-50/60 border-green-200 dark:bg-green-950/20 dark:border-green-900"
-                : "bg-muted/10 border-border"
-            }`}
+            className={`rounded-xl border p-4 transition-colors ${member.acknowledgments.length > 0
+              ? "bg-green-50/60 border-green-200 dark:bg-green-950/20 dark:border-green-900"
+              : "bg-muted/10 border-border"
+              }`}
           >
             <div className="flex items-start gap-3">
               {member.acknowledgments.length > 0 ? (
@@ -208,11 +220,11 @@ export function MemberDetailsDialog({
                   hasError={!!passwordError}
                   className="h-9"
                 />
-                <Button 
-                  onClick={handleChangePassword} 
-                  disabled={actionLoading || !newPassword.trim()} 
-                  size="sm" 
-                  variant="outline" 
+                <Button
+                  onClick={handleChangePassword}
+                  disabled={actionLoading || !newPassword.trim()}
+                  size="sm"
+                  variant="outline"
                   className="shrink-0"
                 >
                   Zapisz

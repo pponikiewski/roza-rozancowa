@@ -20,7 +20,7 @@ export const membersService = {
     const { data: allMembers, error } = await supabase
       .from('profiles')
       .select(`
-        id, full_name, email, role, rose_pos, created_at,
+        id, full_name, email, login, role, rose_pos, created_at,
         groups(id, name),
         acknowledgments(created_at, mystery_id)
       `)
