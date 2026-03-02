@@ -11,6 +11,12 @@ export const emailField = z
   .min(1, 'Email jest wymagany')
   .email('Nieprawidłowy format email')
 
+/** Pole loginu z walidacją długości */
+export const loginField = z
+  .string()
+  .min(3, 'Login musi mieć minimum 3 znaki')
+  .max(50, 'Login jest za długi')
+
 /** Pole hasła z walidacją długości (6-100 znaków) */
 export const passwordField = z
   .string()

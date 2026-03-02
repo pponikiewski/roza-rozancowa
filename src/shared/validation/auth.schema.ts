@@ -1,11 +1,11 @@
 import { z } from 'zod'
-import { emailField, passwordField } from './common.schema'
+import { loginField, passwordField } from './common.schema'
 
 /**
  * Schema validacji dla logowania użytkownika
  */
 export const loginSchema = z.object({
-  email: emailField,
+  login: loginField,
   password: passwordField,
 })
 

@@ -5,7 +5,7 @@
  * 
  * Sprawdza funkcjonalność formularza logowania:
  * - renderowanie elementów UI (przyciski, inputy)
- * - walidację pól formularza (email, hasło)
+ * - walidację pól formularza (login, hasło)
  * - pomyślne logowanie użytkownika
  * - obsługę błędów logowania
  * - stan ładowania podczas procesu logowania
@@ -50,7 +50,7 @@ describe('LoginPage', () => {
 
   /**
    * Test: Sprawdza czy formularz logowania renderuje się poprawnie
-   * Weryfikuje obecność kluczowych elementów: przycisk logowania, pole email, pole hasła
+   * Weryfikuje obecność kluczowych elementów: przycisk logowania, pole login, pole hasła
    */
   it('renderuje formularz logowania', () => {
     // Renderujemy komponent z mockiem kontekstu
@@ -62,16 +62,16 @@ describe('LoginPage', () => {
 
     // Sprawdzamy czy wszystkie kluczowe elementy są w dokumencie
     expect(screen.getByRole('button', { name: /zaloguj się/i })).toBeInTheDocument()
-    expect(screen.getByRole('textbox', { name: /email/i })).toBeInTheDocument()
+    expect(screen.getByRole('textbox', { name: /login/i })).toBeInTheDocument()
     expect(screen.getByPlaceholderText('••••••••')).toBeInTheDocument()
   })
 
   /**
-   * Test: Walidacja pustego pola email
+   * Test: Walidacja pustego pola login
    * Sprawdza czy formularz wyświetla komunikat błędu gdy użytkownik
-   * próbuje zalogować się bez podania emaila
+   * próbuje zalogować się bez podania loginu
    */
-  it('waliduje puste email', async () => {
+  it('waliduje pusty login', async () => {
     const { user } = renderWithProviders(
       <AuthContext.Provider value={mockAuthContext}>
         <LoginPage />
@@ -83,26 +83,23 @@ describe('LoginPage', () => {
 
     // Sprawdzamy czy pojawił się komunikat błędu walidacji
     await waitFor(() => {
-      expect(screen.getByText(/email jest wymagany/i)).toBeInTheDocument()
+      expect(screen.getByText(/login musi mieć minimum 3 znaki/i)).toBeInTheDocument()
     })
   })
 
   /**
-   * Test: Walidacja formatu email (HTML5)
-   * Sprawdza czy pole email ma atrybut type="email",
-   * który zapewnia walidację formatu przez przeglądarkę
+   * Test: Walidacja typu pola login
+   * Sprawdza czy pole login ma atrybut type="text"
    */
-  it('waliduje nieprawidłowy format emaila', async () => {
+  it('pole login ma typ text', async () => {
     renderWithProviders(
       <AuthContext.Provider value={mockAuthContext}>
         <LoginPage />
       </AuthContext.Provider>
     )
 
-    // HTML5 validation może blokować submit, więc po prostu sprawdzamy,
-    // że input email ma atrybut type="email" (walidacja przeglądarki)
-    const emailInput = screen.getByRole('textbox', { name: /email/i }) as HTMLInputElement
-    expect(emailInput.type).toBe('email')
+    const loginInput = screen.getByRole('textbox', { name: /login/i }) as HTMLInputElement
+    expect(loginInput.type).toBe('text')
   })
 
   /**
@@ -126,18 +123,18 @@ describe('LoginPage', () => {
     )
 
     // Pobieramy referencje do elementów formularza
-    const emailInput = screen.getByRole('textbox', { name: /email/i })
+    const loginInput = screen.getByRole('textbox', { name: /login/i })
     const passwordInput = screen.getByPlaceholderText('••••••••')
-    
+
     // Symulujemy wpisywanie danych i kliknięcie przycisku
-    await user.type(emailInput, 'test@example.com')
+    await user.type(loginInput, 'jan.kowalski')
     await user.type(passwordInput, 'password123')
     await user.click(screen.getByRole('button', { name: /zaloguj/i }))
 
     // Sprawdzamy czy API zostało wywołane z poprawnymi parametrami
     // oraz czy wyświetlono powiadomienie sukcesu
     await waitFor(() => {
-      expect(authService.signIn).toHaveBeenCalledWith('test@example.com', 'password123')
+      expect(authService.signIn).toHaveBeenCalledWith('jan.kowalski', 'password123')
       expect(toast.success).toHaveBeenCalledWith('Zalogowano pomyślnie')
     })
   })
@@ -157,11 +154,11 @@ describe('LoginPage', () => {
       </AuthContext.Provider>
     )
 
-    const emailInput = screen.getByRole('textbox', { name: /email/i })
+    const loginInput = screen.getByRole('textbox', { name: /login/i })
     const passwordInput = screen.getByPlaceholderText('••••••••')
-    
+
     // Wpisujemy niepoprawne dane
-    await user.type(emailInput, 'wrong@example.com')
+    await user.type(loginInput, 'zly.login')
     await user.type(passwordInput, 'wrongpass')
     await user.click(screen.getByRole('button', { name: /zaloguj/i }))
 
@@ -179,7 +176,7 @@ describe('LoginPage', () => {
    */
   it('blokuje formularz podczas ładowania', async () => {
     // Mockujemy opóźnioną odpowiedź API (symulacja ładowania)
-    vi.mocked(authService.signIn).mockImplementation(() => 
+    vi.mocked(authService.signIn).mockImplementation(() =>
       new Promise((resolve) => setTimeout(resolve, 1000))
     )
 
@@ -189,16 +186,16 @@ describe('LoginPage', () => {
       </AuthContext.Provider>
     )
 
-    const emailInput = screen.getByRole('textbox', { name: /email/i })
+    const loginInput = screen.getByRole('textbox', { name: /login/i })
     const passwordInput = screen.getByPlaceholderText('••••••••')
-    
-    await user.type(emailInput, 'test@example.com')
+
+    await user.type(loginInput, 'jan.kowalski')
     await user.type(passwordInput, 'password123')
     await user.click(screen.getByRole('button', { name: /zaloguj/i }))
 
     // Sprawdzamy czy pola są zablokowane podczas ładowania
     await waitFor(() => {
-      expect(emailInput).toBeDisabled()
+      expect(loginInput).toBeDisabled()
       expect(passwordInput).toBeDisabled()
     })
   })

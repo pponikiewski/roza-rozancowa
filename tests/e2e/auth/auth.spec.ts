@@ -25,7 +25,7 @@ import {
   TEST_USER,
   TEST_ADMIN,
   INVALID_CREDENTIALS,
-  INVALID_EMAIL,
+  INVALID_LOGIN,
 } from '../fixtures/test-data'
 
 test.describe('Autoryzacja', () => {
@@ -42,7 +42,7 @@ test.describe('Autoryzacja', () => {
     await page.goto('/login')
     
     // Sprawdź czy widoczne pola formularza
-    await expect(page.getByLabel(/email/i)).toBeVisible()
+    await expect(page.getByLabel(/login/i)).toBeVisible()
     await expect(page.locator('input[type="password"]')).toBeVisible()
     
     // Sprawdź czy widoczny przycisk logowania
@@ -92,8 +92,8 @@ test.describe('Autoryzacja', () => {
     // Przejdź na stronę logowania
     await page.goto('/login')
     
-    // Wpisz poprawny email ale złe hasło
-    await page.getByLabel(/email/i).fill(TEST_USER.email)
+    // Wpisz poprawny login ale złe hasło
+    await page.getByLabel(/login/i).fill(INVALID_CREDENTIALS.login)
     await page.locator('input[type="password"]').fill(INVALID_CREDENTIALS.password)
     
     // Kliknij zaloguj
@@ -114,8 +114,8 @@ test.describe('Autoryzacja', () => {
     // Przejdź na stronę logowania
     await page.goto('/login')
     
-    // Wpisz niepoprawny email
-    await page.getByLabel(/email/i).fill(INVALID_EMAIL)
+    // Wpisz niepoprawny login (za krótki)
+    await page.getByLabel(/login/i).fill(INVALID_LOGIN)
     await page.locator('input[type="password"]').fill('SomePassword123')
     
     // Kliknij zaloguj

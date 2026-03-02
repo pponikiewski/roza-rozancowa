@@ -12,6 +12,7 @@
  * Powinien mieć przypisaną tajemnicę różańcową
  */
 export const TEST_USER = {
+  login: 'test.user',
   email: 'test.user@example.com',
   password: 'TestPassword123!',
   firstName: 'Jan',
@@ -23,6 +24,7 @@ export const TEST_USER = {
  * Ma dostęp do panelu /admin
  */
 export const TEST_ADMIN = {
+  login: 'admin',
   email: 'admin@example.com',
   password: 'AdminPassword123!',
   firstName: 'Admin',
@@ -34,6 +36,7 @@ export const TEST_ADMIN = {
  * Nie ma przypisanej tajemnicy - powinien widzieć NoAssignmentCard
  */
 export const TEST_USER_NO_ASSIGNMENT = {
+  login: 'no.assignment',
   email: 'no.assignment@example.com',
   password: 'TestPassword123!',
   firstName: 'Bez',
@@ -44,14 +47,14 @@ export const TEST_USER_NO_ASSIGNMENT = {
  * Niepoprawne dane logowania (do testowania błędów)
  */
 export const INVALID_CREDENTIALS = {
-  email: 'wrong@example.com',
+  login: 'zly.login',
   password: 'WrongPassword123',
 }
 
 /**
- * Niepoprawny format email
+ * Niepoprawny login (za krótki)
  */
-export const INVALID_EMAIL = 'niepoprawny-email'
+export const INVALID_LOGIN = 'ab'
 
 /**
  * Przykładowa tajemnica różańcowa

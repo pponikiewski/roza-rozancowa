@@ -14,20 +14,20 @@ import { TEST_USER, TEST_ADMIN } from '../fixtures/test-data'
  * Loguje użytkownika poprzez formularz logowania
  * 
  * @param page - Obiekt Page z Playwright
- * @param email - Email użytkownika
+ * @param login - Login użytkownika
  * @param password - Hasło użytkownika
  * 
  * Przykład:
  * ```ts
- * await login(page, TEST_USER.email, TEST_USER.password)
+ * await loginWithCredentials(page, TEST_USER.login, TEST_USER.password)
  * ```
  */
-export async function login(page: Page, email: string, password: string) {
+export async function login(page: Page, login: string, password: string) {
   // Przejdź na stronę logowania
   await page.goto('/login')
   
   // Wypełnij formularz - używamy precyzyjnych selektorów
-  await page.getByLabel(/email/i).fill(email)
+  await page.getByLabel(/login/i).fill(login)
   await page.locator('input[type="password"]').fill(password)
   
   // Kliknij przycisk logowania
@@ -39,18 +39,18 @@ export async function login(page: Page, email: string, password: string) {
 
 /**
  * Loguje zwykłego użytkownika (TEST_USER)
- * Skrót dla login(page, TEST_USER.email, TEST_USER.password)
+ * Skrót dla login(page, TEST_USER.login, TEST_USER.password)
  */
 export async function loginAsUser(page: Page) {
-  await login(page, TEST_USER.email, TEST_USER.password)
+  await login(page, TEST_USER.login, TEST_USER.password)
 }
 
 /**
  * Loguje administratora (TEST_ADMIN)
- * Skrót dla login(page, TEST_ADMIN.email, TEST_ADMIN.password)
+ * Skrót dla login(page, TEST_ADMIN.login, TEST_ADMIN.password)
  */
 export async function loginAsAdmin(page: Page) {
-  await login(page, TEST_ADMIN.email, TEST_ADMIN.password)
+  await login(page, TEST_ADMIN.login, TEST_ADMIN.password)
 }
 
 /**

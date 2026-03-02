@@ -6,11 +6,24 @@ import type { User, Session } from '@supabase/supabase-js'
  */
 export const authService = {
   /**
-   * Logowanie użytkownika
+   * Logowanie użytkownika przez login (username)
+   * Wyszukuje email powiązany z loginem w tabeli profiles,
+   * a następnie loguje przez Supabase Auth
    */
-  async signIn(email: string, password: string) {
+  async signIn(login: string, password: string) {
+    // Wyszukaj email na podstawie loginu
+    const { data: profile, error: lookupError } = await supabase
+      .from('profiles')
+      .select('email')
+      .eq('login', login)
+      .single()
+
+    if (lookupError || !profile?.email) {
+      throw new Error('Nieprawidłowy login lub hasło')
+    }
+
     const { data, error } = await supabase.auth.signInWithPassword({
-      email,
+      email: profile.email,
       password,
     })
     

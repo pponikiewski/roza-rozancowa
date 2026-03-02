@@ -7,7 +7,7 @@ import { Button } from "@/shared/components/ui/button"
 import { Input } from "@/shared/components/ui/input"
 import { Label } from "@/shared/components/ui/label"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/shared/components/ui/card"
-import { Loader2, Lock, Mail } from "lucide-react"
+import { Loader2, Lock, User } from "lucide-react"
 import { toast } from "sonner"
 import { HeaderControls, PasswordInput } from "@/shared/components/common"
 import { useAuth } from "@/features/auth/context/AuthContext"
@@ -40,12 +40,12 @@ export default function LoginPage() {
     setInternalLoading(true)
 
     try {
-      await authService.signIn(data.email, data.password)
+      await authService.signIn(data.login, data.password)
       toast.success("Zalogowano pomyślnie")
       // Redirect będzie obsłużony przez useNavigateOnAuthChange w App.tsx
     } catch (error: any) {
       toast.error("Błąd logowania", {
-        description: error.message || "Sprawdź poprawność adresu email i hasła."
+        description: error.message || "Sprawdź poprawność loginu i hasła."
       })
       setInternalLoading(false)
     }
@@ -72,27 +72,27 @@ export default function LoginPage() {
         <CardHeader className="space-y-1">
           <CardTitle className="text-2xl text-center">Zaloguj się</CardTitle>
           <CardDescription className="text-center">
-            Wpisz email i hasło, aby sprawdzić tajemnicę
+            Wpisz login i hasło, aby sprawdzić tajemnicę
           </CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
+              <Label htmlFor="login">Login</Label>
               <div className="relative">
-                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
-                  id="email"
-                  placeholder="nazwa@przyklad.pl"
-                  type="email"
-                  autoComplete="email"
+                  id="login"
+                  placeholder="jan.kowalski"
+                  type="text"
+                  autoComplete="username"
                   className="pl-9"
-                  {...register("email")}
+                  {...register("login")}
                   disabled={internalLoading || authLoading}
                 />
               </div>
-              {errors.email && (
-                <p className="text-sm text-destructive">{errors.email.message}</p>
+              {errors.login && (
+                <p className="text-sm text-destructive">{errors.login.message}</p>
               )}
             </div>
             <div className="space-y-2">
