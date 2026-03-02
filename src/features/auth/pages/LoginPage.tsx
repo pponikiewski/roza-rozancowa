@@ -83,7 +83,7 @@ export default function LoginPage() {
                 <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
                   id="login"
-                  placeholder="jan.kowalski"
+                  placeholder=""
                   type="text"
                   autoComplete="username"
                   className="pl-9"

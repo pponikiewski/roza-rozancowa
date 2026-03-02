@@ -23,7 +23,7 @@ export function useAdminMembers() {
   const createMutation = useTypedMutation({
     mutationFn: async (formData: CreateUserFormData) => {
       await membersService.createMember({
-        email: formData.email,
+        email: formData.email || undefined,
         password: formData.password,
         fullName: formData.fullName,
         groupId: formData.groupId !== "unassigned" ? parseInt(formData.groupId) : null
@@ -65,15 +65,25 @@ export function useAdminMembers() {
     invalidateKeys: [QUERY_KEYS.ADMIN_MEMBERS]
   })
 
+  const updateEmailMutation = useTypedMutation({
+    mutationFn: async ({ userId, newEmail }: { userId: string; newEmail: string }) => {
+      await membersService.updateMemberEmail(userId, newEmail || null)
+    },
+    successMessage: "Email zaktualizowany",
+    errorMessage: "Błąd aktualizacji emaila",
+    invalidateKeys: [QUERY_KEYS.ADMIN_MEMBERS]
+  })
+
   return {
     loading: isLoading,
-    actionLoading: createMutation.isPending || updateGroupMutation.isPending || changePasswordMutation.isPending || deleteMutation.isPending,
+    actionLoading: createMutation.isPending || updateGroupMutation.isPending || changePasswordMutation.isPending || deleteMutation.isPending || updateEmailMutation.isPending,
     groups: data?.groups || [],
     mysteries: data?.mysteries || [],
     members: data?.members || [],
     createUser: (formData: CreateUserFormData) => createMutation.execute(formData),
     updateGroup: (userId: string, groupId: string) => updateGroupMutation.execute({ userId, groupId }),
     changePassword: (userId: string, newPassword: string) => changePasswordMutation.mutateAsync({ userId, newPassword }),
+    updateEmail: (userId: string, newEmail: string) => updateEmailMutation.execute({ userId, newEmail }),
     deleteUser: (userId: string) => deleteMutation.mutateAsync(userId)
   }
 }

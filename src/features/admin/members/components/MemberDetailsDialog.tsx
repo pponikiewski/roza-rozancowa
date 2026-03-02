@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/shared/components/ui/dialog"
 import { Button } from "@/shared/components/ui/button"
+import { Input } from "@/shared/components/ui/input"
 import { Label } from "@/shared/components/ui/label"
 import { Badge } from "@/shared/components/ui/badge"
 import { Separator } from "@/shared/components/ui/separator"
@@ -16,6 +17,7 @@ interface MemberDetailsDialogProps {
   onOpenChange: (open: boolean) => void
   onUpdateGroup: (userId: string, groupId: string) => Promise<void>
   onChangePassword: (userId: string, newPassword: string) => Promise<void>
+  onUpdateEmail: (userId: string, newEmail: string) => Promise<unknown>
   onDeleteUser: (userId: string, fullName: string) => void
   getMysteryName: (id: number | null) => string
   groups: Group[]
@@ -32,6 +34,7 @@ export function MemberDetailsDialog({
   onOpenChange,
   onUpdateGroup,
   onChangePassword,
+  onUpdateEmail,
   onDeleteUser,
   getMysteryName,
   groups,
@@ -40,6 +43,7 @@ export function MemberDetailsDialog({
   const [editGroupId, setEditGroupId] = useState<string>("")
   const [newPassword, setNewPassword] = useState("")
   const [passwordError, setPasswordError] = useState<string | null>(null)
+  const [editEmail, setEditEmail] = useState("")
 
   const MIN_PASSWORD_LENGTH = 6
 
@@ -48,8 +52,10 @@ export function MemberDetailsDialog({
       setNewPassword("")
       setEditGroupId("")
       setPasswordError(null)
+      setEditEmail("")
     } else {
       setEditGroupId(member.groups?.id?.toString() || "unassigned")
+      setEditEmail(member.email || "")
     }
   }, [member])
 
@@ -202,6 +208,32 @@ export function MemberDetailsDialog({
                 />
                 <Button onClick={handleUpdateGroup} disabled={actionLoading} size="sm" variant="secondary" className="shrink-0">
                   <RefreshCcw className="h-3.5 w-3.5 mr-2" /> Zmień
+                </Button>
+              </div>
+            </div>
+
+            {/* Change Email */}
+            <div className="grid gap-2">
+              <Label className="text-xs">Email</Label>
+              <div className="flex gap-2">
+                <Input
+                  type="email"
+                  placeholder="jan@example.com (opcjonalny)"
+                  value={editEmail}
+                  onChange={(e) => setEditEmail(e.target.value)}
+                  className="h-9"
+                />
+                <Button
+                  onClick={async () => {
+                    if (!member) return
+                    await onUpdateEmail(member.id, editEmail.trim())
+                  }}
+                  disabled={actionLoading || editEmail === (member.email || "")}
+                  size="sm"
+                  variant="outline"
+                  className="shrink-0"
+                >
+                  Zapisz
                 </Button>
               </div>
             </div>

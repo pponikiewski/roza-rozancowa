@@ -1,10 +1,28 @@
-import { useState } from "react"
+import { useState, useMemo } from "react"
 import { FormDialog } from "@/shared/components/feedback"
 import { Input } from "@/shared/components/ui/input"
 import { Label } from "@/shared/components/ui/label"
 import { GroupSelect } from "./GroupSelect"
 import type { CreateUserFormData } from "@/shared/validation/member.schema"
 import type { Group } from "@/shared/types/domain.types"
+
+/**
+ * Generuje podgląd loginu z imienia i nazwiska
+ * Polskie znaki → ASCII, lowercase, spacja → kropka
+ */
+function generateLoginPreview(fullName: string): string {
+  const polishMap: Record<string, string> = {
+    'ą': 'a', 'ć': 'c', 'ę': 'e', 'ł': 'l', 'ń': 'n',
+    'ó': 'o', 'ś': 's', 'ź': 'z', 'ż': 'z',
+  }
+
+  return fullName
+    .toLowerCase()
+    .trim()
+    .replace(/[ąćęłńóśźż]/g, (ch) => polishMap[ch] || ch)
+    .replace(/\s+/g, '.')
+    .replace(/[^a-z0-9.\-]/g, '')
+}
 
 interface CreateUserDialogProps {
   open: boolean
@@ -26,6 +44,11 @@ export function CreateUserDialog({ open, onOpenChange, onSubmit, groups, loading
     groupId: "unassigned",
   })
 
+  const loginPreview = useMemo(
+    () => generateLoginPreview(formData.fullName),
+    [formData.fullName]
+  )
+
   const handleSubmit = async () => {
     await onSubmit(formData)
     // Reset form
@@ -42,7 +65,7 @@ export function CreateUserDialog({ open, onOpenChange, onSubmit, groups, loading
       open={open}
       onOpenChange={onOpenChange}
       title="Nowy członek"
-      description="Utwórz konto dla nowej osoby."
+      description="Utwórz konto dla nowej osoby. Email jest opcjonalny."
       onSubmit={handleSubmit}
       loading={loading}
       submitText="Utwórz"
@@ -54,13 +77,18 @@ export function CreateUserDialog({ open, onOpenChange, onSubmit, groups, loading
           value={formData.fullName}
           onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
         />
+        {loginPreview && (
+          <p className="text-xs text-muted-foreground">
+            Login: <span className="font-mono font-medium text-foreground">{loginPreview}</span>
+          </p>
+        )}
       </div>
       <div className="grid grid-cols-2 gap-3">
         <div className="space-y-2">
-          <Label>Email</Label>
+          <Label>Email <span className="text-muted-foreground font-normal">(opcjonalny)</span></Label>
           <Input
             type="email"
-            required
+            placeholder="jan@example.com"
             value={formData.email}
             onChange={(e) => setFormData({ ...formData, email: e.target.value })}
           />

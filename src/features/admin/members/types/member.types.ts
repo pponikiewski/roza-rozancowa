@@ -11,7 +11,7 @@ export interface AdminMember extends Profile {
 }
 
 export interface CreateMemberDTO {
-  email: string
+  email?: string
   password: string
   fullName: string
   groupId: number | null

@@ -61,12 +61,24 @@ export const membersService = {
   async createMember(data: CreateMemberDTO): Promise<void> {
     const { error } = await supabase.functions.invoke('create-user', {
       body: {
-        email: data.email,
+        email: data.email || '',
         password: data.password,
         fullName: data.fullName,
         groupId: data.groupId
       }
     })
+
+    if (error) throw error
+  },
+
+  /**
+   * Aktualizacja emaila członka
+   */
+  async updateMemberEmail(userId: string, newEmail: string | null): Promise<void> {
+    const { error } = await supabase
+      .from('profiles')
+      .update({ email: newEmail })
+      .eq('id', userId)
 
     if (error) throw error
   },

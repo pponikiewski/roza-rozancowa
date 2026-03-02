@@ -36,9 +36,9 @@ serve(async (req) => {
 
     const { email, password, fullName, groupId } = await req.json()
 
-    console.log(`Próba dodania usera: ${email}, grupa: ${groupId}`)
+    console.log(`Próba dodania usera: ${email || '(brak email)'}, grupa: ${groupId}`)
 
-    if (!email || !password || !fullName) throw new Error('Brakuje danych (email, hasło lub imię).')
+    if (!password || !fullName) throw new Error('Brakuje danych (hasło lub imię).')
 
     let assignedPos = null;
 
@@ -90,9 +90,12 @@ serve(async (req) => {
     }
     // ---------------------------
 
+    // Jeśli brak emaila, generuj placeholder z loginu
+    const actualEmail = email && email.trim() ? email.trim() : `${login}@noemail.local`
+
     // Tworzenie usera w Auth
     const { data: userData, error: userError } = await supabaseAdmin.auth.admin.createUser({
-      email,
+      email: actualEmail,
       password,
       email_confirm: true,
       user_metadata: { full_name: fullName }
@@ -110,7 +113,7 @@ serve(async (req) => {
         .upsert({
           id: userData.user.id,
           full_name: fullName,
-          email: email,
+          email: email && email.trim() ? email.trim() : null,
           login: login,
           role: 'user',
           group_id: groupId || null,

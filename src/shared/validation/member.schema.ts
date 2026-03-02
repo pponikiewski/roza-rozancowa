@@ -1,11 +1,12 @@
 import { z } from 'zod'
-import { emailField, passwordField, fullNameField } from './common.schema'
+import { passwordField, fullNameField } from './common.schema'
 
 /**
  * Schema validacji dla tworzenia nowego użytkownika (admin)
+ * Email jest opcjonalny — jeśli nie podany, zostanie wygenerowany placeholder
  */
 export const createUserSchema = z.object({
-  email: emailField,
+  email: z.string().email('Nieprawidłowy format email').or(z.literal('')).optional(),
   password: passwordField,
   fullName: fullNameField,
   groupId: z.string(),
