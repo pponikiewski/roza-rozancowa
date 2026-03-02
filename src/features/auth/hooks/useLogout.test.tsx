@@ -13,7 +13,6 @@ import { renderHook, waitFor } from '@testing-library/react'
 import { BrowserRouter } from 'react-router-dom'
 import { toast } from 'sonner'
 import { useLogout } from './useLogout'
-import { AuthProvider } from '@/features/auth/context/AuthContext'
 import { ROUTES } from '@/shared/lib/constants'
 import type { ReactNode } from 'react'
 
@@ -54,9 +53,7 @@ describe('useLogout', () => {
   })
 
   const wrapper = ({ children }: { children: ReactNode }) => (
-    <BrowserRouter>
-      <AuthProvider>{children}</AuthProvider>
-    </BrowserRouter>
+    <BrowserRouter>{children}</BrowserRouter>
   )
 
   it('powinien wylogować użytkownika i przekierować na stronę logowania', async () => {
