@@ -74,7 +74,7 @@ describe('useTypedMutation', () => {
     const mutationFn = vi.fn().mockResolvedValue({ name: 'Test' })
 
     const { result } = renderHook(
-      () => useTypedMutation({
+      () => useTypedMutation<{ name: string }>({
         mutationFn,
         successMessage: (data) => `Utworzono: ${data.name}`,
       }),
@@ -153,7 +153,7 @@ describe('useTypedMutation', () => {
   })
 
   it('powinien udostępniać alias loading dla isPending', async () => {
-    const mutationFn = vi.fn().mockImplementation(() => 
+    const mutationFn = vi.fn().mockImplementation(() =>
       new Promise(resolve => setTimeout(resolve, 100))
     )
 
