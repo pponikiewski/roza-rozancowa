@@ -18,12 +18,15 @@ export const authService = {
       .eq('login', login)
       .single()
 
-    if (lookupError || !profile?.email) {
+    if (lookupError || !profile) {
       throw new Error('Nieprawidłowy login lub hasło')
     }
 
+    // Użytkownicy bez emaila mają placeholder w auth.users (generowany przez create-user)
+    const email = profile.email || `${login}@noemail.local`
+
     const { data, error } = await supabase.auth.signInWithPassword({
-      email: profile.email,
+      email,
       password,
     })
     
