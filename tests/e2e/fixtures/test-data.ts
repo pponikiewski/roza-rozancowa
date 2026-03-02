@@ -13,7 +13,6 @@
  */
 export const TEST_USER = {
   login: 'test.user',
-  email: 'test.user@example.com',
   password: 'TestPassword123!',
   firstName: 'Jan',
   lastName: 'Testowy',
@@ -25,7 +24,6 @@ export const TEST_USER = {
  */
 export const TEST_ADMIN = {
   login: 'admin',
-  email: 'admin@example.com',
   password: 'AdminPassword123!',
   firstName: 'Admin',
   lastName: 'Testowy',
@@ -37,7 +35,6 @@ export const TEST_ADMIN = {
  */
 export const TEST_USER_NO_ASSIGNMENT = {
   login: 'no.assignment',
-  email: 'no.assignment@example.com',
   password: 'TestPassword123!',
   firstName: 'Bez',
   lastName: 'Przypisania',

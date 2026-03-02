@@ -34,9 +34,9 @@ serve(async (req) => {
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     )
 
-    const { email, password, fullName, groupId } = await req.json()
+    const { password, fullName, groupId } = await req.json()
 
-    console.log(`Próba dodania usera: ${email || '(brak email)'}, grupa: ${groupId}`)
+    console.log(`Próba dodania usera: ${fullName}, grupa: ${groupId}`)
 
     if (!password || !fullName) throw new Error('Brakuje danych (hasło lub imię).')
 
@@ -90,12 +90,12 @@ serve(async (req) => {
     }
     // ---------------------------
 
-    // Jeśli brak emaila, generuj placeholder z loginu
-    const actualEmail = email && email.trim() ? email.trim() : `${login}@noemail.local`
+    // Email wewnętrzny — Supabase Auth wymaga emaila, ale użytkownicy go nie widzą
+    const internalEmail = `${login}@noemail.local`
 
     // Tworzenie usera w Auth
     const { data: userData, error: userError } = await supabaseAdmin.auth.admin.createUser({
-      email: actualEmail,
+      email: internalEmail,
       password,
       email_confirm: true,
       user_metadata: { full_name: fullName }
@@ -103,7 +103,7 @@ serve(async (req) => {
 
     if (userError) {
       console.error("Błąd auth:", userError)
-      throw new Error(userError.message) // Np. "Email already registered"
+      throw new Error(userError.message)
     }
 
     // Tworzenie Profilu
@@ -113,7 +113,6 @@ serve(async (req) => {
         .upsert({
           id: userData.user.id,
           full_name: fullName,
-          email: email && email.trim() ? email.trim() : null,
           login: login,
           role: 'user',
           group_id: groupId || null,
@@ -122,8 +121,6 @@ serve(async (req) => {
       
       if (profileError) {
         console.error("Błąd profilu:", profileError)
-        // Jeśli profil się nie udał, to i tak user w Auth powstał. 
-        // W idealnym świecie powinniśmy go usunąć (rollback), ale tu wystarczy rzucić błąd.
         throw new Error("Konto utworzone, ale błąd przy przypisywaniu do grupy: " + profileError.message)
       }
     }
@@ -140,8 +137,6 @@ serve(async (req) => {
 
   } catch (error: any) {
     console.error("Create User Logic Error:", error.message)
-    // ZWRACAMY 200 Z BŁĘDEM W BODY - dzięki temu frontend może wyświetlić komunikat
-    // zamiast generycznego błędu sieci 400.
     return new Response(JSON.stringify({ error: error.message }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       status: 200, 

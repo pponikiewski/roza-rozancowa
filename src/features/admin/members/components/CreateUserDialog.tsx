@@ -21,7 +21,7 @@ function generateLoginPreview(fullName: string): string {
     .trim()
     .replace(/[ąćęłńóśźż]/g, (ch) => polishMap[ch] || ch)
     .replace(/\s+/g, '.')
-    .replace(/[^a-z0-9.\-]/g, '')
+    .replace(/[^a-z0-9.-]/g, '')
 }
 
 interface CreateUserDialogProps {
@@ -34,11 +34,10 @@ interface CreateUserDialogProps {
 
 /**
  * Dialog do tworzenia nowego użytkownika
- * Zawiera formularz z walidacją email, hasła, imienia i przypisania do grupy
+ * Zawiera formularz z walidacją hasła, imienia i przypisania do grupy
  */
 export function CreateUserDialog({ open, onOpenChange, onSubmit, groups, loading }: CreateUserDialogProps) {
   const [formData, setFormData] = useState<CreateUserFormData>({
-    email: "",
     password: "",
     fullName: "",
     groupId: "unassigned",
@@ -53,7 +52,6 @@ export function CreateUserDialog({ open, onOpenChange, onSubmit, groups, loading
     await onSubmit(formData)
     // Reset form
     setFormData({
-      email: "",
       password: "",
       fullName: "",
       groupId: "unassigned",
@@ -65,7 +63,7 @@ export function CreateUserDialog({ open, onOpenChange, onSubmit, groups, loading
       open={open}
       onOpenChange={onOpenChange}
       title="Nowy członek"
-      description="Utwórz konto dla nowej osoby. Email jest opcjonalny."
+      description="Utwórz konto dla nowej osoby."
       onSubmit={handleSubmit}
       loading={loading}
       submitText="Utwórz"
@@ -83,24 +81,13 @@ export function CreateUserDialog({ open, onOpenChange, onSubmit, groups, loading
           </p>
         )}
       </div>
-      <div className="grid grid-cols-2 gap-3">
-        <div className="space-y-2">
-          <Label>Email <span className="text-muted-foreground font-normal">(opcjonalny)</span></Label>
-          <Input
-            type="email"
-            placeholder="jan@example.com"
-            value={formData.email}
-            onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-          />
-        </div>
-        <div className="space-y-2">
-          <Label>Hasło</Label>
-          <Input
-            required
-            value={formData.password}
-            onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-          />
-        </div>
+      <div className="space-y-2">
+        <Label>Hasło</Label>
+        <Input
+          required
+          value={formData.password}
+          onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+        />
       </div>
       <div className="space-y-2">
         <Label>Grupa</Label>

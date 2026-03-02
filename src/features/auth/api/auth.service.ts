@@ -7,23 +7,10 @@ import type { User, Session } from '@supabase/supabase-js'
 export const authService = {
   /**
    * Logowanie użytkownika przez login (username)
-   * Wyszukuje email powiązany z loginem w tabeli profiles,
-   * a następnie loguje przez Supabase Auth
+   * Konstruuje wewnętrzny email z loginu i loguje przez Supabase Auth
    */
   async signIn(login: string, password: string) {
-    // Wyszukaj email na podstawie loginu
-    const { data: profile, error: lookupError } = await supabase
-      .from('profiles')
-      .select('email')
-      .eq('login', login)
-      .single()
-
-    if (lookupError || !profile) {
-      throw new Error('Nieprawidłowy login lub hasło')
-    }
-
-    // Użytkownicy bez emaila mają placeholder w auth.users (generowany przez create-user)
-    const email = profile.email || `${login}@noemail.local`
+    const email = `${login}@noemail.local`
 
     const { data, error } = await supabase.auth.signInWithPassword({
       email,

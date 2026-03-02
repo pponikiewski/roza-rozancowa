@@ -22,7 +22,7 @@ export default function AdminMembersPage() {
     createUser,
     updateGroup,
     changePassword,
-    updateEmail,
+    updateLogin,
     deleteUser
   } = useAdminMembers()
 
@@ -162,7 +162,7 @@ export default function AdminMembersPage() {
         onOpenChange={(open) => !open && setSelectedMember(null)}
         onUpdateGroup={handleUpdateGroup}
         onChangePassword={handleChangePassword}
-        onUpdateEmail={(userId, newEmail) => updateEmail(userId, newEmail)}
+        onUpdateLogin={(userId, newLogin) => updateLogin(userId, newLogin)}
         onDeleteUser={handleDeleteUser}
         getMysteryName={getMysteryName}
         groups={groups}

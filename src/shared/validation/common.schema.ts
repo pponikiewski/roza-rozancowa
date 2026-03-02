@@ -5,12 +5,6 @@ import { z } from 'zod'
  * Centralizuje definicje eliminując duplikację w auth.schema i member.schema
  */
 
-/** Pole email z walidacją formatu */
-export const emailField = z
-  .string()
-  .min(1, 'Email jest wymagany')
-  .email('Nieprawidłowy format email')
-
 /** Pole loginu z walidacją długości */
 export const loginField = z
   .string()

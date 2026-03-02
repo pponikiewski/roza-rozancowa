@@ -20,7 +20,7 @@ export const membersService = {
     const { data: allMembers, error } = await supabase
       .from('profiles')
       .select(`
-        id, full_name, email, login, role, rose_pos, created_at,
+        id, full_name, login, role, rose_pos, created_at,
         groups(id, name),
         acknowledgments(created_at, mystery_id)
       `)
@@ -61,24 +61,11 @@ export const membersService = {
   async createMember(data: CreateMemberDTO): Promise<void> {
     const { error } = await supabase.functions.invoke('create-user', {
       body: {
-        email: data.email || '',
         password: data.password,
         fullName: data.fullName,
         groupId: data.groupId
       }
     })
-
-    if (error) throw error
-  },
-
-  /**
-   * Aktualizacja emaila członka
-   */
-  async updateMemberEmail(userId: string, newEmail: string | null): Promise<void> {
-    const { error } = await supabase
-      .from('profiles')
-      .update({ email: newEmail })
-      .eq('id', userId)
 
     if (error) throw error
   },
@@ -93,6 +80,48 @@ export const membersService = {
     })
 
     if (error) throw error
+  },
+
+  /**
+   * Aktualizacja loginu członka
+   * Aktualizuje login w profiles oraz email w auth.users (format: login@noemail.local)
+   */
+  async updateMemberLogin(userId: string, newLogin: string): Promise<void> {
+    // Walidacja loginu
+    if (!newLogin || newLogin.length < 3) {
+      throw new Error('Login musi mieć minimum 3 znaki')
+    }
+
+    // Sprawdź czy login jest unikalny
+    const { data: existing } = await supabase
+      .from('profiles')
+      .select('id')
+      .eq('login', newLogin)
+      .neq('id', userId)
+      .maybeSingle()
+
+    if (existing) {
+      throw new Error('Ten login jest już zajęty')
+    }
+
+    // Aktualizuj login w profiles
+    const { error: profileError } = await supabase
+      .from('profiles')
+      .update({ login: newLogin })
+      .eq('id', userId)
+
+    if (profileError) throw profileError
+
+    // Aktualizuj wewnętrzny email w auth.users (Supabase Auth wymaga emaila)
+    const newInternalEmail = `${newLogin}@noemail.local`
+    const { data, error } = await supabase.functions.invoke('update-user-login', {
+      body: { user_id: userId, new_internal_email: newInternalEmail }
+    })
+
+    if (error || data?.error) {
+      // Jeśli nie udało się zaktualizować auth, cofnij zmianę w profiles
+      throw new Error(error?.message || data?.error || 'Błąd aktualizacji loginu')
+    }
   },
 
   /**

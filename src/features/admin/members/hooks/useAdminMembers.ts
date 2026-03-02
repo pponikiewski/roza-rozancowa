@@ -23,7 +23,6 @@ export function useAdminMembers() {
   const createMutation = useTypedMutation({
     mutationFn: async (formData: CreateUserFormData) => {
       await membersService.createMember({
-        email: formData.email || undefined,
         password: formData.password,
         fullName: formData.fullName,
         groupId: formData.groupId !== "unassigned" ? parseInt(formData.groupId) : null
@@ -65,25 +64,25 @@ export function useAdminMembers() {
     invalidateKeys: [QUERY_KEYS.ADMIN_MEMBERS]
   })
 
-  const updateEmailMutation = useTypedMutation({
-    mutationFn: async ({ userId, newEmail }: { userId: string; newEmail: string }) => {
-      await membersService.updateMemberEmail(userId, newEmail || null)
+  const updateLoginMutation = useTypedMutation({
+    mutationFn: async ({ userId, newLogin }: { userId: string; newLogin: string }) => {
+      await membersService.updateMemberLogin(userId, newLogin)
     },
-    successMessage: "Email zaktualizowany",
-    errorMessage: "Błąd aktualizacji emaila",
+    successMessage: "Login zaktualizowany",
+    errorMessage: "Błąd aktualizacji loginu",
     invalidateKeys: [QUERY_KEYS.ADMIN_MEMBERS]
   })
 
   return {
     loading: isLoading,
-    actionLoading: createMutation.isPending || updateGroupMutation.isPending || changePasswordMutation.isPending || deleteMutation.isPending || updateEmailMutation.isPending,
+    actionLoading: createMutation.isPending || updateGroupMutation.isPending || changePasswordMutation.isPending || deleteMutation.isPending || updateLoginMutation.isPending,
     groups: data?.groups || [],
     mysteries: data?.mysteries || [],
     members: data?.members || [],
     createUser: (formData: CreateUserFormData) => createMutation.execute(formData),
     updateGroup: (userId: string, groupId: string) => updateGroupMutation.execute({ userId, groupId }),
     changePassword: (userId: string, newPassword: string) => changePasswordMutation.mutateAsync({ userId, newPassword }),
-    updateEmail: (userId: string, newEmail: string) => updateEmailMutation.execute({ userId, newEmail }),
+    updateLogin: (userId: string, newLogin: string) => updateLoginMutation.execute({ userId, newLogin }),
     deleteUser: (userId: string) => deleteMutation.mutateAsync(userId)
   }
 }

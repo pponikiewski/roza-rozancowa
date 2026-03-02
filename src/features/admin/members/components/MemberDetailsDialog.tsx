@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react"
+import { useState } from "react"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/shared/components/ui/dialog"
 import { Button } from "@/shared/components/ui/button"
 import { Input } from "@/shared/components/ui/input"
@@ -7,7 +7,7 @@ import { Badge } from "@/shared/components/ui/badge"
 import { Separator } from "@/shared/components/ui/separator"
 import { GroupSelect } from "./GroupSelect"
 import { PasswordInput } from "@/shared/components/common"
-import { CheckCircle2, Circle, ScrollText, Mail, CalendarClock, RefreshCcw, Trash2, User } from "lucide-react"
+import { CheckCircle2, Circle, ScrollText, CalendarClock, RefreshCcw, Trash2, User, Pencil } from "lucide-react"
 import type { AdminMember } from "@/features/admin/members/types/member.types"
 import type { Group } from "@/shared/types/domain.types"
 
@@ -17,7 +17,7 @@ interface MemberDetailsDialogProps {
   onOpenChange: (open: boolean) => void
   onUpdateGroup: (userId: string, groupId: string) => Promise<void>
   onChangePassword: (userId: string, newPassword: string) => Promise<void>
-  onUpdateEmail: (userId: string, newEmail: string) => Promise<unknown>
+  onUpdateLogin: (userId: string, newLogin: string) => Promise<unknown>
   onDeleteUser: (userId: string, fullName: string) => void
   getMysteryName: (id: number | null) => string
   groups: Group[]
@@ -34,7 +34,7 @@ export function MemberDetailsDialog({
   onOpenChange,
   onUpdateGroup,
   onChangePassword,
-  onUpdateEmail,
+  onUpdateLogin,
   onDeleteUser,
   getMysteryName,
   groups,
@@ -43,21 +43,28 @@ export function MemberDetailsDialog({
   const [editGroupId, setEditGroupId] = useState<string>("")
   const [newPassword, setNewPassword] = useState("")
   const [passwordError, setPasswordError] = useState<string | null>(null)
-  const [editEmail, setEditEmail] = useState("")
+  const [editLogin, setEditLogin] = useState("")
+  const [isEditingLogin, setIsEditingLogin] = useState(false)
 
   const MIN_PASSWORD_LENGTH = 6
 
-  useEffect(() => {
-    if (!member) {
+  // Reset stanu przy zmianie dialogu (otwarcie/zamknięcie)
+  const handleOpenChange = (isOpen: boolean) => {
+    if (!isOpen) {
       setNewPassword("")
       setEditGroupId("")
       setPasswordError(null)
-      setEditEmail("")
-    } else {
-      setEditGroupId(member.groups?.id?.toString() || "unassigned")
-      setEditEmail(member.email || "")
+      setEditLogin("")
+      setIsEditingLogin(false)
     }
-  }, [member])
+    onOpenChange(isOpen)
+  }
+
+  // Inicjalizacja editGroupId gdy member się zmieni
+  const currentGroupId = member?.groups?.id?.toString() || "unassigned"
+  if (member && editGroupId === "" && currentGroupId !== editGroupId) {
+    setEditGroupId(currentGroupId)
+  }
 
   const formatFullDate = (d: string) =>
     new Date(d).toLocaleString("pl-PL", { day: "numeric", month: "long", hour: "2-digit", minute: "2-digit" })
@@ -89,7 +96,7 @@ export function MemberDetailsDialog({
   if (!member) return null
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent className="sm:max-w-lg p-0 gap-0 overflow-hidden border-0">
         <div className="p-6 pb-6 bg-muted/30 border-b">
           <DialogHeader>
@@ -114,26 +121,56 @@ export function MemberDetailsDialog({
               <Label className="text-[10px] text-muted-foreground uppercase tracking-wider font-bold flex items-center gap-1.5">
                 <User className="h-3 w-3" /> Login
               </Label>
-              <div
-                className="font-medium text-sm truncate p-2.5 bg-muted/40 rounded-md border border-transparent hover:border-border transition-colors"
-                title={member.login}
-              >
-                {member.login || <span className="text-muted-foreground italic">Brak</span>}
-              </div>
+              {isEditingLogin ? (
+                <div className="flex gap-2">
+                  <Input
+                    value={editLogin}
+                    onChange={(e) => setEditLogin(e.target.value)}
+                    placeholder="Nowy login..."
+                    className="h-9 text-sm"
+                    autoFocus
+                  />
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="shrink-0 h-9"
+                    disabled={actionLoading || !editLogin.trim() || editLogin === member.login}
+                    onClick={async () => {
+                      const success = await onUpdateLogin(member.id, editLogin.trim())
+                      if (success) {
+                        setIsEditingLogin(false)
+                        setEditLogin("")
+                      }
+                    }}
+                  >
+                    Zapisz
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    className="shrink-0 h-9"
+                    onClick={() => {
+                      setIsEditingLogin(false)
+                      setEditLogin("")
+                    }}
+                  >
+                    Anuluj
+                  </Button>
+                </div>
+              ) : (
+                <div
+                  className="font-medium text-sm truncate p-2.5 bg-muted/40 rounded-md border border-transparent hover:border-border transition-colors cursor-pointer group flex items-center justify-between"
+                  title={member.login}
+                  onClick={() => {
+                    setEditLogin(member.login || "")
+                    setIsEditingLogin(true)
+                  }}
+                >
+                  <span>{member.login || <span className="text-muted-foreground italic">Brak</span>}</span>
+                  <Pencil className="h-3 w-3 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
+                </div>
+              )}
             </div>
-            <div className="space-y-1.5">
-              <Label className="text-[10px] text-muted-foreground uppercase tracking-wider font-bold flex items-center gap-1.5">
-                <Mail className="h-3 w-3" /> Email
-              </Label>
-              <div
-                className="font-medium text-sm truncate p-2.5 bg-muted/40 rounded-md border border-transparent hover:border-border transition-colors"
-                title={member.email}
-              >
-                {member.email || <span className="text-muted-foreground italic">Brak</span>}
-              </div>
-            </div>
-          </div>
-          <div className="grid grid-cols-2 gap-4">
             <div className="space-y-1.5">
               <Label className="text-[10px] text-muted-foreground uppercase tracking-wider font-bold flex items-center gap-1.5">
                 <CalendarClock className="h-3 w-3" /> Dołączył(a)
@@ -208,32 +245,6 @@ export function MemberDetailsDialog({
                 />
                 <Button onClick={handleUpdateGroup} disabled={actionLoading} size="sm" variant="secondary" className="shrink-0">
                   <RefreshCcw className="h-3.5 w-3.5 mr-2" /> Zmień
-                </Button>
-              </div>
-            </div>
-
-            {/* Change Email */}
-            <div className="grid gap-2">
-              <Label className="text-xs">Email</Label>
-              <div className="flex gap-2">
-                <Input
-                  type="email"
-                  placeholder="jan@example.com (opcjonalny)"
-                  value={editEmail}
-                  onChange={(e) => setEditEmail(e.target.value)}
-                  className="h-9"
-                />
-                <Button
-                  onClick={async () => {
-                    if (!member) return
-                    await onUpdateEmail(member.id, editEmail.trim())
-                  }}
-                  disabled={actionLoading || editEmail === (member.email || "")}
-                  size="sm"
-                  variant="outline"
-                  className="shrink-0"
-                >
-                  Zapisz
                 </Button>
               </div>
             </div>

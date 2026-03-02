@@ -5,7 +5,7 @@
  * - Renderowanie strony logowania
  * - Logowanie zwykłego użytkownika
  * - Logowanie administratora
- * - Obsługę błędów (niepoprawne hasło, zły format email)
+ * - Obsługę błędów (niepoprawne hasło, zły format loginu)
  * - Wylogowanie
  * - Ochronę tras przed niezalogowanymi
  * - Ochronę tras admina przed zwykłymi użytkownikami
@@ -55,7 +55,7 @@ test.describe('Autoryzacja', () => {
    * Sprawdza czy:
    * - Formularz akceptuje poprawne dane
    * - Po zalogowaniu przekierowuje na /user
-   * - Widoczny jest header użytkownika z jego emailem
+   * - Widoczny jest header użytkownika
    */
   test('pomyślnie loguje użytkownika zwykłego', async ({ page }) => {
     // Zaloguj zwykłego użytkownika
@@ -104,13 +104,13 @@ test.describe('Autoryzacja', () => {
   })
 
   /**
-   * Test 5: Walidacja formatu email
+   * Test 5: Walidacja formatu loginu
    * 
    * Sprawdza czy:
-   * - Formularz waliduje format email
-   * - Przycisk jest zablokowany lub pokazany błąd przy niepoprawnym email
+   * - Formularz waliduje format loginu
+   * - Przycisk jest zablokowany lub pokazany błąd przy niepoprawnym loginie
    */
-  test('wyświetla błąd przy niepoprawnym formacie email', async ({ page }) => {
+  test('wyświetla błąd przy niepoprawnym formacie loginu', async ({ page }) => {
     // Przejdź na stronę logowania
     await page.goto('/login')
     

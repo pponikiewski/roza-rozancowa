@@ -64,7 +64,7 @@ export default function LoginPage() {
           fetchPriority="high"
         />
         <h1 className="text-3xl font-bold tracking-tight text-primary">Róża Różańcowa</h1>
-        <p className="text-muted-foreground text-sm">Aplikacja dla Żywego Różańca</p>
+        <p className="text-muted-foreground text-sm">Aplikacja Żywego Różańca</p>
       </div>
 
       {/* KARTA LOGOWANIA */}
@@ -83,7 +83,7 @@ export default function LoginPage() {
                 <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
                   id="login"
-                  placeholder=""
+                  placeholder="login"
                   type="text"
                   autoComplete="username"
                   className="pl-9"
