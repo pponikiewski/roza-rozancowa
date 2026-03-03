@@ -1,7 +1,9 @@
-import { memo } from "react"
-import { Rose, Loader2, ScrollText } from "lucide-react"
+import { memo, useState } from "react"
+import { Rose, Loader2, ScrollText, KeyRound } from "lucide-react"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/shared/components/ui/dialog"
 import { Badge } from "@/shared/components/ui/badge"
+import { Button } from "@/shared/components/ui/button"
+import { ChangePasswordDialog } from "@/features/user/components/ChangePasswordDialog"
 import type { RoseMember } from "@/features/user/types/user.types"
 
 interface RoseDialogProps {
@@ -25,18 +27,21 @@ export const RoseDialog = memo(function RoseDialog({
   loading,
   currentUserId,
 }: RoseDialogProps) {
+  const [isPasswordDialogOpen, setIsPasswordDialogOpen] = useState(false)
+
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-md max-h-[85vh] flex flex-col p-0 gap-0 overflow-hidden">
-        <div className="p-6 pb-4 border-b bg-muted/20">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <Rose className="h-5 w-5 text-rose-500" />
-              {groupName || "Moja Róża"}
-            </DialogTitle>
-            <DialogDescription>Skład Twojej róży i aktualne tajemnice.</DialogDescription>
-          </DialogHeader>
-        </div>
+    <>
+      <Dialog open={open} onOpenChange={onOpenChange}>
+        <DialogContent className="max-w-md max-h-[85vh] flex flex-col p-0 gap-0 overflow-hidden">
+          <div className="p-6 pb-4 border-b bg-muted/20">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Rose className="h-5 w-5 text-rose-500" />
+                {groupName || "Moja Róża"}
+              </DialogTitle>
+              <DialogDescription>Skład Twojej róży i aktualne tajemnice.</DialogDescription>
+            </DialogHeader>
+          </div>
 
         <div className="flex-1 min-h-0 scrollbar-subtle">
           {loading ? (
@@ -87,7 +92,25 @@ export const RoseDialog = memo(function RoseDialog({
             </div>
           )}
         </div>
-      </DialogContent>
-    </Dialog>
+
+          {/* Footer z opcją zmiany hasła */}
+          <div className="p-4 border-t bg-muted/10">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setIsPasswordDialogOpen(true)}
+              className="w-full text-muted-foreground hover:text-foreground"
+            >
+              <KeyRound className="h-4 w-4 mr-2" />
+              Zmień hasło
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+      <ChangePasswordDialog
+        open={isPasswordDialogOpen}
+        onOpenChange={setIsPasswordDialogOpen}
+      />
+    </>
   )
 })

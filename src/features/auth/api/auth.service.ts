@@ -66,4 +66,14 @@ export const authService = {
       callback(event, session)
     })
   },
+
+  /**
+   * Zmiana hasła użytkownika
+   */
+  async updatePassword(newPassword: string) {
+    const { error } = await supabase.auth.updateUser({
+      password: newPassword,
+    })
+    if (error) throw error
+  },
 }
