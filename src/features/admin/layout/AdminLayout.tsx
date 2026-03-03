@@ -7,13 +7,15 @@ import { HeaderControls } from "@/shared/components/common/HeaderControls"
 import { useMysteryChangeTimer } from "@/features/user/hooks/useMysteryChangeTimer"
 import { ROUTES } from "@/shared/lib/constants"
 
-// Główny komponent układu panelu administratora, zarządzający stanem nawigacji i licznikiem czasu
-export default function AdminLayout() {
-  const [open, setOpen] = useState(false)
-  const { timeLeft, targetDate } = useMysteryChangeTimer()
+interface NavContentProps {
+  timeLeft: { days: number; hours: number; minutes: number }
+  targetDate: Date | null
+  onNavClick?: () => void
+}
 
-  // Komponent renderujący zawartość paska nawigacyjnego (logo, linki, licznik)
-  const NavContent = () => (
+// Komponent renderujący zawartość paska nawigacyjnego (logo, linki, licznik)
+function NavContent({ timeLeft, targetDate, onNavClick }: NavContentProps) {
+  return (
     <div className="flex flex-col h-full">
       <div className="p-6 border-b">
         <h2 className="text-xl font-bold flex items-center gap-2">
@@ -30,7 +32,7 @@ export default function AdminLayout() {
           <NavLink
             key={to}
             to={to}
-            onClick={() => setOpen(false)}
+            onClick={onNavClick}
             className={({ isActive }) =>
               `flex items-center gap-3 px-3 py-2 rounded-md transition-colors text-sm font-medium ${isActive ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:bg-muted hover:text-foreground"
               }`
@@ -59,11 +61,17 @@ export default function AdminLayout() {
       </div>
     </div>
   )
+}
+
+// Główny komponent układu panelu administratora, zarządzający stanem nawigacji i licznikiem czasu
+export default function AdminLayout() {
+  const [open, setOpen] = useState(false)
+  const { timeLeft, targetDate } = useMysteryChangeTimer()
 
   return (
     <div className="flex h-screen w-full bg-background flex-col md:flex-row">
       <aside className="hidden md:flex w-64 border-r bg-card flex-col">
-        <NavContent />
+        <NavContent timeLeft={timeLeft} targetDate={targetDate} />
       </aside>
       <div className="app-header md:hidden sticky top-0 z-40 bg-background/80 backdrop-blur-md border-b px-4 py-3 flex items-center justify-between shadow-sm">
         <div className="header-user-info flex items-center gap-3">
@@ -74,7 +82,7 @@ export default function AdminLayout() {
               </Button>
             </SheetTrigger>
             <SheetContent side="left" className="p-0 w-64">
-              <NavContent />
+              <NavContent timeLeft={timeLeft} targetDate={targetDate} onNavClick={() => setOpen(false)} />
             </SheetContent>
           </Sheet>
           <div className="flex items-center gap-3">

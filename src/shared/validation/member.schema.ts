@@ -13,10 +13,10 @@ export const createUserSchema = z.object({
 export type CreateUserFormData = z.infer<typeof createUserSchema>
 
 /**
- * Schema validacji dla zmiany hasła użytkownika
+ * Schema validacji dla zmiany hasła użytkownika przez admina (bez potwierdzenia)
  */
-export const changePasswordSchema = z.object({
+export const adminChangePasswordSchema = z.object({
   newPassword: passwordField,
 })
 
-export type ChangePasswordFormData = z.infer<typeof changePasswordSchema>
+export type AdminChangePasswordFormData = z.infer<typeof adminChangePasswordSchema>

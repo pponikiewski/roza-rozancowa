@@ -8,10 +8,10 @@ export function useMysteryChangeTimer() {
     const calculateTimeLeft = () => {
       const now = new Date()
       // First day of next month
-      let nextMonth = new Date(now.getFullYear(), now.getMonth() + 1, 1)
+      const nextMonth = new Date(now.getFullYear(), now.getMonth() + 1, 1)
       // Find first Sunday
-      let dayOfWeek = nextMonth.getDay()
-      let daysUntilSunday = (7 - dayOfWeek) % 7 
+      const dayOfWeek = nextMonth.getDay()
+      const daysUntilSunday = (7 - dayOfWeek) % 7 
       nextMonth.setDate(nextMonth.getDate() + daysUntilSunday)
       nextMonth.setHours(0, 0, 0, 0) 
       

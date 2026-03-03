@@ -81,6 +81,7 @@ export function useConfirmation() {
       setLoading(false)
       setState(initialState)
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [state.onConfirm])
 
   const dialogProps = {

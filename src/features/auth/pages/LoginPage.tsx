@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react"
+import { useState } from "react"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { authService } from "@/features/auth/api/auth.service"
@@ -12,12 +12,16 @@ import { toast } from "sonner"
 import { HeaderControls, PasswordInput } from "@/shared/components/common"
 import { useAuth } from "@/features/auth/context/AuthContext"
 import { ROSARY_QUOTES } from "@/shared/lib/constants"
+import { getErrorMessage } from "@/shared/lib/utils"
+
+// Losowanie cytatu - wykonywane raz przy imporcie modułu
+const getRandomQuote = () => ROSARY_QUOTES[Math.floor(Math.random() * ROSARY_QUOTES.length)]
 
 // Komponent strony logowania
 // Obsługuje uwierzytelnianie użytkowników i przekierowanie w zależności od roli (admin/user)
 export default function LoginPage() {
   const [internalLoading, setInternalLoading] = useState(false)
-  const [quote, setQuote] = useState<typeof ROSARY_QUOTES[number]>(ROSARY_QUOTES[0])
+  const [quote] = useState(getRandomQuote)
 
   const { loading: authLoading } = useAuth()
 
@@ -29,12 +33,6 @@ export default function LoginPage() {
     resolver: zodResolver(loginSchema),
   })
 
-  useEffect(() => {
-    // Losowanie cytatu przy załadowaniu komponentu
-    const randomQuote = ROSARY_QUOTES[Math.floor(Math.random() * ROSARY_QUOTES.length)]
-    setQuote(randomQuote)
-  }, [])
-
   // Obsługa procesu logowania
   const onSubmit = async (data: LoginFormData) => {
     setInternalLoading(true)
@@ -43,9 +41,9 @@ export default function LoginPage() {
       await authService.signIn(data.login, data.password)
       toast.success("Zalogowano pomyślnie")
       // Redirect będzie obsłużony przez useNavigateOnAuthChange w App.tsx
-    } catch (error: any) {
+    } catch (error) {
       toast.error("Błąd logowania", {
-        description: error.message || "Sprawdź poprawność loginu i hasła."
+        description: getErrorMessage(error) || "Sprawdź poprawność loginu i hasła."
       })
       setInternalLoading(false)
     }
