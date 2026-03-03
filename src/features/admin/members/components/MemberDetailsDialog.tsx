@@ -117,57 +117,62 @@ export function MemberDetailsDialog({
         <div className="p-6 space-y-6 bg-card max-h-[80vh] scrollbar-subtle">
           {/* Basic Info */}
           <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-1.5">
+            <div className="space-y-1.5 col-span-2 sm:col-span-1">
               <Label className="text-[10px] text-muted-foreground uppercase tracking-wider font-bold flex items-center gap-1.5">
                 <User className="h-3 w-3" /> Login
               </Label>
               {isEditingLogin ? (
-                <div className="flex gap-2">
+                <div className="space-y-2">
                   <Input
                     value={editLogin}
-                    onChange={(e) => setEditLogin(e.target.value)}
+                    onChange={(e) => setEditLogin(e.target.value.toLowerCase().replace(/[^a-z0-9.-]/g, ''))}
                     placeholder="Nowy login..."
-                    className="h-9 text-sm"
+                    className="h-10 text-sm font-mono"
                     autoFocus
                   />
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    className="shrink-0 h-9"
-                    disabled={actionLoading || !editLogin.trim() || editLogin === member.login}
-                    onClick={async () => {
-                      const success = await onUpdateLogin(member.id, editLogin.trim())
-                      if (success) {
+                  <div className="flex gap-2">
+                    <Button
+                      size="sm"
+                      variant="default"
+                      className="flex-1 h-8"
+                      disabled={actionLoading || !editLogin.trim() || editLogin.trim().length < 3 || editLogin === member.login}
+                      onClick={async () => {
+                        const success = await onUpdateLogin(member.id, editLogin.trim())
+                        if (success) {
+                          setIsEditingLogin(false)
+                          setEditLogin("")
+                        }
+                      }}
+                    >
+                      {actionLoading ? "Zapisywanie..." : "Zapisz"}
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      className="h-8"
+                      onClick={() => {
                         setIsEditingLogin(false)
                         setEditLogin("")
-                      }
-                    }}
-                  >
-                    Zapisz
-                  </Button>
-                  <Button
-                    size="sm"
-                    variant="ghost"
-                    className="shrink-0 h-9"
-                    onClick={() => {
-                      setIsEditingLogin(false)
-                      setEditLogin("")
-                    }}
-                  >
-                    Anuluj
-                  </Button>
+                      }}
+                    >
+                      Anuluj
+                    </Button>
+                  </div>
+                  {editLogin.trim().length > 0 && editLogin.trim().length < 3 && (
+                    <p className="text-xs text-destructive">Login musi mieć min. 3 znaki</p>
+                  )}
                 </div>
               ) : (
                 <div
-                  className="font-medium text-sm truncate p-2.5 bg-muted/40 rounded-md border border-transparent hover:border-border transition-colors cursor-pointer group flex items-center justify-between"
-                  title={member.login}
+                  className="font-medium text-sm p-2.5 bg-muted/40 rounded-md border border-transparent hover:border-primary/50 hover:bg-muted/60 transition-all cursor-pointer group flex items-center justify-between"
+                  title="Kliknij aby edytować login"
                   onClick={() => {
                     setEditLogin(member.login || "")
                     setIsEditingLogin(true)
                   }}
                 >
-                  <span>{member.login || <span className="text-muted-foreground italic">Brak</span>}</span>
-                  <Pencil className="h-3 w-3 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
+                  <span className="font-mono">{member.login || <span className="text-muted-foreground italic font-sans">Brak</span>}</span>
+                  <Pencil className="h-3.5 w-3.5 text-primary opacity-0 group-hover:opacity-100 transition-opacity" />
                 </div>
               )}
             </div>
