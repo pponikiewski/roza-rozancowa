@@ -281,6 +281,12 @@ npm run dev
 | `npm run build` | Budowanie wersji produkcyjnej |
 | `npm run preview` | Podgląd wersji produkcyjnej lokalnie |
 | `npm run lint` | Sprawdzenie kodu (ESLint) |
+| `npm run test` | Uruchomienie testów jednostkowych (Vitest) |
+| `npm run test:ui` | Testy z interfejsem graficznym |
+| `npm run test:coverage` | Generowanie raportu pokrycia kodu |
+| `npm run test:e2e` | Uruchomienie testów e2e (Playwright) |
+| `npm run test:e2e:ui` | Testy e2e z interfejsem graficznym |
+| `npm run test:e2e:debug` | Testy e2e w trybie debugowania |
 
 ---
 
@@ -383,16 +389,44 @@ Plik `supabase/seed.sql` zawiera 20 tajemnic różańcowych z opisami i grafikam
 
 ## 🧪 Testy
 
-> ⚠️ **Status:** Testy są w planach rozwojowych (patrz [Roadmapa](#-roadmapa))
+Projekt zawiera testy jednostkowe (Vitest) oraz end-to-end (Playwright).
 
-### Planowana struktura
+### Struktura testów
+
+```
+tests/
+├── e2e/                    # Testy end-to-end (Playwright)
+│   ├── auth/               # Testy autentykacji
+│   ├── fixtures/           # Fixtures Playwright
+│   └── helpers/            # Funkcje pomocnicze
+├── features/               # Testy jednostkowe modułów
+│   ├── auth/
+│   └── user/
+├── shared/                 # Testy współdzielone
+│   ├── hooks/
+│   └── lib/
+└── utils/                  # Utilities testowe
+    ├── test-utils.tsx      # Renderowanie z providerami
+    └── hook-helpers.tsx    # Helpery do testowania hooków
+```
+
+### Polecenia testowe
 
 ```bash
 # Testy jednostkowe (Vitest)
 npm run test
 
+# Testy z interfejsem UI
+npm run test:ui
+
 # Testy e2e (Playwright)
 npm run test:e2e
+
+# Testy e2e z UI
+npm run test:e2e:ui
+
+# Testy e2e w trybie debug
+npm run test:e2e:debug
 
 # Coverage
 npm run test:coverage
@@ -528,6 +562,7 @@ Projekt jest skonfigurowany do deploymentu na **Vercel**:
 # Deploy funkcji
 npx supabase functions deploy create-user
 npx supabase functions deploy delete-user
+npx supabase functions deploy update-user-login
 npx supabase functions deploy update-user-password
 ```
 
@@ -545,13 +580,13 @@ npx supabase functions deploy update-user-password
 - [x] Intencje miesięczne
 - [x] Responsywny design (mobile-first)
 - [x] Dark/Light mode
+- [x] Testy jednostkowe (Vitest + React Testing Library)
+- [x] Testy e2e (Playwright)
 
 ### 🚧 W planach
 
 - [ ] **PWA** — instalacja na urządzeniu, offline support
 - [ ] **Powiadomienia push** — przypomnienia o modlitwie
-- [ ] **Testy jednostkowe** — Vitest + React Testing Library
-- [ ] **Testy e2e** — Playwright
 - [ ] **i18n** — wielojęzyczność (PL/EN)
 - [ ] **Statystyki** — dashboard ze statystykami modlitwy
 - [ ] **Eksport danych** — CSV/PDF raportów
