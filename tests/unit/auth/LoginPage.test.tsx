@@ -1,6 +1,6 @@
 /**
  * @vitest-environment jsdom
- * Testy LoginPage - strona logowania (3 kluczowe testy)
+ * Testy LoginPage - strona logowania 
  */
 
 import { describe, it, expect, vi, beforeEach } from 'vitest'

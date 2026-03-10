@@ -120,6 +120,7 @@ export default defineConfig({
     globals: true,
     environment: 'jsdom',
     setupFiles: './tests/setup.ts',
+    reporters: ['verbose'],
     exclude: ['**/node_modules/**', '**/e2e/**', '**/tests/e2e/**'],
     coverage: {
       provider: 'v8',
