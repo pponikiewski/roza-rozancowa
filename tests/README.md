@@ -6,23 +6,22 @@ Struktura i konwencje testowe dla projektu Róża Różańcowa.
 
 ```
 tests/
-├── features/          # Testy funkcjonalności (unit + integration)
+├── unit/             # Testy jednostkowe (Vitest) - 10 kluczowych testów
 │   ├── auth/
-│   │   ├── components/
-│   │   └── pages/
-│   └── user/
-│       ├── components/
-│       └── hooks/
-├── shared/            # Testy współdzielonych komponentów/utils
-│   ├── hooks/
-│   └── lib/
+│   │   ├── LoginPage.test.tsx        # 3 testy
+│   │   └── ProtectedRoute.test.tsx   # 2 testy
+│   ├── user/
+│   │   ├── MysteryCard.test.tsx      # 3 testy
+│   │   └── useMysteryChangeTimer.test.ts  # 1 test
+│   └── shared/
+│       └── useTypedMutation.test.tsx # 1 test
 ├── e2e/              # Testy end-to-end (Playwright)
 │   └── auth/
 ├── utils/            # Helpery testowe
-│   ├── test-utils.tsx      # Renderowanie komponentów
-│   ├── hook-helpers.tsx    # Renderowanie hooks
-│   └── index.ts            # Centralne eksporty
-└── setup.ts          # Konfiguracja globalna
+│   ├── test-utils.tsx
+│   ├── hook-helpers.tsx
+│   └── index.ts
+└── setup.ts
 ```
 
 ## 🔧 Konfiguracja
