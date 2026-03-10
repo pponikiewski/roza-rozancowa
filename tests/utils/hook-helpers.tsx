@@ -7,24 +7,11 @@
  * - setupTimers() - konfiguracja fake timers
  */
 
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import { QueryClientProvider } from '@tanstack/react-query'
 import { renderHook as baseRenderHook } from '@testing-library/react'
 import { vi } from 'vitest'
 import type { ReactNode } from 'react'
-
-/**
- * Tworzy klienta TanStack Query dla testów hooks
- * - Wyłącza retry (błędy natychmiastowe)
- * - Brak cache między testami
- */
-export function createTestQueryClient() {
-  return new QueryClient({
-    defaultOptions: {
-      queries: { retry: false, gcTime: 0 },
-      mutations: { retry: false },
-    },
-  })
-}
+import { createTestQueryClient } from './test-utils'
 
 /**
  * Renderuje hook z QueryClientProvider

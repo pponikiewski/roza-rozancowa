@@ -6,15 +6,13 @@ Struktura i konwencje testowe dla projektu Róża Różańcowa.
 
 ```
 tests/
-├── unit/             # Testy jednostkowe (Vitest) - 10 kluczowych testów
+├── unit/             # Testy jednostkowe (Vitest) - 9 kluczowych testów
 │   ├── auth/
 │   │   ├── LoginPage.test.tsx        # 3 testy
 │   │   └── ProtectedRoute.test.tsx   # 2 testy
-│   ├── user/
-│   │   ├── MysteryCard.test.tsx      # 3 testy
-│   │   └── useMysteryChangeTimer.test.ts  # 1 test
-│   └── shared/
-│       └── useTypedMutation.test.tsx # 1 test
+│   └── user/
+│       ├── MysteryCard.test.tsx      # 3 testy
+│       └── useMysteryChangeTimer.test.ts  # 1 test
 ├── e2e/              # Testy end-to-end (Playwright)
 │   └── auth/
 ├── utils/            # Helpery testowe

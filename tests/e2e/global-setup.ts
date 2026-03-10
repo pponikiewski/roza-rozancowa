@@ -42,22 +42,23 @@ async function globalSetup() {
   ]
 
   for (const user of testUsers) {
+    // Aplikacja używa formatu login@noemail.local jako email w Supabase Auth
+    const email = `${user.login}@noemail.local`
     try {
       // Sprawdź czy użytkownik już istnieje
       const { data: existingUsers } = await supabase.auth.admin.listUsers()
-      const existingUser = existingUsers?.users.find((u) => u.email === user.email)
+      const existingUser = existingUsers?.users.find((u) => u.email === email)
 
       if (existingUser) {
-        // USUŃ starego użytkownika żeby utworzyć go na nowo z poprawnymi flagami
-        console.log(`🗑️  Usuwam użytkownika ${user.email} (zostanie utworzony ponownie)`)
+        console.log(`🗑️  Usuwam użytkownika ${email} (zostanie utworzony ponownie)`)
         await supabase.auth.admin.deleteUser(existingUser.id)
       }
 
       // Utwórz użytkownika przez Admin API
       const { data: newUser, error: createError } = await supabase.auth.admin.createUser({
-        email: user.email,
+        email,
         password: user.password,
-        email_confirm: true, // Automatyczne potwierdzenie email
+        email_confirm: true,
         user_metadata: {
           first_name: user.firstName,
           last_name: user.lastName,
@@ -65,32 +66,32 @@ async function globalSetup() {
       })
 
       if (createError) {
-        console.error(`❌ Błąd tworzenia ${user.email}:`, createError.message)
+        console.error(`❌ Błąd tworzenia ${email}:`, createError.message)
         continue
       }
 
-      console.log(`✅ Utworzono użytkownika ${user.email}`)
+      console.log(`✅ Utworzono użytkownika ${email}`)
 
       // Dodaj wpis do tabeli profiles
       if (newUser.user) {
         const { error: profileError } = await supabase.from('profiles').upsert({
           id: newUser.user.id,
           full_name: `${user.firstName} ${user.lastName}`,
-          email: user.email,
+          email,
+          login: user.login,
           role: user.isAdmin ? 'admin' : 'user',
-          // group_id: null, rose_pos: null (automatycznie)
         }, {
-          onConflict: 'id' // Jeśli już istnieje, zaktualizuj
+          onConflict: 'id'
         })
 
         if (profileError) {
-          console.error(`❌ Błąd dodawania do profiles ${user.email}:`, profileError.message)
+          console.error(`❌ Błąd dodawania do profiles ${email}:`, profileError.message)
         } else {
-          console.log(`✅ Dodano ${user.email} do tabeli profiles${user.isAdmin ? ' (ADMIN)' : ''}`)
+          console.log(`✅ Dodano ${email} do tabeli profiles${user.isAdmin ? ' (ADMIN)' : ''}`)
         }
       }
     } catch (error) {
-      console.error(`❌ Błąd dla ${user.email}:`, error)
+      console.error(`❌ Błąd dla ${email}:`, error)
     }
   }
 
