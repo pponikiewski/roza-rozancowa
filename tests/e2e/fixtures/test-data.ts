@@ -24,7 +24,7 @@ export const TEST_USER = {
  */
 export const TEST_ADMIN = {
   login: 'admin',
-  password: 'AdminPassword123!',
+  password: 'admin123',
   firstName: 'Admin',
   lastName: 'Testowy',
 }
@@ -35,7 +35,7 @@ export const TEST_ADMIN = {
  */
 export const TEST_USER_NO_ASSIGNMENT = {
   login: 'no.assignment',
-  password: 'TestPassword123!',
+  password: 'admin123',
   firstName: 'Bez',
   lastName: 'Przypisania',
 }

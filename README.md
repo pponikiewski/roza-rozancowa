@@ -195,7 +195,7 @@ src/
 │   │   └── intentions/     # Zarządzanie intencjami
 │   │
 │   └── mysteries/          # Tajemnice różańcowe
-│       └── utils/          # Algorytm rotacji
+│       └── api/            # mysteries.service.ts
 │
 ├── shared/                 # Współdzielone zasoby
 │   ├── components/
@@ -217,6 +217,7 @@ supabase/
 └── functions/              # Edge Functions (Deno)
     ├── create-user/
     ├── delete-user/
+    ├── update-user-login/
     └── update-user-password/
 ```
 
@@ -335,6 +336,7 @@ VITE_SUPABASE_ANON_KEY=
          │ 1:N          ├─────────────────┤
          └─────────────►│ id (FK → users) │
                         │ full_name       │
+                        │ login           │
                         │ role            │
                         │ group_id (FK)   │
                         │ rose_pos        │
@@ -360,9 +362,11 @@ VITE_SUPABASE_ANON_KEY=
 | Funkcja | Opis |
 |---------|------|
 | `get_mystery_id_for_user(user_id)` | Oblicza aktualną tajemnicę na podstawie pozycji i daty (modulo 20) |
+| `get_mystery_ids_for_users(user_ids[])` | Batch: oblicza tajemnice dla wielu użytkowników naraz |
 | `rotate_group_members(group_id)` | Rotuje członków grupy o jedną pozycję |
 | `move_user_to_group(user_id, group_id)` | Przypisuje użytkownika do pierwszego wolnego miejsca |
 | `batch_rotate_groups(group_ids)` | Masowa rotacja wybranych grup |
+| `generate_login(full_name)` | Generuje unikalny login z imienia i nazwiska |
 
 ### Row Level Security (RLS)
 
@@ -399,15 +403,13 @@ tests/
 │   ├── auth/               # Testy autentykacji
 │   ├── fixtures/           # Fixtures Playwright
 │   └── helpers/            # Funkcje pomocnicze
-├── features/               # Testy jednostkowe modułów
-│   ├── auth/
-│   └── user/
-├── shared/                 # Testy współdzielone
-│   ├── hooks/
-│   └── lib/
-└── utils/                  # Utilities testowe
-    ├── test-utils.tsx      # Renderowanie z providerami
-    └── hook-helpers.tsx    # Helpery do testowania hooków
+├── unit/                   # Testy jednostkowe
+│   ├── auth/               # Testy autentykacji
+│   └── user/               # Testy panelu użytkownika
+├── utils/                  # Utilities testowe
+│   ├── test-utils.tsx      # Renderowanie z providerami
+│   └── hook-helpers.tsx    # Helpery do testowania hooków
+└── setup.ts                # Konfiguracja środowiska testowego
 ```
 
 ### Polecenia testowe
@@ -572,7 +574,7 @@ npx supabase functions deploy update-user-password
 
 ### ✅ Zrealizowane (MVP)
 
-- [x] Autentykacja (email/hasło)
+- [x] Autentykacja (login/hasło)
 - [x] Panel użytkownika z podglądem tajemnicy
 - [x] Potwierdzenie modlitwy
 - [x] Panel administratora (CRUD członków, Róż)
@@ -583,9 +585,9 @@ npx supabase functions deploy update-user-password
 - [x] Testy jednostkowe (Vitest + React Testing Library)
 - [x] Testy e2e (Playwright)
 
-### 🚧 W planach
+- [x] **PWA** — instalacja na urządzeniu, offline support
 
-- [ ] **PWA** — instalacja na urządzeniu, offline support
+### 🚧 W planach
 - [ ] **Powiadomienia push** — przypomnienia o modlitwie
 - [ ] **i18n** — wielojęzyczność (PL/EN)
 - [ ] **Statystyki** — dashboard ze statystykami modlitwy
