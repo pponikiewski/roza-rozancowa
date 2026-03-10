@@ -164,14 +164,6 @@ describe('Feature/Component name', () => {
 5. **Helpery** - wykorzystuj `renderWithProviders()`, `renderHookWithQuery()` zamiast ręcznych wrapperów
 6. **waitFor dla asynchroniczności** - gdy sprawdzasz callbacki/efekty uboczne, używaj `waitFor(() => { expect(...) })`
 
-## 🎯 Coverage
-
-Coverage jest generowany w folderze `coverage/`:
-- HTML report: `coverage/index.html`
-- JSON data: `coverage/coverage-final.json`
-
-Docelowy próg: **80% coverage** dla krytycznych modułów.
-
 ## 🔍 Debugowanie
 
 ### VS Code

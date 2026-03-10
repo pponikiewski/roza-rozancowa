@@ -13,7 +13,6 @@ export { ROUTES, QUERY_KEYS, ROSARY_PARTS, ROSARY_QUOTES } from './lib/constants
 export * from './lib/utils'
 
 // Types
-export type * from './types/common.types'
 export type * from './types/domain.types'
 
 // Validation schemas

@@ -25,40 +25,4 @@ export function getCurrentYear(): number {
   return new Date().getFullYear()
 }
 
-/**
- * Formatery dat do różnych zastosowań
- */
-export const dateFormatters = {
-  /**
-   * Pełna data z godziną: "3 stycznia, 14:30"
-   */
-  fullDateTime: (date: string | Date): string =>
-    new Date(date).toLocaleString('pl-PL', {
-      day: 'numeric',
-      month: 'long',
-      hour: '2-digit',
-      minute: '2-digit'
-    }),
 
-  /**
-   * Sama data: "03.01.2026"
-   */
-  date: (date: string | Date): string =>
-    new Date(date).toLocaleDateString('pl-PL'),
-
-  /**
-   * Pełna data słownie: "3 stycznia 2026"
-   */
-  fullDate: (date: string | Date): string =>
-    new Date(date).toLocaleDateString('pl-PL', {
-      day: 'numeric',
-      month: 'long',
-      year: 'numeric'
-    }),
-
-  /**
-   * Miesiąc i rok: "styczeń 2026"
-   */
-  monthYear: (month: number, year: number): string =>
-    `${getMonthName(month)} ${year}`,
-}
