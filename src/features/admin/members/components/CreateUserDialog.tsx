@@ -85,6 +85,8 @@ export function CreateUserDialog({ open, onOpenChange, onSubmit, groups, loading
         <Label>Hasło</Label>
         <Input
           required
+          type="password"
+          autoComplete="new-password"
           value={formData.password}
           onChange={(e) => setFormData({ ...formData, password: e.target.value })}
         />
