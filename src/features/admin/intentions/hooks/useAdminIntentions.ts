@@ -45,6 +45,6 @@ export function useAdminIntentions() {
     saved,
     saveIntention: (title: string, content: string) => saveMutation.execute({ title, content }),
     updateIntention: (id: number, title: string, content: string) => updateMutation.execute({ id, title, content }),
-    deleteIntention: (id: number) => deleteMutation.execute(id)
+    deleteIntention: deleteMutation.execute,
   }
 }

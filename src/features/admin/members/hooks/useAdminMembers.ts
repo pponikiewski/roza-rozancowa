@@ -22,26 +22,20 @@ export function useAdminMembers() {
 
   // Mutations
   const createMutation = useTypedMutation({
-    mutationFn: async (formData: CreateUserFormData) => {
-      await membersService.createMember({
+    mutationFn: (formData: CreateUserFormData) =>
+      membersService.createMember({
         password: formData.password,
         fullName: formData.fullName,
         groupId: formData.groupId !== "unassigned" ? parseInt(formData.groupId) : null
-      })
-      return formData.fullName
-    },
+      }).then(() => formData.fullName),
     successMessage: (fullName) => `Dodano użytkownika: ${fullName}`,
     errorMessage: "Błąd tworzenia",
     invalidateKeys: [QUERY_KEYS.ADMIN_MEMBERS]
   })
 
   const updateGroupMutation = useTypedMutation({
-    mutationFn: async ({ userId, groupId }: { userId: string; groupId: string }) => {
-      await membersService.updateMemberGroup(
-        userId,
-        groupId !== "unassigned" ? parseInt(groupId) : null
-      )
-    },
+    mutationFn: ({ userId, groupId }: { userId: string; groupId: string }) =>
+      membersService.updateMemberGroup(userId, groupId !== "unassigned" ? parseInt(groupId) : null),
     successMessage: "Przypisanie do grupy zostało zmienione",
     errorMessage: "Błąd aktualizacji",
     invalidateKeys: [QUERY_KEYS.ADMIN_MEMBERS]
@@ -49,9 +43,7 @@ export function useAdminMembers() {
 
   const changePasswordMutation = useTypedMutation({
     mutationFn: async ({ userId, newPassword }: { userId: string; newPassword: string }) => {
-      if (!newPassword || newPassword.length < 6) {
-        throw new Error("Hasło za krótkie (min. 6 znaków)")
-      }
+      if (newPassword.length < 6) throw new Error("Hasło za krótkie (min. 6 znaków)")
       await membersService.changeMemberPassword(userId, newPassword)
     },
     successMessage: "Hasło zmienione",
@@ -66,24 +58,25 @@ export function useAdminMembers() {
   })
 
   const updateLoginMutation = useTypedMutation({
-    mutationFn: async ({ userId, newLogin }: { userId: string; newLogin: string }) => {
-      await membersService.updateMemberLogin(userId, newLogin)
-    },
+    mutationFn: ({ userId, newLogin }: { userId: string; newLogin: string }) =>
+      membersService.updateMemberLogin(userId, newLogin),
     successMessage: "Login zaktualizowany",
     errorMessage: "Błąd aktualizacji loginu",
     invalidateKeys: [QUERY_KEYS.ADMIN_MEMBERS]
   })
 
+  const mutations = [createMutation, updateGroupMutation, changePasswordMutation, deleteMutation, updateLoginMutation]
+
   return {
     loading: isLoading,
-    actionLoading: createMutation.isPending || updateGroupMutation.isPending || changePasswordMutation.isPending || deleteMutation.isPending || updateLoginMutation.isPending,
+    actionLoading: mutations.some(m => m.isPending),
     groups: data?.groups || [],
     mysteries: data?.mysteries || [],
     members: data?.members || [],
-    createUser: (formData: CreateUserFormData) => createMutation.execute(formData),
+    createUser: createMutation.execute,
     updateGroup: (userId: string, groupId: string) => updateGroupMutation.execute({ userId, groupId }),
-    changePassword: (userId: string, newPassword: string) => changePasswordMutation.mutateAsync({ userId, newPassword }),
+    changePassword: (userId: string, newPassword: string) => changePasswordMutation.execute({ userId, newPassword }),
     updateLogin: (userId: string, newLogin: string) => updateLoginMutation.execute({ userId, newLogin }),
-    deleteUser: (userId: string) => deleteMutation.mutateAsync(userId)
+    deleteUser: deleteMutation.execute,
   }
 }

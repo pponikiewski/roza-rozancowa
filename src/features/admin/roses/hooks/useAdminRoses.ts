@@ -49,11 +49,11 @@ export function useAdminRoses() {
 
   return {
     loading: isLoading,
-    actionLoading: saveGroupMutation.isPending || deleteGroupMutation.isPending || rotateGroupMutation.isPending,
+    actionLoading: [saveGroupMutation, deleteGroupMutation, rotateGroupMutation].some(m => m.isPending),
     groups: groups || [],
     fetchGroups: () => queryClient.invalidateQueries({ queryKey: QUERY_KEYS.ADMIN_ROSES }),
     saveGroup: (name: string, id?: number) => saveGroupMutation.execute({ name, id }),
-    deleteGroup: (id: number) => deleteGroupMutation.execute(id),
-    rotateGroup: (id: number) => rotateGroupMutation.execute(id)
+    deleteGroup: deleteGroupMutation.execute,
+    rotateGroup: rotateGroupMutation.execute,
   }
 }
