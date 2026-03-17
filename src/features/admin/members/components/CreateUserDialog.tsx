@@ -24,6 +24,12 @@ function generateLoginPreview(fullName: string): string {
     .replace(/[^a-z0-9.-]/g, '')
 }
 
+const INITIAL_FORM_DATA: CreateUserFormData = {
+  password: "",
+  fullName: "",
+  groupId: "unassigned",
+}
+
 interface CreateUserDialogProps {
   open: boolean
   onOpenChange: (open: boolean) => void
@@ -37,11 +43,7 @@ interface CreateUserDialogProps {
  * Zawiera formularz z walidacją hasła, imienia i przypisania do grupy
  */
 export function CreateUserDialog({ open, onOpenChange, onSubmit, groups, loading }: CreateUserDialogProps) {
-  const [formData, setFormData] = useState<CreateUserFormData>({
-    password: "",
-    fullName: "",
-    groupId: "unassigned",
-  })
+  const [formData, setFormData] = useState<CreateUserFormData>(INITIAL_FORM_DATA)
 
   const loginPreview = useMemo(
     () => generateLoginPreview(formData.fullName),
@@ -50,12 +52,7 @@ export function CreateUserDialog({ open, onOpenChange, onSubmit, groups, loading
 
   const handleSubmit = async () => {
     await onSubmit(formData)
-    // Reset form
-    setFormData({
-      password: "",
-      fullName: "",
-      groupId: "unassigned",
-    })
+    setFormData(INITIAL_FORM_DATA)
   }
 
   return (

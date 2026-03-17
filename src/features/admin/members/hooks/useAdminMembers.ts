@@ -1,5 +1,6 @@
 import { membersService } from "@/features/admin/members/api/members.service"
 import { mysteriesService } from "@/features/mysteries/api/mysteries.service"
+import { groupsService } from "@/shared/api"
 import type { CreateUserFormData } from "@/shared/validation/member.schema"
 import { useQuery } from "@tanstack/react-query"
 import { useTypedMutation } from "@/shared/hooks"
@@ -11,7 +12,7 @@ export function useAdminMembers() {
     queryKey: QUERY_KEYS.ADMIN_MEMBERS,
     queryFn: async () => {
       const [groups, mysteries, members] = await Promise.all([
-        membersService.getAllGroups(),
+        groupsService.getAll(),
         mysteriesService.getAllMysteries(),
         membersService.getAllMembers()
       ])

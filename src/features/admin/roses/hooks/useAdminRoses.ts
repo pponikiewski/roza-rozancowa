@@ -1,4 +1,5 @@
 import { rosesService } from "@/features/admin/roses/api/roses.service"
+import { groupsService } from "@/shared/api"
 import { toast } from "sonner"
 import { useQuery, useQueryClient } from "@tanstack/react-query"
 import { useTypedMutation } from "@/shared/hooks"
@@ -9,7 +10,7 @@ export function useAdminRoses() {
 
   const { data: groups, isLoading } = useQuery({
     queryKey: QUERY_KEYS.ADMIN_ROSES,
-    queryFn: () => rosesService.getAllGroups()
+    queryFn: () => groupsService.getAll()
   })
 
   const saveGroupMutation = useTypedMutation({

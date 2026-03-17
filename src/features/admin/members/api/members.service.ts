@@ -1,8 +1,7 @@
 import { supabase } from '@/shared/lib/supabase'
 import { mysteriesService } from '@/features/mysteries/api/mysteries.service'
-import { groupsService } from '@/shared/api'
+import { throwOnFunctionError } from '@/shared/lib/utils'
 import type { AdminMember, CreateMemberDTO } from '@/features/admin/members/types/member.types'
-import type { Group } from '@/shared/types/domain.types'
 
 interface RawMember extends Omit<AdminMember, 'current_mystery_id'> {
   acknowledgments: { created_at: string; mystery_id: number }[]
@@ -48,12 +47,6 @@ export const membersService = {
 
     return members
   },
-
-  /**
-   * Pobranie wszystkich grup
-   * @deprecated Użyj groupsService.getAll() bezpośrednio
-   */
-  getAllGroups: (): Promise<Group[]> => groupsService.getAll(),
 
   /**
    * Utworzenie nowego członka
@@ -118,10 +111,8 @@ export const membersService = {
       body: { user_id: userId, new_internal_email: newInternalEmail }
     })
 
-    if (error || data?.error) {
-      // Jeśli nie udało się zaktualizować auth, cofnij zmianę w profiles
-      throw new Error(error?.message || data?.error || 'Błąd aktualizacji loginu')
-    }
+    // Jeśli nie udało się zaktualizować auth, cofnij zmianę w profiles
+    throwOnFunctionError(error, data, 'Błąd aktualizacji loginu')
   },
 
   /**
@@ -131,10 +122,7 @@ export const membersService = {
     const { data, error } = await supabase.functions.invoke('update-user-password', {
       body: { user_id: userId, new_password: newPassword }
     })
-
-    if (error || data?.error) {
-      throw new Error(error?.message || data?.error)
-    }
+    throwOnFunctionError(error, data)
   },
 
   /**
@@ -144,9 +132,6 @@ export const membersService = {
     const { data, error } = await supabase.functions.invoke('delete-user', {
       body: { user_id: userId }
     })
-
-    if (error || data?.error) {
-      throw new Error(error?.message || data?.error)
-    }
+    throwOnFunctionError(error, data)
   },
 }

@@ -7,6 +7,18 @@ export function cn(...inputs: ClassValue[]) {
 }
 
 /**
+ * Rzuca błąd jeśli odpowiedź Edge Function zawiera błąd
+ */
+export function throwOnFunctionError(
+  error: { message?: string } | null,
+  data?: { error?: string },
+  fallback?: string
+): void {
+  if (error || data?.error)
+    throw new Error(error?.message || data?.error || fallback)
+}
+
+/**
  * Bezpiecznie wyciąga wiadomość z obiektu błędu
  */
 export function getErrorMessage(error: unknown): string {

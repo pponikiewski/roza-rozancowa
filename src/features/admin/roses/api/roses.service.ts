@@ -1,18 +1,10 @@
 import { supabase } from '@/shared/lib/supabase'
 import { mysteriesService } from '@/features/mysteries/api/mysteries.service'
-import { groupsService } from '@/shared/api'
-import type { Group } from '@/shared/types/domain.types'
 
 /**
  * Serwis obsługujący zarządzanie różami (admin)
  */
 export const rosesService = {
-  /**
-   * Pobranie wszystkich grup (róż)
-   * @deprecated Użyj groupsService.getAll() bezpośrednio
-   */
-  getAllGroups: (): Promise<Group[]> => groupsService.getAll(),
-
   /**
    * Utworzenie nowej grupy
    */
