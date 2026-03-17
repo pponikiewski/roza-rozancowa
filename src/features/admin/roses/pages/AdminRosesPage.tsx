@@ -23,20 +23,16 @@ export default function AdminRosesPage() {
   const [isFormOpen, setIsFormOpen] = useState(false)
   const [editingGroup, setEditingGroup] = useState<Group | null>(null)
   const [viewingGroup, setViewingGroup] = useState<Group | null>(null)
-  const [groupName, setGroupName] = useState("")
 
   const handleOpenForm = (groupToEdit?: Group) => {
     setEditingGroup(groupToEdit || null)
-    setGroupName(groupToEdit?.name || "")
     setIsFormOpen(true)
   }
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    const success = await saveGroup(groupName, editingGroup?.id)
-    if (success) {
-      setIsFormOpen(false)
-    }
+  const handleSubmit = async (name: string) => {
+    const success = await saveGroup(name, editingGroup?.id)
+    if (success) setIsFormOpen(false)
+    return success
   }
 
   const handleDelete = (group: Group) => {
@@ -131,8 +127,6 @@ export default function AdminRosesPage() {
         open={isFormOpen}
         onOpenChange={setIsFormOpen}
         editingGroup={editingGroup}
-        groupName={groupName}
-        onGroupNameChange={setGroupName}
         onSubmit={handleSubmit}
         loading={actionLoading}
       />

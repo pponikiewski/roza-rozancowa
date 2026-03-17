@@ -1,3 +1,4 @@
+import { useState, useEffect } from "react"
 import { FormDialog } from "@/shared/components/feedback"
 import { Input } from "@/shared/components/ui/input"
 import { Label } from "@/shared/components/ui/label"
@@ -7,9 +8,7 @@ interface RoseFormDialogProps {
   open: boolean
   onOpenChange: (open: boolean) => void
   editingGroup: Group | null
-  groupName: string
-  onGroupNameChange: (name: string) => void
-  onSubmit: (e: React.FormEvent) => void
+  onSubmit: (name: string) => Promise<boolean>
   loading: boolean
 }
 
@@ -20,12 +19,25 @@ export function RoseFormDialog({
   open,
   onOpenChange,
   editingGroup,
-  groupName,
-  onGroupNameChange,
   onSubmit,
   loading,
 }: RoseFormDialogProps) {
+  const [groupName, setGroupName] = useState("")
   const isEditing = !!editingGroup
+
+  // Wypełnij pole nazwą gdy otwieramy dialog edycji
+  useEffect(() => {
+    if (open) {
+      setGroupName(editingGroup?.name || "")
+    }
+  }, [open, editingGroup])
+
+  const handleSubmit = async () => {
+    const success = await onSubmit(groupName)
+    if (success) {
+      setGroupName("")
+    }
+  }
 
   return (
     <FormDialog
@@ -33,7 +45,7 @@ export function RoseFormDialog({
       onOpenChange={onOpenChange}
       title={isEditing ? "Edytuj Różę" : "Utwórz Nową Różę"}
       description={isEditing ? "Zmień nazwę istniejącej grupy." : "Dodaj nową grupę modlitewną."}
-      onSubmit={onSubmit}
+      onSubmit={handleSubmit}
       loading={loading}
     >
       <div className="space-y-2">
@@ -41,7 +53,7 @@ export function RoseFormDialog({
         <Input
           placeholder="np. Róża pw. Św. Rity"
           value={groupName}
-          onChange={(e) => onGroupNameChange(e.target.value)}
+          onChange={(e) => setGroupName(e.target.value)}
           autoFocus
         />
       </div>

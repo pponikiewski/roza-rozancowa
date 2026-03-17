@@ -17,13 +17,7 @@ export default function AdminIntentionsPage() {
     deleteIntention
   } = useAdminIntentions()
 
-  const [editDialogOpen, setEditDialogOpen] = useState(false)
   const [editingIntention, setEditingIntention] = useState<IntentionHistoryType | null>(null)
-
-  const handleEdit = (intention: IntentionHistoryType) => {
-    setEditingIntention(intention)
-    setEditDialogOpen(true)
-  }
 
   const handleEditSave = async (id: number, title: string, content: string) => {
     const success = await updateIntention(id, title, content)
@@ -55,14 +49,14 @@ export default function AdminIntentionsPage() {
       {/* Historia intencji */}
       <IntentionHistory
         history={history}
-        onEdit={handleEdit}
+        onEdit={setEditingIntention}
         onDelete={deleteIntention}
       />
 
       {/* Dialog edycji */}
       <EditIntentionDialog
-        open={editDialogOpen}
-        onOpenChange={setEditDialogOpen}
+        open={!!editingIntention}
+        onOpenChange={(open) => !open && setEditingIntention(null)}
         intention={editingIntention}
         loading={loading}
         onSave={handleEditSave}
