@@ -1,4 +1,3 @@
-import { useState } from "react"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { Lock, Loader2 } from "lucide-react"
@@ -15,8 +14,7 @@ import { Label } from "@/shared/components/ui/label"
 import { PasswordInput } from "@/shared/components/common"
 import { changePasswordSchema, type ChangePasswordFormData } from "@/shared/validation/auth.schema"
 import { authService } from "@/features/auth/api/auth.service"
-import { toast } from "sonner"
-import { getErrorMessage } from "@/shared/lib/utils"
+import { useTypedMutation } from "@/shared/hooks"
 
 interface ChangePasswordDialogProps {
   open: boolean
@@ -27,8 +25,6 @@ interface ChangePasswordDialogProps {
  * Dialog umożliwiający użytkownikowi zmianę hasła
  */
 export function ChangePasswordDialog({ open, onOpenChange }: ChangePasswordDialogProps) {
-  const [loading, setLoading] = useState(false)
-
   const {
     register,
     handleSubmit,
@@ -38,24 +34,18 @@ export function ChangePasswordDialog({ open, onOpenChange }: ChangePasswordDialo
     resolver: zodResolver(changePasswordSchema),
   })
 
-  const onSubmit = async (data: ChangePasswordFormData) => {
-    setLoading(true)
-    try {
-      await authService.updatePassword(data.newPassword)
-      toast.success("Hasło zostało zmienione", {
-        description: "Twoje nowe hasło jest teraz aktywne.",
-        duration: 5000,
-      })
+  const { execute, isPending: loading } = useTypedMutation({
+    mutationFn: (data: ChangePasswordFormData) => authService.updatePassword(data.newPassword),
+    successMessage: "Hasło zostało zmienione",
+    errorMessage: "Nie udało się zmienić hasła",
+    onSuccessCallback: () => {
       reset()
       onOpenChange(false)
-    } catch (err) {
-      toast.error("Nie udało się zmienić hasła", {
-        description: getErrorMessage(err),
-        duration: 5000,
-      })
-    } finally {
-      setLoading(false)
-    }
+    },
+  })
+
+  const onSubmit = async (data: ChangePasswordFormData) => {
+    await execute(data)
   }
 
   const handleOpenChange = (isOpen: boolean) => {

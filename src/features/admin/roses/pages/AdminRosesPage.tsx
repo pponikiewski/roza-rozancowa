@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useState, useMemo } from "react"
 import { Button } from "@/shared/components/ui/button"
 import { Input } from "@/shared/components/ui/input"
 import { ConfirmationDialog, useConfirmation } from "@/shared/components/feedback"
@@ -60,8 +60,9 @@ export default function AdminRosesPage() {
     })
   }
 
-  const filteredGroups = groups.filter(g => 
-    g.name.toLowerCase().includes(search.toLowerCase())
+  const filteredGroups = useMemo(
+    () => groups.filter(g => g.name.toLowerCase().includes(search.toLowerCase())),
+    [groups, search]
   )
 
   return (
