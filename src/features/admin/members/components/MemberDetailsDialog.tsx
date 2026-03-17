@@ -42,18 +42,17 @@ export function MemberDetailsDialog({
 }: MemberDetailsDialogProps) {
   const {
     editGroupId,
-    setEditGroupId,
     newPassword,
-    setNewPassword,
     passwordError,
-    setPasswordError,
     editLogin,
-    setEditLogin,
     isEditingLogin,
     handleOpenChange,
+    handleGroupChange,
     handleUpdateGroup,
+    handlePasswordChange,
     handleChangePassword,
     handleDelete,
+    handleLoginInputChange,
     handleSaveLogin,
     handleStartEditLogin,
     handleCancelEditLogin,
@@ -94,7 +93,7 @@ export function MemberDetailsDialog({
                 <div className="space-y-2">
                   <Input
                     value={editLogin}
-                    onChange={(e) => setEditLogin(e.target.value.toLowerCase().replace(/[^a-z0-9.-]/g, ''))}
+                    onChange={(e) => handleLoginInputChange(e.target.value)}
                     placeholder="Nowy login..."
                     className="h-10 text-sm font-mono"
                     autoFocus
@@ -199,7 +198,7 @@ export function MemberDetailsDialog({
               <div className="flex gap-2">
                 <GroupSelect
                   value={editGroupId}
-                  onValueChange={setEditGroupId}
+                  onValueChange={handleGroupChange}
                   groups={groups}
                   placeholder="-- Wybierz (lub usuń z grupy) --"
                   unassignedLabel="-- Bez grupy (usuń) --"
@@ -218,10 +217,7 @@ export function MemberDetailsDialog({
                 <PasswordInput
                   placeholder="Wpisz nowe hasło (min. 6 znaków)..."
                   value={newPassword}
-                  onChange={(e) => {
-                    setNewPassword(e.target.value)
-                    if (passwordError) setPasswordError(null)
-                  }}
+                  onChange={(e) => handlePasswordChange(e.target.value)}
                   hasError={!!passwordError}
                   className="h-9"
                 />

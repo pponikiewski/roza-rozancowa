@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import type { AdminMember } from "@/features/admin/members/types/member.types"
 
 const MIN_PASSWORD_LENGTH = 6
@@ -30,11 +30,12 @@ export function useMemberDialogState({
   const [editLogin, setEditLogin] = useState("")
   const [isEditingLogin, setIsEditingLogin] = useState(false)
 
-  // Inicjalizacja editGroupId gdy member się zmieni
-  const currentGroupId = member?.groups?.id?.toString() || "unassigned"
-  if (member && editGroupId === "" && currentGroupId !== editGroupId) {
-    setEditGroupId(currentGroupId)
-  }
+  // Synchronizacja editGroupId gdy zmieni się wybrany member
+  useEffect(() => {
+    if (member) {
+      setEditGroupId(member.groups?.id?.toString() || "unassigned")
+    }
+  }, [member?.id])
 
   const handleOpenChange = (isOpen: boolean) => {
     if (!isOpen) {
@@ -47,9 +48,16 @@ export function useMemberDialogState({
     onOpenChange(isOpen)
   }
 
+  const handleGroupChange = (id: string) => setEditGroupId(id)
+
   const handleUpdateGroup = async () => {
     if (!member) return
     await onUpdateGroup(member.id, editGroupId)
+  }
+
+  const handlePasswordChange = (value: string) => {
+    setNewPassword(value)
+    if (passwordError) setPasswordError(null)
   }
 
   const handleChangePassword = async () => {
@@ -67,6 +75,10 @@ export function useMemberDialogState({
   const handleDelete = () => {
     if (!member) return
     onDeleteUser(member.id, member.full_name)
+  }
+
+  const handleLoginInputChange = (value: string) => {
+    setEditLogin(value.toLowerCase().replace(/[^a-z0-9.-]/g, ''))
   }
 
   const handleSaveLogin = async () => {
@@ -89,18 +101,17 @@ export function useMemberDialogState({
 
   return {
     editGroupId,
-    setEditGroupId,
     newPassword,
-    setNewPassword,
     passwordError,
-    setPasswordError,
     editLogin,
-    setEditLogin,
     isEditingLogin,
     handleOpenChange,
+    handleGroupChange,
     handleUpdateGroup,
+    handlePasswordChange,
     handleChangePassword,
     handleDelete,
+    handleLoginInputChange,
     handleSaveLogin,
     handleStartEditLogin,
     handleCancelEditLogin,

@@ -48,10 +48,6 @@ export default function AdminMembersPage() {
     }
   }
 
-  const handleChangePassword = async (userId: string, newPassword: string) => {
-    await changePassword(userId, newPassword)
-  }
-
   const handleDeleteUser = (userId: string, fullName: string) => {
     confirm({
       title: "Usunąć użytkownika?",
@@ -62,15 +58,11 @@ export default function AdminMembersPage() {
     })
   }
 
-  const handleSelectMember = (member: AdminMember) => {
-    setSelectedMember(member)
-  }
-
-  const filteredAllMembers = members.filter((m) => m.full_name.toLowerCase().includes(search.toLowerCase()))
   const groupedData = useMemo(() => {
+    const filtered = members.filter((m) => m.full_name.toLowerCase().includes(search.toLowerCase()))
     const map = new Map<number, AdminMember[]>()
     const unassigned: AdminMember[] = []
-    filteredAllMembers.forEach((m) => {
+    filtered.forEach((m) => {
       if (m.groups?.id) {
         if (!map.has(m.groups.id)) map.set(m.groups.id, [])
         map.get(m.groups.id)!.push(m)
@@ -79,7 +71,7 @@ export default function AdminMembersPage() {
       }
     })
     return { map, unassigned }
-  }, [filteredAllMembers])
+  }, [members, search])
 
   return (
     <div className="space-y-6 pb-24 max-w-6xl mx-auto p-6 pt-6">
@@ -131,7 +123,7 @@ export default function AdminMembersPage() {
                 </div>
               </AccordionTrigger>
               <AccordionContent className="px-4 pb-4 pt-2 border-t border-dashed">
-                <MembersList list={groupMembers} onSelect={handleSelectMember} getMysteryName={getMysteryName} />
+                <MembersList list={groupMembers} onSelect={setSelectedMember} getMysteryName={getMysteryName} />
               </AccordionContent>
             </AccordionItem>
           )
@@ -149,7 +141,7 @@ export default function AdminMembersPage() {
             </div>
           </AccordionTrigger>
           <AccordionContent className="px-4 pb-4 pt-2 border-t border-dashed">
-            <MembersList list={groupedData.unassigned} onSelect={handleSelectMember} getMysteryName={getMysteryName} />
+            <MembersList list={groupedData.unassigned} onSelect={setSelectedMember} getMysteryName={getMysteryName} />
           </AccordionContent>
         </AccordionItem>
       </Accordion>
@@ -161,8 +153,8 @@ export default function AdminMembersPage() {
         open={!!selectedMember}
         onOpenChange={(open) => !open && setSelectedMember(null)}
         onUpdateGroup={handleUpdateGroup}
-        onChangePassword={handleChangePassword}
-        onUpdateLogin={(userId, newLogin) => updateLogin(userId, newLogin)}
+        onChangePassword={changePassword}
+        onUpdateLogin={updateLogin}
         onDeleteUser={handleDeleteUser}
         getMysteryName={getMysteryName}
         groups={groups}
