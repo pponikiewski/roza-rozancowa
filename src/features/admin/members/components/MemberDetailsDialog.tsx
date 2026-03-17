@@ -1,4 +1,3 @@
-import { useState } from "react"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/shared/components/ui/dialog"
 import { Button } from "@/shared/components/ui/button"
 import { Input } from "@/shared/components/ui/input"
@@ -10,6 +9,7 @@ import { PasswordInput } from "@/shared/components/common"
 import { CheckCircle2, Circle, ScrollText, CalendarClock, RefreshCcw, Trash2, User, Pencil } from "lucide-react"
 import type { AdminMember } from "@/features/admin/members/types/member.types"
 import type { Group } from "@/shared/types/domain.types"
+import { useMemberDialogState } from "@/features/admin/members/hooks/useMemberDialogState"
 
 interface MemberDetailsDialogProps {
   member: AdminMember | null
@@ -40,58 +40,27 @@ export function MemberDetailsDialog({
   groups,
   actionLoading,
 }: MemberDetailsDialogProps) {
-  const [editGroupId, setEditGroupId] = useState<string>("")
-  const [newPassword, setNewPassword] = useState("")
-  const [passwordError, setPasswordError] = useState<string | null>(null)
-  const [editLogin, setEditLogin] = useState("")
-  const [isEditingLogin, setIsEditingLogin] = useState(false)
-
-  const MIN_PASSWORD_LENGTH = 6
-
-  // Reset stanu przy zmianie dialogu (otwarcie/zamknięcie)
-  const handleOpenChange = (isOpen: boolean) => {
-    if (!isOpen) {
-      setNewPassword("")
-      setEditGroupId("")
-      setPasswordError(null)
-      setEditLogin("")
-      setIsEditingLogin(false)
-    }
-    onOpenChange(isOpen)
-  }
-
-  // Inicjalizacja editGroupId gdy member się zmieni
-  const currentGroupId = member?.groups?.id?.toString() || "unassigned"
-  if (member && editGroupId === "" && currentGroupId !== editGroupId) {
-    setEditGroupId(currentGroupId)
-  }
+  const {
+    editGroupId,
+    setEditGroupId,
+    newPassword,
+    setNewPassword,
+    passwordError,
+    setPasswordError,
+    editLogin,
+    setEditLogin,
+    isEditingLogin,
+    handleOpenChange,
+    handleUpdateGroup,
+    handleChangePassword,
+    handleDelete,
+    handleSaveLogin,
+    handleStartEditLogin,
+    handleCancelEditLogin,
+  } = useMemberDialogState({ member, onUpdateGroup, onChangePassword, onUpdateLogin, onDeleteUser, onOpenChange })
 
   const formatFullDate = (d: string) =>
     new Date(d).toLocaleString("pl-PL", { day: "numeric", month: "long", hour: "2-digit", minute: "2-digit" })
-
-  const handleUpdateGroup = async () => {
-    if (!member) return
-    await onUpdateGroup(member.id, editGroupId)
-  }
-
-  const handleChangePassword = async () => {
-    if (!member) return
-
-    const trimmedPassword = newPassword.trim()
-    if (trimmedPassword.length < MIN_PASSWORD_LENGTH) {
-      setPasswordError(`Hasło musi mieć minimum ${MIN_PASSWORD_LENGTH} znaków`)
-      return
-    }
-
-    setPasswordError(null)
-    await onChangePassword(member.id, trimmedPassword)
-    setNewPassword("")
-  }
-
-  const handleDelete = () => {
-    if (!member) return
-    onDeleteUser(member.id, member.full_name)
-  }
 
   if (!member) return null
 
@@ -136,13 +105,7 @@ export function MemberDetailsDialog({
                       variant="default"
                       className="flex-1 h-8"
                       disabled={actionLoading || !editLogin.trim() || editLogin.trim().length < 3 || editLogin === member.login}
-                      onClick={async () => {
-                        const success = await onUpdateLogin(member.id, editLogin.trim())
-                        if (success) {
-                          setIsEditingLogin(false)
-                          setEditLogin("")
-                        }
-                      }}
+                      onClick={handleSaveLogin}
                     >
                       {actionLoading ? "Zapisywanie..." : "Zapisz"}
                     </Button>
@@ -150,10 +113,7 @@ export function MemberDetailsDialog({
                       size="sm"
                       variant="ghost"
                       className="h-8"
-                      onClick={() => {
-                        setIsEditingLogin(false)
-                        setEditLogin("")
-                      }}
+                      onClick={handleCancelEditLogin}
                     >
                       Anuluj
                     </Button>
@@ -166,10 +126,7 @@ export function MemberDetailsDialog({
                 <div
                   className="font-medium text-sm p-2.5 bg-muted/40 rounded-md border border-transparent hover:border-primary/50 hover:bg-muted/60 transition-all cursor-pointer group flex items-center justify-between"
                   title="Kliknij aby edytować login"
-                  onClick={() => {
-                    setEditLogin(member.login || "")
-                    setIsEditingLogin(true)
-                  }}
+                  onClick={handleStartEditLogin}
                 >
                   <span className="font-mono">{member.login || <span className="text-muted-foreground italic font-sans">Brak</span>}</span>
                   <Pencil className="h-3.5 w-3.5 text-primary opacity-0 group-hover:opacity-100 transition-opacity" />
