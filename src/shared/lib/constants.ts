@@ -30,6 +30,9 @@ export const QUERY_KEYS = {
   ADMIN_ROSES: ['admin-roses'],
 } as const
 
+/** Sentinel value used by GroupSelect when no group is assigned */
+export const UNASSIGNED_GROUP_VALUE = "unassigned" as const
+
 /** Części różańca */
 export const ROSARY_PARTS = {
   JOYFUL: 'Radosne',

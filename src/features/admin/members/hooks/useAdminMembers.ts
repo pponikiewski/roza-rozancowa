@@ -4,7 +4,7 @@ import { groupsService } from "@/shared/api"
 import type { CreateUserFormData } from "@/shared/validation/member.schema"
 import { useQuery } from "@tanstack/react-query"
 import { useTypedMutation } from "@/shared/hooks"
-import { QUERY_KEYS } from "@/shared/lib/constants"
+import { QUERY_KEYS, UNASSIGNED_GROUP_VALUE } from "@/shared/lib/constants"
 
 export function useAdminMembers() {
   // Query for all data
@@ -26,7 +26,7 @@ export function useAdminMembers() {
       membersService.createMember({
         password: formData.password,
         fullName: formData.fullName,
-        groupId: formData.groupId !== "unassigned" ? parseInt(formData.groupId) : null
+        groupId: formData.groupId !== UNASSIGNED_GROUP_VALUE ? parseInt(formData.groupId) : null
       }).then(() => formData.fullName),
     successMessage: (fullName) => `Dodano użytkownika: ${fullName}`,
     errorMessage: "Błąd tworzenia",
@@ -35,7 +35,7 @@ export function useAdminMembers() {
 
   const updateGroupMutation = useTypedMutation({
     mutationFn: ({ userId, groupId }: { userId: string; groupId: string }) =>
-      membersService.updateMemberGroup(userId, groupId !== "unassigned" ? parseInt(groupId) : null),
+      membersService.updateMemberGroup(userId, groupId !== UNASSIGNED_GROUP_VALUE ? parseInt(groupId) : null),
     successMessage: "Przypisanie do grupy zostało zmienione",
     errorMessage: "Błąd aktualizacji",
     invalidateKeys: [QUERY_KEYS.ADMIN_MEMBERS]

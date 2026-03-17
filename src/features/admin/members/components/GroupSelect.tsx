@@ -6,6 +6,7 @@ import {
   SelectValue,
 } from "@/shared/components/ui/select"
 import type { Group } from "@/shared/types/domain.types"
+import { UNASSIGNED_GROUP_VALUE } from "@/shared/lib/constants"
 
 interface GroupSelectProps {
   value: string
@@ -44,7 +45,7 @@ export function GroupSelect({
         <SelectValue placeholder={placeholder} />
       </SelectTrigger>
       <SelectContent className={className}>
-        <SelectItem value="unassigned">{unassignedLabel}</SelectItem>
+        <SelectItem value={UNASSIGNED_GROUP_VALUE}>{unassignedLabel}</SelectItem>
         {groups.map((g) => (
           <SelectItem key={g.id} value={g.id.toString()}>
             {g.name}
