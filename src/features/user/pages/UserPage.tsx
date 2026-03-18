@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useState, useEffect } from "react"
 // UI Components
 import { LoadingScreen } from "@/shared/components/feedback"
 import { IntentionCard } from "@/features/user/components/IntentionCard"
@@ -10,6 +10,7 @@ import { NoAssignmentCard } from "@/features/user/components/NoAssignmentCard"
 import { useUserData } from "@/features/user/hooks/useUserData"
 import { useMysteryChangeTimer } from "@/features/user/hooks/useMysteryChangeTimer"
 import { userService } from "@/features/user/api/user.service"
+import { getOptimizedImageUrl } from "@/shared/lib/utils"
 import { useQuery } from "@tanstack/react-query"
 
 /** Główny komponent panelu użytkownika - wyświetla przydzieloną tajemnicę, intencję oraz podgląd Róży */
@@ -28,6 +29,19 @@ export default function UserPage() {
   const { timeLeft } = useMysteryChangeTimer()
 
   const [isRoseOpen, setIsRoseOpen] = useState(false)
+
+  // Preload LCP image as soon as mystery data is available
+  useEffect(() => {
+    if (mystery?.image_url) {
+      const link = document.createElement('link')
+      link.rel = 'preload'
+      link.as = 'image'
+      link.href = getOptimizedImageUrl(mystery.image_url, 800)
+      link.fetchPriority = 'high'
+      document.head.appendChild(link)
+      return () => { document.head.removeChild(link) }
+    }
+  }, [mystery?.image_url])
 
   const { data: roseMembers = [], isLoading: roseLoading } = useQuery({
     queryKey: ["rose-members", profile?.groups?.id],

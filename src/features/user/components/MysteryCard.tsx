@@ -29,7 +29,7 @@ export const MysteryCard = memo(function MysteryCard({
 }: MysteryCardProps) {
   return (
     <Card className="overflow-hidden shadow-lg border-border/60">
-      <div className="w-full bg-black/5 dark:bg-black/20 flex items-center justify-center p-4 relative min-h-[200px]">
+      <div className="w-full bg-black/5 dark:bg-black/20 flex items-center justify-center p-4 relative aspect-[3/4] max-h-[50vh]">
         {mystery.image_url ? (
           <img
             src={getOptimizedImageUrl(mystery.image_url, 800)}
@@ -40,8 +40,10 @@ export const MysteryCard = memo(function MysteryCard({
             `}
             sizes="(max-width: 550px) 90vw, 500px"
             alt={mystery.name}
+            width={600}
+            height={800}
             fetchPriority="high"
-            className="w-auto h-auto max-h-[50vh] object-contain shadow-sm rounded-md"
+            className="w-auto h-auto max-h-full object-contain shadow-sm rounded-md"
           />
         ) : (
           <div className="h-32 flex items-center justify-center text-muted-foreground text-sm">

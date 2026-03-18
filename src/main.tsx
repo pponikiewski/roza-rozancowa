@@ -4,9 +4,6 @@ import { injectSpeedInsights } from '@vercel/speed-insights'
 import './index.css'
 import { App } from '@/app'
 
-// Initialize Vercel Speed Insights (client-side only)
-injectSpeedInsights()
-
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <App />

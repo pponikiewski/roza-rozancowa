@@ -1,16 +1,20 @@
+import { lazy, Suspense } from "react"
 import { Routes, Route, Navigate } from "react-router-dom"
 import { ProtectedRoute, AdminRoute } from "@/features/auth/components/ProtectedRoute"
 import { useNavigateOnAuthChange } from "@/features/auth/hooks/useNavigateOnAuthChange"
 import { FeatureErrorBoundary } from "@/shared/components/layout/FeatureErrorBoundary"
+import { LoadingScreen } from "@/shared/components/feedback"
 import { ROUTES } from "@/shared/lib/constants"
 
-// Pages
+// Eager-loaded pages (primary entry points)
 import LoginPage from "@/features/auth/pages/LoginPage"
 import UserPage from "@/features/user/pages/UserPage"
-import AdminLayout from "@/features/admin/layout/AdminLayout"
-import AdminMembersPage from "@/features/admin/members/pages/AdminMembersPage"
-import AdminIntentionsPage from "@/features/admin/intentions/pages/AdminIntentionsPage"
-import AdminRosesPage from "@/features/admin/roses/pages/AdminRosesPage"
+
+// Lazy-loaded admin pages
+const AdminLayout = lazy(() => import("@/features/admin/layout/AdminLayout"))
+const AdminMembersPage = lazy(() => import("@/features/admin/members/pages/AdminMembersPage"))
+const AdminIntentionsPage = lazy(() => import("@/features/admin/intentions/pages/AdminIntentionsPage"))
+const AdminRosesPage = lazy(() => import("@/features/admin/roses/pages/AdminRosesPage"))
 
 /**
  * Komponent definiujący wszystkie trasy aplikacji
@@ -36,7 +40,11 @@ export function AppRoutes() {
 
       {/* Protected admin routes */}
       <Route path={ROUTES.ADMIN.ROOT} element={<AdminRoute />}>
-        <Route element={<AdminLayout />}>
+        <Route element={
+          <Suspense fallback={<LoadingScreen fullScreen />}>
+            <AdminLayout />
+          </Suspense>
+        }>
           <Route index element={<Navigate to="members" replace />} />
           <Route path="members" element={
             <FeatureErrorBoundary featureName="Użytkownicy">

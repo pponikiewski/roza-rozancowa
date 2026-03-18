@@ -44,7 +44,7 @@ export function getOptimizedImageUrl(url: string, width: number = 800): string {
       return url;
     }
     const optimizedUrl = url.replace('/storage/v1/object/public/', '/storage/v1/render/image/public/');
-    return `${optimizedUrl}?width=${width}&resize=contain&quality=80`;
+    return `${optimizedUrl}?width=${width}&resize=contain&quality=75&format=webp`;
   }
   
   return url;
