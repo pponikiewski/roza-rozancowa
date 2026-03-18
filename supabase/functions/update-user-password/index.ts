@@ -1,17 +1,12 @@
 // supabase/functions/update-user-password/index.ts
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import { requireAdmin, AuthorizationError } from "../_shared/auth.ts"
-
-const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-}
+import { corsHeaders, handleCorsPreflightRequest } from "../_shared/cors.ts"
 
 serve(async (req) => {
   // 1. Obsługa zapytań OPTIONS (CORS Preflight)
-  if (req.method === 'OPTIONS') {
-    return new Response('ok', { headers: corsHeaders })
-  }
+  const corsResponse = handleCorsPreflightRequest(req)
+  if (corsResponse) return corsResponse
 
   try {
     // 2. WERYFIKACJA ROLI ADMINISTRATORA
