@@ -36,7 +36,12 @@ export default function UserPage() {
       const link = document.createElement('link')
       link.rel = 'preload'
       link.as = 'image'
-      link.href = getOptimizedImageUrl(mystery.image_url, 800)
+      link.setAttribute('imagesrcset', [
+        `${getOptimizedImageUrl(mystery.image_url, 300)} 300w`,
+        `${getOptimizedImageUrl(mystery.image_url, 500)} 500w`,
+        `${getOptimizedImageUrl(mystery.image_url, 800)} 800w`,
+      ].join(', '))
+      link.setAttribute('imagesizes', '(max-width: 550px) 90vw, 500px')
       link.fetchPriority = 'high'
       document.head.appendChild(link)
       return () => { document.head.removeChild(link) }
