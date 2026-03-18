@@ -39,10 +39,6 @@ export function getOptimizedImageUrl(url: string, width: number = 800): string {
   
   // Jeśli URL wskazuje na standardowy endpoint storage, spróbuj zamienić na render/image
   if (url.includes('/storage/v1/object/public/')) {
-    // Sprawdź czy to jest webp - jeśli tak, zwróć normalny URL bo webp już jest zoptymalizowany
-    if (url.endsWith('.webp')) {
-      return url;
-    }
     const optimizedUrl = url.replace('/storage/v1/object/public/', '/storage/v1/render/image/public/');
     return `${optimizedUrl}?width=${width}&resize=contain&quality=75&format=webp`;
   }
