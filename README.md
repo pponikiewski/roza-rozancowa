@@ -50,6 +50,7 @@ Aplikacja **Róża Różańcowa** digitalizuje ten proces, eliminując potrzebę
 ### Główne funkcjonalności
 
 #### 👤 Panel Użytkownika
+
 - **Podgląd tajemnicy** — wyświetlanie aktualnie przypisanej tajemnicy na dany miesiąc
 - **Potwierdzenie modlitwy** — możliwość odznaczenia wykonania modlitwy
 - **Licznik czasu** — odliczanie do najbliższej zmiany tajemnic (pierwsza niedziela miesiąca)
@@ -57,11 +58,12 @@ Aplikacja **Róża Różańcowa** digitalizuje ten proces, eliminując potrzebę
 - **Intencja miesięczna** — wspólna intencja modlitewna dla całej grupy
 
 #### 🛡️ Panel Administratora
+
 - **Zarządzanie członkami** — dodawanie, edycja, usuwanie, przypisywanie do grup
 - **Zarządzanie Różami** — tworzenie i konfiguracja grup modlitewnych
 - **Rotacja tajemnic** — automatyczna lub ręczna rotacja dla wybranych grup
 - **Intencje** — ustawianie miesięcznych intencji modlitewnych
-- **Statystyki** — podgląd statusu modlitwy w grupach
+- **Zmiana hasła** — resetowanie haseł członków
 
 ---
 
@@ -75,7 +77,9 @@ Aplikacja **Róża Różańcowa** digitalizuje ten proces, eliminując potrzebę
 | **Formularze** | React Hook Form 7.x, Zod 4.x |
 | **Routing** | React Router 7.x |
 | **Backend** | Supabase (PostgreSQL 17, Auth, Edge Functions, Storage) |
-| **Hosting** | Vercel |
+| **PWA** | vite-plugin-pwa (Workbox), offline support, instalacja na urządzeniu |
+| **Testy** | Vitest 4.x, React Testing Library 16.x, Playwright 1.x |
+| **Hosting** | Vercel (frontend), Supabase (backend) |
 | **Narzędzia** | ESLint 9.x, TypeScript ESLint, PostCSS, Autoprefixer |
 
 ---
@@ -241,18 +245,17 @@ supabase/
 
 ```bash
 # 1. Sklonuj repozytorium
-git clone https://github.com/twoj-login/roza-rozancowa.git
+git clone https://github.com/pponikiewski/roza-rozancowa.git
 cd roza-rozancowa
 
 # 2. Zainstaluj zależności
 npm install
 
-# 3. Skopiuj przykładowy plik konfiguracyjny
-cp .env.example .env
+# 3. Utwórz plik .env i uzupełnij zmienne środowiskowe (patrz sekcja Konfiguracja)
+#    VITE_SUPABASE_URL=https://your-project.supabase.co
+#    VITE_SUPABASE_PUBLISHABLE_DEFAULT_KEY=eyJ...
 
-# 4. Uzupełnij zmienne środowiskowe (patrz sekcja Konfiguracja)
-
-# 5. Uruchom serwer deweloperski
+# 4. Uruchom serwer deweloperski
 npm run dev
 ```
 
@@ -268,7 +271,7 @@ npx supabase start
 
 # 4. Skopiuj wyświetlone klucze do .env
 #    - API URL → VITE_SUPABASE_URL
-#    - anon key → VITE_SUPABASE_ANON_KEY
+#    - anon key → VITE_SUPABASE_PUBLISHABLE_DEFAULT_KEY
 
 # 5. Uruchom aplikację
 npm run dev
@@ -300,20 +303,10 @@ Utwórz plik `.env` w głównym katalogu projektu:
 ```env
 # Supabase - WYMAGANE
 VITE_SUPABASE_URL=https://your-project.supabase.co
-VITE_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
-```
+VITE_SUPABASE_PUBLISHABLE_DEFAULT_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
 
-### Plik `.env.example`
-
-```env
-# ===========================================
-# SUPABASE CONFIGURATION
-# ===========================================
-# URL projektu Supabase (znajdziesz w Settings > API)
-VITE_SUPABASE_URL=
-
-# Klucz publiczny (anon key) - bezpieczny do użycia po stronie klienta
-VITE_SUPABASE_ANON_KEY=
+# Tylko dla testów E2E (opcjonalne)
+VITE_SUPABASE_SERVICE_ROLE_KEY=...
 ```
 
 > ⚠️ **Uwaga:** Nigdy nie commituj pliku `.env` z prawdziwymi kluczami!
@@ -516,6 +509,7 @@ export function MemberCard({ member, onEdit }: MemberCardProps) {
 ```
 
 **Typy:**
+
 - `feat` — nowa funkcjonalność
 - `fix` — naprawa błędu
 - `docs` — dokumentacja
@@ -525,6 +519,7 @@ export function MemberCard({ member, onEdit }: MemberCardProps) {
 - `chore` — zadania pomocnicze
 
 **Przykłady:**
+
 ```
 feat(admin): add batch mystery rotation
 fix(dashboard): correct countdown timer calculation
@@ -540,10 +535,11 @@ docs(readme): update installation instructions
 Projekt jest skonfigurowany do deploymentu na **Vercel**:
 
 1. Połącz repozytorium z Vercel
-2. Ustaw zmienne środowiskowe (`VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`)
+2. Ustaw zmienne środowiskowe (`VITE_SUPABASE_URL`, `VITE_SUPABASE_PUBLISHABLE_DEFAULT_KEY`)
 3. Deploy automatycznie przy push do `main`
 
 **Konfiguracja** (`vercel.json`):
+
 ```json
 {
   "rewrites": [{ "source": "/(.*)", "destination": "/index.html" }]
@@ -588,6 +584,7 @@ npx supabase functions deploy update-user-password
 - [x] **PWA** — instalacja na urządzeniu, offline support
 
 ### 🚧 W planach
+
 - [ ] **Powiadomienia push** — przypomnienia o modlitwie
 - [ ] **i18n** — wielojęzyczność (PL/EN)
 - [ ] **Statystyki** — dashboard ze statystykami modlitwy
@@ -608,9 +605,10 @@ npx supabase functions deploy update-user-password
 **Przyczyna:** Nieprawidłowe klucze Supabase w `.env`
 
 **Rozwiązanie:**
+
 1. Sprawdź czy plik `.env` istnieje w głównym katalogu
 2. Zweryfikuj klucze w panelu Supabase (Settings → API)
-3. Upewnij się, że używasz `anon key`, nie `service_role key`
+3. Upewnij się, że używasz klucza publicznego (`publishable key`), nie `service_role key`
 
 ---
 
@@ -619,6 +617,7 @@ npx supabase functions deploy update-user-password
 **Przyczyna:** Docker nie jest uruchomiony
 
 **Rozwiązanie:**
+
 ```bash
 # Sprawdź status Dockera
 docker info
@@ -634,6 +633,7 @@ docker info
 **Przyczyna:** Brak danych w tabeli `mysteries`
 
 **Rozwiązanie:**
+
 ```bash
 # Lokalnie
 npx supabase db reset
@@ -656,6 +656,7 @@ npx supabase db reset
 **Przyczyna:** Inbucket nie przechwytuje emaili weryfikacyjnych
 
 **Rozwiązanie:**
+
 1. Otwórz Inbucket: `http://localhost:54324`
 2. Znajdź email weryfikacyjny i kliknij link
 
@@ -663,26 +664,14 @@ npx supabase db reset
 
 ## 📄 Licencja
 
-Ten projekt jest udostępniony na licencji **MIT**. Zobacz plik [LICENSE](LICENSE) po szczegóły.
-
-```
-MIT License
-
-Copyright (c) 2024-2026 Róża Różańcowa
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software...
-```
+Ten projekt jest udostępniony na licencji **MIT**.
 
 ---
 
 ## 📬 Kontakt
 
-- **Issues:** [GitHub Issues](https://github.com/twoj-login/roza-rozancowa/issues)
-- **Dyskusje:** [GitHub Discussions](https://github.com/twoj-login/roza-rozancowa/discussions)
+- **Issues:** [GitHub Issues](https://github.com/pponikiewski/roza-rozancowa/issues)
+- **Dyskusje:** [GitHub Discussions](https://github.com/pponikiewski/roza-rozancowa/discussions)
 
 ---
 
