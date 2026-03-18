@@ -38,7 +38,7 @@ export class FeatureErrorBoundary extends Component<FeatureErrorBoundaryProps, S
   }
 
   public componentDidCatch(error: Error, errorInfo: ErrorInfo) {
-    console.error(`[FeatureErrorBoundary] Error in ${this.props.featureName || 'feature'}:`, error, errorInfo)
+    // TODO: Wysłać do serwisu error tracking (np. Sentry)
     this.props.onError?.(error, errorInfo)
   }
 
@@ -69,7 +69,7 @@ export class FeatureErrorBoundary extends Component<FeatureErrorBoundaryProps, S
                 }
               </p>
             </div>
-            {this.state.error && (
+            {import.meta.env.DEV && this.state.error && (
               <div className="p-2 bg-muted/50 rounded-md text-left overflow-auto max-h-20 text-xs font-mono text-muted-foreground break-all">
                 {this.state.error.message}
               </div>

@@ -6,7 +6,7 @@ const MIN_PASSWORD_LENGTH = 6
 interface UseMemberDialogStateProps {
   member: AdminMember | null
   onUpdateGroup: (userId: string, groupId: string) => Promise<void>
-  onChangePassword: (userId: string, newPassword: string) => Promise<void>
+  onChangePassword: (userId: string, newPassword: string) => Promise<boolean | void>
   onUpdateLogin: (userId: string, newLogin: string) => Promise<unknown>
   onDeleteUser: (userId: string, fullName: string) => void
   onOpenChange: (open: boolean) => void

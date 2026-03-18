@@ -32,8 +32,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             if (isMounted()) {
                 setIsAdmin(role === 'admin')
             }
-        } catch (e) {
-            console.error("Error checking role", e)
+        } catch {
+            // Błąd sprawdzania roli — użytkownik nie dostanie uprawnień admina
         } finally {
             if (isMounted()) {
                 setLoading(false)
@@ -95,8 +95,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const signOut = async () => {
         try {
             await authService.signOut()
-        } catch (error) {
-            console.error("Error signing out:", error)
+        } catch {
+            // Błąd wylogowania — localStorage zostanie wyczyszczony w finally
         } finally {
             // Nuclear option for mobile devices with aggressive caching
             clearSupabaseStorage()

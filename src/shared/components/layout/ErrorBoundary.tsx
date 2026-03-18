@@ -22,8 +22,8 @@ export class ErrorBoundary extends Component<Props, State> {
         return { hasError: true, error }
     }
 
-    public componentDidCatch(error: Error, errorInfo: ErrorInfo) {
-        console.error("Uncaught error:", error, errorInfo)
+    public componentDidCatch(_error: Error, _errorInfo: ErrorInfo) {
+        // TODO: Wysłać do serwisu error tracking (np. Sentry)
     }
 
     public render() {
@@ -40,7 +40,7 @@ export class ErrorBoundary extends Component<Props, State> {
                                 Wystąpił nieoczekiwany błąd aplikacji. Spróbuj odświeżyć stronę.
                             </p>
                         </div>
-                        {this.state.error && (
+                        {import.meta.env.DEV && this.state.error && (
                             <div className="p-3 bg-muted/50 rounded-md text-left overflow-auto max-h-32 text-xs font-mono text-muted-foreground break-all">
                                 {this.state.error.message}
                             </div>

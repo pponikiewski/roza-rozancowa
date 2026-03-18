@@ -41,7 +41,6 @@ export const mysteriesService = {
     })
 
     if (error) {
-      console.error('Error calling get_mystery_id_for_user:', error)
       return null
     }
 
@@ -96,7 +95,6 @@ export const mysteriesService = {
     })
 
     if (error) {
-      console.error('Error calling get_mystery_ids_for_users:', error)
       return new Map()
     }
 

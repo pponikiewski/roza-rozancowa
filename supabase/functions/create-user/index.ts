@@ -31,8 +31,6 @@ serve(async (req) => {
 
     const { password, fullName, groupId } = await req.json()
 
-    console.log(`Próba dodania usera: ${fullName}, grupa: ${groupId}`)
-
     if (!password || !fullName) throw new Error('Brakuje danych (hasło lub imię).')
 
     // Walidacja wejścia
@@ -57,7 +55,6 @@ serve(async (req) => {
         .eq('group_id', groupId)
       
       if (groupError) {
-        console.error("Błąd pobierania grupy:", groupError)
         throw new Error("Błąd bazy danych przy sprawdzaniu grupy.")
       }
 
@@ -112,7 +109,6 @@ serve(async (req) => {
     })
 
     if (userError) {
-      console.error("Błąd auth:", userError)
       throw new Error(userError.message)
     }
 
@@ -130,7 +126,6 @@ serve(async (req) => {
         })
       
       if (profileError) {
-        console.error("Błąd profilu:", profileError)
         throw new Error("Konto utworzone, ale błąd przy przypisywaniu do grupy: " + profileError.message)
       }
     }
@@ -147,7 +142,6 @@ serve(async (req) => {
 
   } catch (error: unknown) {
     const message = error instanceof Error ? error.message : 'Nieznany błąd'
-    console.error("Create User Logic Error:", message)
     const status = error instanceof AuthorizationError ? error.status : 500
     return new Response(JSON.stringify({ error: message }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
