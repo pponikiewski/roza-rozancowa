@@ -125,25 +125,20 @@ CREATE OR REPLACE FUNCTION public.get_mystery_id_for_user(p_user_id uuid)
  LANGUAGE plpgsql
 AS $function$
 DECLARE
-    start_date date := '2024-01-01'; -- Data startu rotacji
+    start_date date := '2024-01-01';
     months_passed integer;
     user_pos integer;
     calculated_id integer;
 BEGIN
-    -- Pobierz pozycję użytkownika
     SELECT rose_pos INTO user_pos FROM public.profiles WHERE id = p_user_id;
 
-    -- Jeśli user nie ma przypisanej pozycji (np. Admin bez grupy), zwróć NULL
     IF user_pos IS NULL THEN
         RETURN NULL;
     END IF;
 
-    -- Oblicz ile miesięcy minęło
     SELECT EXTRACT(YEAR FROM age(now(), start_date)) * 12 +
            EXTRACT(MONTH FROM age(now(), start_date)) INTO months_passed;
 
-    -- Algorytm Żywego Różańca:
-    -- (Pozycja startowa + przesunięcie miesięczne) modulo 20
     calculated_id := ((user_pos - 1 + months_passed) % 20) + 1;
 
     RETURN calculated_id;
