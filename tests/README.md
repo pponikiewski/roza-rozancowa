@@ -6,14 +6,17 @@ Struktura i konwencje testowe dla projektu Róża Różańcowa.
 
 ```
 tests/
-├── unit/             # Testy jednostkowe (Vitest) - 9 kluczowych testów
+├── unit/             # Testy jednostkowe (Vitest) - kluczowe logiki w izolacji
 │   ├── auth/
 │   │   ├── LoginPage.test.tsx        # 3 testy
 │   │   └── ProtectedRoute.test.tsx   # 2 testy
 │   └── user/
 │       ├── MysteryCard.test.tsx      # 3 testy
 │       └── useMysteryChangeTimer.test.ts  # 1 test
-├── e2e/              # Testy end-to-end (Playwright)
+├── integration/      # Testy integracyjne (Vitest + RTL) - pełne ekrany i logika
+│   ├── admin/        # np. AdminIntentionsIntegration.test.tsx
+│   └── user/         # np. UserDashboardIntegration.test.tsx
+├── e2e/              # Testy end-to-end (Playwright) - z prawdziwym środowiskiem
 │   └── auth/
 ├── utils/            # Helpery testowe
 │   ├── test-utils.tsx
@@ -29,6 +32,9 @@ tests/
 ```bash
 # Wszystkie testy jednostkowe
 npm test
+
+# Testy integracyjne
+npm run test:integration
 
 # Testy z UI (interactive mode)
 npm run test:ui
@@ -131,6 +137,7 @@ vi.mock('@/shared/lib/utils', () => ({
 ### Nazewnictwo plików
 
 - Testy jednostkowe: `*.test.{ts,tsx}`
+- Testy integracyjne: `*Integration.test.{ts,tsx}` 
 - Testy E2E: `*.spec.ts`
 
 ### Struktura testów
