@@ -587,8 +587,6 @@ npx supabase functions deploy update-user-password
 
 - [ ] **Powiadomienia push** — przypomnienia o modlitwie
 - [ ] **i18n** — wielojęzyczność (PL/EN)
-- [ ] **Statystyki** — dashboard ze statystykami modlitwy
-- [ ] **Eksport danych** — CSV/PDF raportów
 
 ### 💡 Pomysły na przyszłość
 
