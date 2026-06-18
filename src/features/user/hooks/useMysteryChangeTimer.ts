@@ -7,23 +7,31 @@ export function useMysteryChangeTimer() {
   useEffect(() => {
     const calculateTimeLeft = () => {
       const now = new Date()
-      // First day of next month
-      const nextMonth = new Date(now.getFullYear(), now.getMonth() + 1, 1)
-      // Find first Sunday
-      const dayOfWeek = nextMonth.getDay()
-      const daysUntilSunday = (7 - dayOfWeek) % 7 
-      nextMonth.setDate(nextMonth.getDate() + daysUntilSunday)
-      nextMonth.setHours(0, 0, 0, 0) 
-      
-      setTargetDate(nextMonth)
 
-      const difference = nextMonth.getTime() - now.getTime()
+      const findFirstSunday = (year: number, month: number): Date => {
+        const first = new Date(year, month, 1)
+        const daysUntilSunday = (7 - first.getDay()) % 7
+        first.setDate(first.getDate() + daysUntilSunday)
+        first.setHours(0, 0, 0, 0)
+        return first
+      }
+
+      const thisMonthSunday = findFirstSunday(now.getFullYear(), now.getMonth())
+      const target = thisMonthSunday.getTime() > now.getTime()
+        ? thisMonthSunday
+        : findFirstSunday(now.getFullYear(), now.getMonth() + 1)
+
+      setTargetDate(target)
+
+      const difference = target.getTime() - now.getTime()
       if (difference > 0) {
         setTimeLeft({
           days: Math.floor(difference / (1000 * 60 * 60 * 24)),
           hours: Math.floor((difference / (1000 * 60 * 60)) % 24),
           minutes: Math.floor((difference / 1000 / 60) % 60),
         })
+      } else {
+        setTimeLeft({ days: 0, hours: 0, minutes: 0 })
       }
     }
     calculateTimeLeft()
