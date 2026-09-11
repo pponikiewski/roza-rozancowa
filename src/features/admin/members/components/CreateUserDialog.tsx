@@ -4,6 +4,7 @@ import { Input } from "@/shared/components/ui/input"
 import { Label } from "@/shared/components/ui/label"
 import { GroupSelect } from "./GroupSelect"
 import type { CreateUserFormData } from "@/shared/validation/member.schema"
+import { passwordField } from "@/shared/validation/common.schema"
 import type { Group } from "@/shared/types/domain.types"
 
 /**
@@ -35,6 +36,7 @@ interface CreateUserDialogProps {
   onOpenChange: (open: boolean) => void
   onSubmit: (data: CreateUserFormData) => Promise<void>
   groups: Group[]
+  groupMemberCounts: Record<number, number>
   loading: boolean
 }
 
@@ -42,13 +44,18 @@ interface CreateUserDialogProps {
  * Dialog do tworzenia nowego użytkownika
  * Zawiera formularz z walidacją hasła, imienia i przypisania do grupy
  */
-export function CreateUserDialog({ open, onOpenChange, onSubmit, groups, loading }: CreateUserDialogProps) {
+export function CreateUserDialog({ open, onOpenChange, onSubmit, groups, groupMemberCounts, loading }: CreateUserDialogProps) {
   const [formData, setFormData] = useState<CreateUserFormData>(INITIAL_FORM_DATA)
 
   const loginPreview = useMemo(
     () => generateLoginPreview(formData.fullName),
     [formData.fullName]
   )
+
+  const passwordValidation = passwordField.safeParse(formData.password)
+  const passwordError = formData.password && !passwordValidation.success
+    ? passwordValidation.error.issues[0]?.message
+    : undefined
 
   const handleSubmit = async () => {
     await onSubmit(formData)
@@ -63,6 +70,7 @@ export function CreateUserDialog({ open, onOpenChange, onSubmit, groups, loading
       description="Utwórz konto dla nowej osoby."
       onSubmit={handleSubmit}
       loading={loading}
+      submitDisabled={!passwordValidation.success}
       submitText="Utwórz"
     >
       <div className="space-y-2">
@@ -87,6 +95,7 @@ export function CreateUserDialog({ open, onOpenChange, onSubmit, groups, loading
           value={formData.password}
           onChange={(e) => setFormData({ ...formData, password: e.target.value })}
         />
+        {passwordError && <p className="text-xs text-destructive">{passwordError}</p>}
       </div>
       <div className="space-y-2">
         <Label>Grupa</Label>
@@ -94,6 +103,7 @@ export function CreateUserDialog({ open, onOpenChange, onSubmit, groups, loading
           value={formData.groupId}
           onValueChange={(val) => setFormData({ ...formData, groupId: val })}
           groups={groups}
+          groupMemberCounts={groupMemberCounts}
         />
       </div>
     </FormDialog>

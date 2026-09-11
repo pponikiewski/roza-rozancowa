@@ -73,6 +73,26 @@ export default function AdminMembersPage() {
     return { map, unassigned }
   }, [members, search])
 
+  const groupMemberCounts = useMemo(() => {
+    const counts: Record<number, number> = {}
+    members.forEach((member) => {
+      if (member.groups?.id && member.role !== "admin") {
+        counts[member.groups.id] = (counts[member.groups.id] || 0) + 1
+      }
+    })
+    return counts
+  }, [members])
+
+  const groupCompletedCounts = useMemo(() => {
+    const counts: Record<number, number> = {}
+    members.forEach((member) => {
+      if (member.groups?.id && member.role !== "admin" && member.acknowledgments.length > 0) {
+        counts[member.groups.id] = (counts[member.groups.id] || 0) + 1
+      }
+    })
+    return counts
+  }, [members])
+
   return (
     <div className="space-y-6 pb-24 max-w-6xl mx-auto p-6 pt-6">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 border-b pb-6">
@@ -95,8 +115,8 @@ export default function AdminMembersPage() {
       <Accordion type="multiple" className="w-full space-y-4" defaultValue={groups.length > 0 ? [`group-${groups[0].id}`] : []}>
         {groups.map((group) => {
           const groupMembers = groupedData.map.get(group.id) || []
-          const count = groupMembers.length
-          const completed = groupMembers.filter((m) => m.acknowledgments.length > 0).length
+          const count = groupMemberCounts[group.id] || 0
+          const completed = groupCompletedCounts[group.id] || 0
           return (
             <AccordionItem key={group.id} value={`group-${group.id}`} className="border rounded-xl bg-card px-1 overflow-hidden shadow-sm">
               <AccordionTrigger className="hover:no-underline px-4 py-4 hover:bg-muted/50 transition-colors">
@@ -146,7 +166,14 @@ export default function AdminMembersPage() {
         </AccordionItem>
       </Accordion>
 
-      <CreateUserDialog open={isAddOpen} onOpenChange={setIsAddOpen} onSubmit={handleCreateUser} groups={groups} loading={loading} />
+      <CreateUserDialog
+        open={isAddOpen}
+        onOpenChange={setIsAddOpen}
+        onSubmit={handleCreateUser}
+        groups={groups}
+        groupMemberCounts={groupMemberCounts}
+        loading={loading}
+      />
 
       <MemberDetailsDialog
         member={selectedMember}
@@ -158,6 +185,7 @@ export default function AdminMembersPage() {
         onDeleteUser={handleDeleteUser}
         getMysteryName={getMysteryName}
         groups={groups}
+        groupMemberCounts={groupMemberCounts}
         actionLoading={actionLoading}
       />
 

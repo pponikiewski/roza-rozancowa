@@ -12,6 +12,8 @@ interface GroupSelectProps {
   value: string
   onValueChange: (value: string) => void
   groups: Group[]
+  groupMemberCounts?: Record<number, number>
+  currentGroupId?: number | null
   placeholder?: string
   unassignedLabel?: string
   className?: string
@@ -34,6 +36,8 @@ export function GroupSelect({
   value,
   onValueChange,
   groups,
+  groupMemberCounts = {},
+  currentGroupId,
   placeholder = "-- Bez grupy --",
   unassignedLabel = "-- Bez grupy --",
   className,
@@ -47,8 +51,12 @@ export function GroupSelect({
       <SelectContent className={className}>
         <SelectItem value={UNASSIGNED_GROUP_VALUE}>{unassignedLabel}</SelectItem>
         {groups.map((g) => (
-          <SelectItem key={g.id} value={g.id.toString()}>
-            {g.name}
+          <SelectItem
+            key={g.id}
+            value={g.id.toString()}
+            disabled={groupMemberCounts[g.id] >= 20 && g.id !== currentGroupId}
+          >
+            {g.name}{groupMemberCounts[g.id] >= 20 ? " (pełna)" : ""}
           </SelectItem>
         ))}
       </SelectContent>

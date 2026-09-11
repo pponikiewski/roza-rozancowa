@@ -21,6 +21,7 @@ interface MemberDetailsDialogProps {
   onDeleteUser: (userId: string, fullName: string) => void
   getMysteryName: (id: number | null) => string
   groups: Group[]
+  groupMemberCounts: Record<number, number>
   actionLoading: boolean
 }
 
@@ -38,6 +39,7 @@ export function MemberDetailsDialog({
   onDeleteUser,
   getMysteryName,
   groups,
+  groupMemberCounts,
   actionLoading,
 }: MemberDetailsDialogProps) {
   const {
@@ -200,6 +202,8 @@ export function MemberDetailsDialog({
                   value={editGroupId}
                   onValueChange={handleGroupChange}
                   groups={groups}
+                  groupMemberCounts={groupMemberCounts}
+                  currentGroupId={member.groups?.id}
                   placeholder="-- Wybierz (lub usuń z grupy) --"
                   unassignedLabel="-- Bez grupy (usuń) --"
                   triggerClassName="h-9 w-full text-sm"
