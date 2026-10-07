@@ -77,7 +77,7 @@ export function MemberDetailsDialog({
         }}
       >
         <div className="p-6 pb-4 border-b">
-          <DialogHeader className="text-left">
+          <DialogHeader>
             <DialogTitle className="text-xl font-semibold leading-tight">{member.full_name}</DialogTitle>
             <DialogDescription className="text-[0.9375rem]">
               {member.groups ? member.groups.name : "Brak grupy"}

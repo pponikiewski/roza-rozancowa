@@ -56,13 +56,13 @@ export function ConfirmationDialog({
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[400px]">
-        <DialogHeader className="text-left">
+        <DialogHeader>
           <DialogTitle className="text-lg">{title}</DialogTitle>
           <DialogDescription className="text-[0.9375rem] leading-relaxed">
             {description}
           </DialogDescription>
         </DialogHeader>
-        <DialogFooter className="mt-4 gap-2 sm:gap-0">
+        <DialogFooter className="mt-4">
           <Button
             variant="outline"
             onClick={() => onOpenChange(false)}
