@@ -1,5 +1,4 @@
 import { useState } from "react"
-import { HandHeart } from "lucide-react"
 import { useAdminIntentions } from "@/features/admin/intentions/hooks/useAdminIntentions"
 import { IntentionForm, IntentionHistory, EditIntentionDialog } from "@/features/admin/intentions/components"
 import type { IntentionHistory as IntentionHistoryType } from "@/features/admin/intentions/types/intention.types"
@@ -28,13 +27,11 @@ export default function AdminIntentionsPage() {
   }
 
   return (
-    <div className="space-y-6 max-w-2xl mx-auto p-6 pt-6">
+    <div className="space-y-8 max-w-2xl mx-auto">
       {/* Header */}
-      <div>
-        <h1 className="text-2xl font-bold tracking-tight flex items-center gap-2">
-          <HandHeart className="h-6 w-6 text-primary" /> Intencja
-        </h1>
-        <p className="text-muted-foreground">
+      <div className="space-y-1">
+        <h1 className="text-2xl font-bold tracking-tight">Intencja</h1>
+        <p className="text-[0.9375rem] text-muted-foreground">
           Zmiana intencji modlitwy na dany miesiąc.
         </p>
       </div>

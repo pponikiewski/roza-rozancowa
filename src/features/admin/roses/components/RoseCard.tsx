@@ -1,4 +1,4 @@
-import { ChevronRight, Rose } from "lucide-react"
+import { ChevronRight } from "lucide-react"
 import { formatDayMonth } from "@/shared/lib/formatters"
 import type { Group } from "@/shared/types/domain.types"
 
@@ -8,28 +8,24 @@ interface RoseCardProps {
 }
 
 /**
- * Karta reprezentująca pojedynczą Różę na liście
+ * Wiersz z pojedynczą Różą na liście
  */
 export function RoseCard({ group, onClick }: RoseCardProps) {
   return (
-    <div
+    <button
+      type="button"
       onClick={onClick}
-      className="flex items-center justify-between p-4 bg-card border rounded-xl shadow-sm hover:bg-accent/50 transition-all cursor-pointer active:scale-[0.99]"
+      className="flex w-full items-center justify-between gap-3 py-3.5 text-left transition-colors hover:bg-accent/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
     >
-      <div className="flex items-center gap-4">
-        <div className="bg-primary-soft p-2.5 rounded-full text-primary shrink-0">
-          <Rose className="h-5 w-5" />
-        </div>
-        <div className="flex flex-col">
-          <span className="font-semibold text-base">{group.name}</span>
-          <span className="text-xs text-muted-foreground">
-            {group.admission_month && group.admission_day
-              ? `Przyjęcie do Stowarzyszenia: ${formatDayMonth(group.admission_day, group.admission_month)}`
-              : "Kliknij, aby zarządzać"}
+      <div className="flex min-w-0 flex-col">
+        <span className="truncate text-base font-semibold">{group.name}</span>
+        {group.admission_month && group.admission_day && (
+          <span className="text-sm text-muted-foreground">
+            Przyjęcie do Stowarzyszenia: {formatDayMonth(group.admission_day, group.admission_month)}
           </span>
-        </div>
+        )}
       </div>
-      <ChevronRight className="h-5 w-5 text-muted-foreground" />
-    </div>
+      <ChevronRight className="h-5 w-5 flex-shrink-0 text-muted-foreground" />
+    </button>
   )
 }

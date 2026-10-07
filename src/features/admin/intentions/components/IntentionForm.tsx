@@ -2,11 +2,9 @@ import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { intentionSchema, type IntentionFormData } from "@/shared/validation/intention.schema"
 import { Button } from "@/shared/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/shared/components/ui/card"
 import { Label } from "@/shared/components/ui/label"
 import { Textarea } from "@/shared/components/ui/textarea"
 import { Input } from "@/shared/components/ui/input"
-import { Save, CalendarHeart, Check } from "lucide-react"
 import { getCurrentMonthName, getCurrentYear } from "@/shared/lib/formatters"
 
 interface IntentionFormProps {
@@ -39,53 +37,31 @@ export function IntentionForm({ loading, saved, onSave }: IntentionFormProps) {
   }
 
   return (
-    <Card>
-      <CardHeader>
-        <div className="flex items-center gap-2">
-          <div className="p-2 bg-primary-soft rounded-full text-primary">
-            <CalendarHeart className="h-6 w-6" />
-          </div>
-          <div>
-            <CardTitle>Intencja Miesięczna</CardTitle>
-            <CardDescription className="capitalize">Na {monthName} {currentYear}</CardDescription>
-          </div>
+    <section>
+      <h2 className="text-lg font-semibold">Nowa intencja na {monthName} {currentYear}</h2>
+      <form onSubmit={handleSubmit(onSubmit)} className="mt-4 space-y-5">
+        <div className="space-y-2">
+          <Label htmlFor="title">Nagłówek</Label>
+          <Input id="title" {...register("title")} className="font-semibold" />
+          {errors.title && (
+            <p className="text-sm text-destructive">{errors.title.message}</p>
+          )}
         </div>
-      </CardHeader>
-      <CardContent className="space-y-6">
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-          <div className="space-y-2">
-            <Label htmlFor="title">Nagłówek</Label>
-            <Input id="title" {...register("title")} className="font-semibold" />
-            {errors.title && (
-              <p className="text-sm text-destructive">{errors.title.message}</p>
-            )}
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="content">Treść modlitwy</Label>
-            <Textarea 
-              id="content" 
-              className="min-h-[120px] text-base leading-relaxed" 
-              {...register("content")} 
-            />
-            {errors.content && (
-              <p className="text-sm text-destructive">{errors.content.message}</p>
-            )}
-          </div>
-          <Button type="submit" disabled={loading} className="w-full sm:w-auto min-w-[150px]">
-            {loading ? (
-              "Zapisywanie..."
-            ) : saved ? (
-              <>
-                <Check className="mr-2 h-4 w-4" /> Zapisano
-              </>
-            ) : (
-              <>
-                <Save className="mr-2 h-4 w-4" /> Zapisz Intencję
-              </>
-            )}
-          </Button>
-        </form>
-      </CardContent>
-    </Card>
+        <div className="space-y-2">
+          <Label htmlFor="content">Treść modlitwy</Label>
+          <Textarea
+            id="content"
+            className="min-h-[120px] text-base leading-relaxed"
+            {...register("content")}
+          />
+          {errors.content && (
+            <p className="text-sm text-destructive">{errors.content.message}</p>
+          )}
+        </div>
+        <Button type="submit" disabled={loading} className="w-full sm:w-auto min-w-[150px]">
+          {loading ? "Zapisywanie..." : saved ? "Zapisano" : "Zapisz intencję"}
+        </Button>
+      </form>
+    </section>
   )
 }

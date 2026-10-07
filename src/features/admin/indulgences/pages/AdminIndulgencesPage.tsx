@@ -1,5 +1,4 @@
 import { useState } from "react"
-import { CalendarHeart, Plus } from "lucide-react"
 import { Button } from "@/shared/components/ui/button"
 import { useAdminIndulgences } from "@/features/admin/indulgences/hooks/useAdminIndulgences"
 import { IndulgenceList } from "@/features/admin/indulgences/components/IndulgenceList"
@@ -36,23 +35,21 @@ export default function AdminIndulgencesPage() {
     editing ? updateIndulgence(editing.id, input) : createIndulgence(input)
 
   return (
-    <div className="space-y-6 max-w-2xl mx-auto p-6 pt-6">
+    <div className="space-y-6 max-w-2xl mx-auto">
       {/* Header */}
-      <div className="flex flex-wrap items-end justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight flex items-center gap-2">
-            <CalendarHeart className="h-6 w-6 text-primary" /> Odpusty
-          </h1>
-          <p className="text-muted-foreground">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div className="space-y-1">
+          <h1 className="text-2xl font-bold tracking-tight">Odpusty</h1>
+          <p className="text-[0.9375rem] text-muted-foreground">
             Dni, w których członkowie Róż mogą zyskać odpust. W każdy z nich wysyłane jest powiadomienie.
           </p>
         </div>
-        <Button onClick={openCreate}>
-          <Plus className="mr-2 h-4 w-4" /> Dodaj dzień
+        <Button onClick={openCreate} className="w-full md:w-auto font-semibold">
+          Dodaj dzień
         </Button>
       </div>
 
-      <p className="text-sm text-muted-foreground rounded-lg border bg-muted/30 px-4 py-3">
+      <p className="text-sm text-muted-foreground">
         Dzień przyjęcia do Stowarzyszenia Żywego Różańca jest inny dla każdej Róży. Ustawisz go w zakładce <b>Róże</b> (edycja Róży).
       </p>
 

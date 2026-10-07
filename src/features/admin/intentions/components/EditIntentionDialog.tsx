@@ -64,7 +64,7 @@ export function EditIntentionDialog({
         if (!isOpen) reset()
         onOpenChange(isOpen)
       }}
-      title="Edytuj Intencję"
+      title="Edytuj intencję"
       description={intention ? `${getMonthName(intention.month)} ${intention.year}` : ""}
       onSubmit={onSubmit}
       loading={loading}

@@ -1,8 +1,7 @@
 import { Button } from "@/shared/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/shared/components/ui/card"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/shared/components/ui/table"
 import { ConfirmationDialog, useConfirmation } from "@/shared/components/feedback"
-import { History, Pencil, Trash2 } from "lucide-react"
+import { Pencil, Trash2 } from "lucide-react"
 import { getMonthName } from "@/shared/lib/formatters"
 import type { IntentionHistory as IntentionHistoryType } from "@/features/admin/intentions/types/intention.types"
 
@@ -21,7 +20,7 @@ export function IntentionHistory({ history, onEdit, onDelete }: IntentionHistory
   const handleDelete = (id: number, title: string) => {
     confirm({
       title: "Usunąć intencję?",
-      description: <>Czy na pewno chcesz usunąć intencję <b>"{title}"</b>?</>,
+      description: <>Czy na pewno chcesz usunąć intencję <b>„{title}”</b>?</>,
       confirmText: "Usuń",
       variant: "danger",
       onConfirm: () => onDelete(id),
@@ -30,16 +29,9 @@ export function IntentionHistory({ history, onEdit, onDelete }: IntentionHistory
 
   return (
     <>
-      <Card>
-        <CardHeader>
-          <div className="flex items-center gap-2">
-            <div className="p-2 bg-muted rounded-full">
-              <History className="h-5 w-5" />
-            </div>
-            <CardTitle>Historia Intencji</CardTitle>
-          </div>
-        </CardHeader>
-        <CardContent>
+      <section className="border-t pt-6">
+        <h2 className="text-lg font-semibold">Historia intencji</h2>
+        <div className="mt-2">
           <Table>
             <TableHeader>
               <TableRow>
@@ -55,15 +47,15 @@ export function IntentionHistory({ history, onEdit, onDelete }: IntentionHistory
                     {getMonthName(item.month)} {item.year}
                   </TableCell>
                   <TableCell>
-                    <div className="font-semibold text-xs mb-1">{item.title}</div>
-                    <div className="text-xs text-muted-foreground">{item.content}</div>
+                    <div className="font-semibold mb-1">{item.title}</div>
+                    <div className="text-sm text-muted-foreground">{item.content}</div>
                   </TableCell>
                   <TableCell>
                     <div className="flex gap-2">
                       <Button
                         variant="ghost"
                         size="icon"
-                        className="h-8 w-8"
+                        aria-label={`Edytuj intencję: ${item.title}`}
                         onClick={() => onEdit(item)}
                       >
                         <Pencil className="h-4 w-4" />
@@ -71,7 +63,8 @@ export function IntentionHistory({ history, onEdit, onDelete }: IntentionHistory
                       <Button
                         variant="ghost"
                         size="icon"
-                        className="h-8 w-8 text-destructive hover:text-destructive"
+                        className="text-destructive hover:text-destructive"
+                        aria-label={`Usuń intencję: ${item.title}`}
                         onClick={() => handleDelete(item.id, item.title)}
                       >
                         <Trash2 className="h-4 w-4" />
@@ -89,8 +82,8 @@ export function IntentionHistory({ history, onEdit, onDelete }: IntentionHistory
               )}
             </TableBody>
           </Table>
-        </CardContent>
-      </Card>
+        </div>
+      </section>
 
       <ConfirmationDialog {...dialogProps} />
     </>

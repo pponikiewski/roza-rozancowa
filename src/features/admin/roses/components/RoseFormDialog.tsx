@@ -73,7 +73,7 @@ export function RoseFormDialog({
     <FormDialog
       open={open}
       onOpenChange={onOpenChange}
-      title={isEditing ? "Edytuj Różę" : "Utwórz Nową Różę"}
+      title={isEditing ? "Edytuj Różę" : "Nowa Róża"}
       description={isEditing ? "Zmień dane istniejącej grupy." : "Dodaj nową grupę modlitewną."}
       onSubmit={handleSubmit}
       loading={loading}

@@ -1,5 +1,4 @@
 import type { ReactNode } from "react"
-import { AlertCircle, RotateCw, Trash2, type LucideIcon } from "lucide-react"
 import { Button } from "@/shared/components/ui/button"
 import {
   Dialog,
@@ -21,34 +20,13 @@ export interface ConfirmationDialogProps {
   confirmText?: string
   cancelText?: string
   variant?: ConfirmationVariant
-  icon?: LucideIcon
   loading?: boolean
 }
 
-const variantStyles: Record<ConfirmationVariant, {
-  iconBg: string
-  iconColor: string
-  buttonVariant: "destructive" | "default" | "outline"
-  defaultIcon: LucideIcon
-}> = {
-  danger: {
-    iconBg: "bg-destructive-soft",
-    iconColor: "text-destructive",
-    buttonVariant: "destructive",
-    defaultIcon: Trash2,
-  },
-  warning: {
-    iconBg: "bg-warning-soft",
-    iconColor: "text-warning",
-    buttonVariant: "default",
-    defaultIcon: AlertCircle,
-  },
-  info: {
-    iconBg: "bg-primary/10",
-    iconColor: "text-primary",
-    buttonVariant: "default",
-    defaultIcon: RotateCw,
-  },
+const buttonVariants: Record<ConfirmationVariant, "destructive" | "default"> = {
+  danger: "destructive",
+  warning: "default",
+  info: "default",
 }
 
 /**
@@ -68,12 +46,8 @@ export function ConfirmationDialog({
   confirmText = "Potwierdź",
   cancelText = "Anuluj",
   variant = "danger",
-  icon,
   loading = false,
 }: ConfirmationDialogProps) {
-  const styles = variantStyles[variant]
-  const Icon = icon || styles.defaultIcon
-
   const handleConfirm = async () => {
     await onConfirm()
     onOpenChange(false)
@@ -82,18 +56,11 @@ export function ConfirmationDialog({
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[400px]">
-        <DialogHeader>
-          <div className="flex items-start gap-4">
-            <div className={`${styles.iconBg} p-3 rounded-full shrink-0`}>
-              <Icon className={`h-5 w-5 ${styles.iconColor}`} />
-            </div>
-            <div className="space-y-2 pt-1">
-              <DialogTitle className="text-base">{title}</DialogTitle>
-              <DialogDescription className="text-sm leading-relaxed">
-                {description}
-              </DialogDescription>
-            </div>
-          </div>
+        <DialogHeader className="text-left">
+          <DialogTitle className="text-lg">{title}</DialogTitle>
+          <DialogDescription className="text-[0.9375rem] leading-relaxed">
+            {description}
+          </DialogDescription>
         </DialogHeader>
         <DialogFooter className="mt-4 gap-2 sm:gap-0">
           <Button
@@ -104,7 +71,7 @@ export function ConfirmationDialog({
             {cancelText}
           </Button>
           <Button
-            variant={styles.buttonVariant}
+            variant={buttonVariants[variant]}
             onClick={handleConfirm}
             disabled={loading}
           >

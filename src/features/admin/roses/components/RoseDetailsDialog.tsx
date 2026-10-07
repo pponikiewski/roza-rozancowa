@@ -6,8 +6,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/shared/components/ui/dialog"
-import { Separator } from "@/shared/components/ui/separator"
-import { CalendarClock, Pencil, Rose, RotateCw, Trash2 } from "lucide-react"
+import { Pencil, RotateCw, Trash2 } from "lucide-react"
 import type { Group } from "@/shared/types/domain.types"
 
 interface RoseDetailsDialogProps {
@@ -49,35 +48,15 @@ export function RoseDetailsDialog({
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-md">
-        <DialogHeader>
-          <DialogTitle className="flex items-center gap-2 text-xl">
-            <div className="bg-primary-soft p-2 rounded-full text-primary">
-              <Rose className="h-5 w-5" />
-            </div>
-            {group.name}
-          </DialogTitle>
-          <DialogDescription>Szczegóły i zarządzanie Różą.</DialogDescription>
+        <DialogHeader className="text-left">
+          <DialogTitle className="text-xl">{group.name}</DialogTitle>
+          <DialogDescription className="text-[0.9375rem]">
+            Utworzona {formatDate(group.created_at)}
+          </DialogDescription>
         </DialogHeader>
 
-        <div className="space-y-6 py-2">
-          <div className="bg-muted/30 p-3 rounded-lg border flex items-center gap-3">
-            <CalendarClock className="h-5 w-5 text-muted-foreground" />
-            <div className="flex flex-col">
-              <span className="text-xs font-medium text-muted-foreground uppercase">
-                Data utworzenia
-              </span>
-              <span className="text-sm font-medium">
-                {formatDate(group.created_at)}
-              </span>
-            </div>
-          </div>
-
-          <Separator />
-
+        <div className="py-2">
           <div className="space-y-3">
-            <h4 className="text-sm font-medium text-muted-foreground uppercase tracking-wider">
-              Dostępne akcje
-            </h4>
             <div className="grid gap-2">
               <Button
                 variant="outline"

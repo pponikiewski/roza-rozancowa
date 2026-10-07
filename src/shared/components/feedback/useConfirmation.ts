@@ -1,5 +1,4 @@
 import { useState, useCallback, type ReactNode } from "react"
-import type { LucideIcon } from "lucide-react"
 import type { ConfirmationVariant } from "./ConfirmationDialog"
 
 interface ConfirmationState {
@@ -9,7 +8,6 @@ interface ConfirmationState {
   confirmText: string
   cancelText: string
   variant: ConfirmationVariant
-  icon?: LucideIcon
   onConfirm: () => void | Promise<unknown>
 }
 
@@ -19,7 +17,6 @@ interface ConfirmOptions {
   confirmText?: string
   cancelText?: string
   variant?: ConfirmationVariant
-  icon?: LucideIcon
   onConfirm: () => void | Promise<unknown>
 }
 
@@ -62,7 +59,6 @@ export function useConfirmation() {
       confirmText: options.confirmText || "Potwierdź",
       cancelText: options.cancelText || "Anuluj",
       variant: options.variant || "danger",
-      icon: options.icon,
       onConfirm: options.onConfirm,
     })
   }, [])
@@ -93,7 +89,6 @@ export function useConfirmation() {
     confirmText: state.confirmText,
     cancelText: state.cancelText,
     variant: state.variant,
-    icon: state.icon,
     loading,
   }
 

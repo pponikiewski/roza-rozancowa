@@ -1,8 +1,6 @@
 import { Button } from "@/shared/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/shared/components/ui/card"
-import { Badge } from "@/shared/components/ui/badge"
 import { ConfirmationDialog, useConfirmation } from "@/shared/components/feedback"
-import { CalendarDays, Pencil, Trash2 } from "lucide-react"
+import { Pencil, Trash2 } from "lucide-react"
 import { formatDayMonth } from "@/shared/lib/formatters"
 import { getEasterDate } from "@/shared/lib/liturgical"
 import type { IndulgenceDay } from "@/features/admin/indulgences/types/indulgence.types"
@@ -33,7 +31,7 @@ export function IndulgenceList({ indulgences, loading, onEdit, onDelete }: Indul
   const handleDelete = (item: IndulgenceDay) => {
     confirm({
       title: "Usunąć dzień odpustu?",
-      description: <>Czy na pewno chcesz usunąć <b>"{item.name}"</b>?</>,
+      description: <>Czy na pewno chcesz usunąć <b>„{item.name}”</b>?</>,
       confirmText: "Usuń",
       variant: "danger",
       onConfirm: () => onDelete(item.id),
@@ -42,55 +40,46 @@ export function IndulgenceList({ indulgences, loading, onEdit, onDelete }: Indul
 
   return (
     <>
-      <Card>
-        <CardHeader>
-          <div className="flex items-center gap-2">
-            <div className="p-2 bg-muted rounded-full">
-              <CalendarDays className="h-5 w-5" />
-            </div>
-            <CardTitle>Kalendarz odpustów</CardTitle>
-          </div>
-        </CardHeader>
-        <CardContent>
-          <ul className="divide-y">
-            {indulgences.map((item) => (
-              <li key={item.id} className="flex items-start gap-3 py-3">
-                <div className="flex-1 min-w-0">
-                  <div className="flex flex-wrap items-center gap-2 mb-0.5">
-                    <span className="text-sm font-semibold">{getDateLabel(item)}</span>
-                    <Badge variant="outline" className="text-xs">
-                      {item.is_easter ? "święto ruchome" : item.year === null ? "co roku" : item.year}
-                    </Badge>
-                  </div>
-                  <div className="text-sm">{item.name}</div>
-                  {item.description && (
-                    <div className="text-xs text-muted-foreground mt-1 line-clamp-2">{item.description}</div>
-                  )}
+      <section className="border-t pt-6">
+        <h2 className="text-lg font-semibold">Kalendarz odpustów</h2>
+        <ul className="mt-2 divide-y">
+          {indulgences.map((item) => (
+            <li key={item.id} className="flex items-start gap-3 py-3">
+              <div className="flex-1 min-w-0">
+                <div className="mb-0.5">
+                  <span className="font-semibold">{getDateLabel(item)}</span>
+                  <span className="text-sm text-muted-foreground">
+                    {", "}{item.is_easter ? "święto ruchome" : item.year === null ? "co roku" : item.year}
+                  </span>
                 </div>
-                <div className="flex gap-1 flex-shrink-0">
-                  <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => onEdit(item)} title="Edytuj">
-                    <Pencil className="h-4 w-4" />
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="h-8 w-8 text-destructive hover:text-destructive"
-                    onClick={() => handleDelete(item)}
-                    title="Usuń"
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
-                </div>
-              </li>
-            ))}
-            {!loading && indulgences.length === 0 && (
-              <li className="text-center text-sm text-muted-foreground py-6">
-                Brak dni odpustów
-              </li>
-            )}
-          </ul>
-        </CardContent>
-      </Card>
+                <div className="text-[0.9375rem]">{item.name}</div>
+                {item.description && (
+                  <div className="text-sm text-muted-foreground mt-1 line-clamp-2">{item.description}</div>
+                )}
+              </div>
+              <div className="flex gap-1 flex-shrink-0">
+                <Button variant="ghost" size="icon" onClick={() => onEdit(item)} aria-label={`Edytuj: ${item.name}`}>
+                  <Pencil className="h-4 w-4" />
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="text-destructive hover:text-destructive"
+                  onClick={() => handleDelete(item)}
+                  aria-label={`Usuń: ${item.name}`}
+                >
+                  <Trash2 className="h-4 w-4" />
+                </Button>
+              </div>
+            </li>
+          ))}
+          {!loading && indulgences.length === 0 && (
+            <li className="text-center text-sm text-muted-foreground py-6">
+              Brak dni odpustów
+            </li>
+          )}
+        </ul>
+      </section>
 
       <ConfirmationDialog {...dialogProps} />
     </>
