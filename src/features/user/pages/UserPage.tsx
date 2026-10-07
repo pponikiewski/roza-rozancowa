@@ -6,6 +6,8 @@ import { MysteryCard } from "@/features/user/components/MysteryCard"
 import { RoseDialog } from "@/features/user/components/RoseDialog"
 import { UserHeader } from "@/features/user/components/UserHeader"
 import { NoAssignmentCard } from "@/features/user/components/NoAssignmentCard"
+import { IndulgenceCard } from "@/features/user/components/IndulgenceCard"
+import { NotificationCard } from "@/features/notifications/components/NotificationCard"
 // Hooks & Utils
 import { useUserData } from "@/features/user/hooks/useUserData"
 import { useMysteryChangeTimer } from "@/features/user/hooks/useMysteryChangeTimer"
@@ -23,6 +25,7 @@ export default function UserPage() {
     mystery,
     intention,
     isAcknowledged,
+    todayIndulgences,
     acknowledgeMystery
   } = useUserData()
 
@@ -67,6 +70,9 @@ export default function UserPage() {
       <UserHeader profile={profile} onOpenRose={() => setIsRoseOpen(true)} />
 
       <main className="flex-1 w-full max-w-lg mx-auto p-8 md:p-8 flex flex-col gap-5">
+        {/* KARTA ODPUSTU — tylko w dniu odpustu */}
+        {todayIndulgences.length > 0 && <IndulgenceCard indulgences={todayIndulgences} />}
+
         {/* KARTA INTENCJI */}
         {intention && (
           <IntentionCard
@@ -84,6 +90,9 @@ export default function UserPage() {
           timeLeft={timeLeft}
           onAcknowledge={acknowledgeMystery}
         />
+
+        {/* POWIADOMIENIA PUSH */}
+        <NotificationCard />
       </main>
 
       {/* DIALOG RÓŻY */}
