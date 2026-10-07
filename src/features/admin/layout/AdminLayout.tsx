@@ -51,14 +51,12 @@ function NavContent({ timeLeft, targetDate, onNavClick }: NavContentProps) {
         ))}
       </nav>
 
-      <div className="border-t px-5 py-4">
-        <p className="text-sm text-muted-foreground">Do zmiany tajemnic</p>
-        <p className="mt-0.5 font-semibold tabular-nums">{formatTimeLeft(timeLeft)}</p>
-        {targetDate && (
-          <p className="text-sm text-muted-foreground">
-            {targetDate.toLocaleDateString("pl-PL", { day: "numeric", month: "long", year: "numeric" })}
-          </p>
-        )}
+      <div className="border-t px-5 py-3 text-sm">
+        <p className="text-muted-foreground">
+          Zmiana tajemnic
+          {targetDate && ` ${targetDate.toLocaleDateString("pl-PL", { day: "numeric", month: "long" })}`}
+        </p>
+        <p className="font-medium tabular-nums">za {formatTimeLeft(timeLeft)}</p>
       </div>
 
       <div className="border-t p-3">
