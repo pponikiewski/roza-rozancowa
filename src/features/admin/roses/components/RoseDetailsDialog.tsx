@@ -6,7 +6,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/shared/components/ui/dialog"
-import { Pencil, RotateCw, Trash2 } from "lucide-react"
+import { formatDayMonth } from "@/shared/lib/formatters"
 import type { Group } from "@/shared/types/domain.types"
 
 interface RoseDetailsDialogProps {
@@ -47,43 +47,47 @@ export function RoseDetailsDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-md">
-        <DialogHeader className="text-left">
+      <DialogContent
+        className="sm:max-w-md"
+        // Fokus na okno, a nie na pierwszy przycisk - inaczej wygląda na zaznaczony
+        onOpenAutoFocus={(e) => {
+          e.preventDefault()
+          ;(e.currentTarget as HTMLElement).focus()
+        }}
+      >
+        <DialogHeader>
           <DialogTitle className="text-xl">{group.name}</DialogTitle>
-          <DialogDescription className="text-[0.9375rem]">
-            Utworzona {formatDate(group.created_at)}
-          </DialogDescription>
+          <DialogDescription className="sr-only">Dane Róży i dostępne akcje</DialogDescription>
         </DialogHeader>
 
-        <div className="py-2">
-          <div className="space-y-3">
-            <div className="grid gap-2">
-              <Button
-                variant="outline"
-                className="justify-start h-11"
-                onClick={() => handleAction(onRotate)}
-              >
-                <RotateCw className="mr-2 h-4 w-4 text-primary" />
-                Wymuś rotację tajemnic
-              </Button>
-              <Button
-                variant="outline"
-                className="justify-start h-11"
-                onClick={() => handleAction(onEdit)}
-              >
-                <Pencil className="mr-2 h-4 w-4" />
-                Edytuj nazwę
-              </Button>
-              <Button
-                variant="destructive"
-                className="justify-start h-11"
-                onClick={() => handleAction(onDelete)}
-              >
-                <Trash2 className="mr-2 h-4 w-4" />
-                Usuń Różę
-              </Button>
-            </div>
+        <dl className="divide-y border-y">
+          <div className="flex items-center justify-between gap-4 py-2.5">
+            <dt className="text-sm text-muted-foreground">Utworzona</dt>
+            <dd className="text-[0.9375rem]">{formatDate(group.created_at)}</dd>
           </div>
+          <div className="flex items-center justify-between gap-4 py-2.5">
+            <dt className="text-sm text-muted-foreground">Przyjęcie do Stowarzyszenia</dt>
+            <dd className="text-right text-[0.9375rem]">
+              {group.admission_day && group.admission_month
+                ? formatDayMonth(group.admission_day, group.admission_month)
+                : <span className="text-muted-foreground">nie ustawiono</span>}
+            </dd>
+          </div>
+        </dl>
+
+        <div className="grid gap-2">
+          <Button variant="outline" onClick={() => handleAction(onEdit)}>
+            Edytuj dane
+          </Button>
+          <Button variant="outline" onClick={() => handleAction(onRotate)}>
+            Wymuś rotację tajemnic
+          </Button>
+        </div>
+
+        <div className="flex justify-end border-t pt-4">
+          <Button variant="destructive" onClick={() => handleAction(onDelete)}>
+            Usuń Różę
+          </Button>
         </div>
       </DialogContent>
     </Dialog>

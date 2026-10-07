@@ -95,7 +95,6 @@ export function IndulgenceFormDialog({
         <Label htmlFor="indulgence-name">Nazwa</Label>
         <Input
           id="indulgence-name"
-          placeholder="np. Święto Matki Bożej Różańcowej"
           {...register("name")}
         />
         {errors.name && <p className="text-sm text-destructive">{errors.name.message}</p>}

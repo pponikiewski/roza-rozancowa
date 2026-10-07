@@ -74,14 +74,14 @@ export function RoseFormDialog({
       open={open}
       onOpenChange={onOpenChange}
       title={isEditing ? "Edytuj Różę" : "Nowa Róża"}
-      description={isEditing ? "Zmień dane istniejącej grupy." : "Dodaj nową grupę modlitewną."}
+      submitText={isEditing ? "Zapisz" : "Dodaj Różę"}
       onSubmit={handleSubmit}
       loading={loading}
     >
       <div className="space-y-2">
-        <Label>Nazwa Róży</Label>
+        <Label htmlFor="rose-name">Nazwa Róży</Label>
         <Input
-          placeholder="np. Róża pw. Św. Rity"
+          id="rose-name"
           value={groupName}
           onChange={(e) => setGroupName(e.target.value)}
           autoFocus
@@ -106,7 +106,7 @@ export function RoseFormDialog({
             aria-label="Miesiąc przyjęcia"
             value={admissionMonth}
             onChange={(e) => setAdmissionMonth(e.target.value)}
-            className="flex h-10 flex-1 rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+            className="flex h-10 flex-1 rounded-md border border-input bg-background px-3 py-2 text-base md:text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50 focus-visible:border-ring"
           >
             <option value="">Miesiąc</option>
             {MONTHS.map((m) => (
@@ -115,7 +115,7 @@ export function RoseFormDialog({
           </select>
         </div>
         {admissionError && <p className="text-sm text-destructive">{admissionError}</p>}
-        <p className="text-xs text-muted-foreground">
+        <p className="text-sm text-muted-foreground">
           Co roku w tym dniu członkowie Róży dostaną powiadomienie o odpuście.
         </p>
       </div>
