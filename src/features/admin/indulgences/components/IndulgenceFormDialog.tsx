@@ -104,9 +104,9 @@ export function IndulgenceFormDialog({
       <div className="space-y-2">
         <Label htmlFor="indulgence-date">Data</Label>
         {isEasterKind ? (
-          // Wielkanoc (z listy startowej) — data liczona automatycznie, bez edycji
+          // Wielkanoc (z listy startowej): data liczona automatycznie, bez edycji
           <p className="text-sm text-muted-foreground rounded-md border bg-muted/30 px-3 py-2">
-            Wielkanoc — data liczona automatycznie co roku.
+            Wielkanoc. Data jest liczona automatycznie co roku.
           </p>
         ) : (
           <>

@@ -53,7 +53,7 @@ export default function AdminIndulgencesPage() {
       </div>
 
       <p className="text-sm text-muted-foreground rounded-lg border bg-muted/30 px-4 py-3">
-        Dzień przyjęcia do Stowarzyszenia Żywego Różańca jest inny dla każdej Róży — ustawisz go w zakładce <b>Róże</b> (edycja Róży).
+        Dzień przyjęcia do Stowarzyszenia Żywego Różańca jest inny dla każdej Róży. Ustawisz go w zakładce <b>Róże</b> (edycja Róży).
       </p>
 
       <IndulgenceList
