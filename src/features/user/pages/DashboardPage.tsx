@@ -63,7 +63,7 @@ export default function DashboardPage() {
     <div className="min-h-screen w-full bg-background flex flex-col pb-safe">
       <UserHeader profile={profile} onOpenRose={handleOpenRose} />
 
-      <main className="flex-1 w-full max-w-lg mx-auto px-4 py-5 md:px-8 md:py-8 flex flex-col gap-4">
+      <main className="flex-1 w-full max-w-lg mx-auto px-5 py-2 md:px-8 md:py-4 flex flex-col divide-y">
         {/* KARTA INTENCJI */}
         {intention && (
           <IntentionCard

@@ -1,6 +1,6 @@
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
-import { Lock, Loader2 } from "lucide-react"
+import { Loader2 } from "lucide-react"
 import {
   Dialog,
   DialogContent,
@@ -59,10 +59,7 @@ export function ChangePasswordDialog({ open, onOpenChange }: ChangePasswordDialo
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent className="max-w-sm">
         <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
-            <Lock className="h-5 w-5 text-primary" />
-            Zmiana hasła
-          </DialogTitle>
+          <DialogTitle>Zmiana hasła</DialogTitle>
           <DialogDescription>
             Wprowadź nowe hasło. Hasło musi mieć minimum 6 znaków.
           </DialogDescription>

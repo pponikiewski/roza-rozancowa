@@ -1,4 +1,3 @@
-import { AlertCircle, LogOut } from "lucide-react"
 import { Button } from "@/shared/components/ui/button"
 import { Card, CardContent, CardFooter, CardHeader } from "@/shared/components/ui/card"
 import { useLogout } from "@/features/auth"
@@ -16,11 +15,8 @@ export function NoAssignmentCard({ profile }: NoAssignmentCardProps) {
 
   return (
     <div className="flex flex-col min-h-screen bg-background p-4 items-center justify-center text-center">
-      <Card className="w-full max-w-sm">
+      <Card className="w-full max-w-sm border-0 bg-transparent shadow-none">
         <CardHeader className="items-center pb-2">
-          <div className="bg-warning-soft p-4 rounded-full mb-2">
-            <AlertCircle className="h-8 w-8 text-warning" />
-          </div>
           <h2 className="text-xl font-semibold tracking-tight">Brak przydziału</h2>
         </CardHeader>
         <CardContent>
@@ -30,8 +26,8 @@ export function NoAssignmentCard({ profile }: NoAssignmentCardProps) {
           </p>
         </CardContent>
         <CardFooter className="justify-center pt-2">
-          <Button variant="outline" onClick={handleLogout} className="gap-2">
-            <LogOut className="h-4 w-4" /> Wyloguj się
+          <Button variant="outline" onClick={handleLogout}>
+            Wyloguj się
           </Button>
         </CardFooter>
       </Card>

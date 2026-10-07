@@ -6,6 +6,7 @@ import { useState } from "react"
 import { HeaderControls } from "@/shared/components/common/HeaderControls"
 import { useMysteryChangeTimer } from "@/features/user/hooks/useMysteryChangeTimer"
 import { ROUTES } from "@/shared/lib/constants"
+import { formatTimeLeft } from "@/shared/lib/formatters"
 
 interface NavContentProps {
   timeLeft: { days: number; hours: number; minutes: number }
@@ -51,7 +52,7 @@ function NavContent({ timeLeft, targetDate, onNavClick }: NavContentProps) {
             <span>Do zmiany tajemnic:</span>
           </div>
           <div className="text-sm font-mono font-semibold tabular-nums pl-5">
-            {timeLeft.days}d {timeLeft.hours}h {timeLeft.minutes}m
+            {formatTimeLeft(timeLeft)}
           </div>
           {targetDate && (
             <div className="text-xs text-muted-foreground pl-5 pt-1">

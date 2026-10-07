@@ -13,6 +13,7 @@ type ThemeProviderState = {
   theme: Theme
   setTheme: (theme: Theme) => void
   seniorMode: SeniorMode
+  setSeniorMode: (mode: SeniorMode) => void
   toggleSeniorMode: () => void
 }
 
@@ -20,6 +21,7 @@ const initialState: ThemeProviderState = {
   theme: "system",
   setTheme: () => null,
   seniorMode: "normal",
+  setSeniorMode: () => null,
   toggleSeniorMode: () => null,
 }
 
@@ -88,6 +90,7 @@ export function ThemeProvider({
       setTheme(theme)
     },
     seniorMode,
+    setSeniorMode,
     toggleSeniorMode,
   }
 

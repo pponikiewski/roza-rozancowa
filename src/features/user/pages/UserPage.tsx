@@ -1,13 +1,12 @@
 import { useState, useEffect } from "react"
 // UI Components
-import { LoadingScreen } from "@/shared/components/feedback"
+import { UserPageSkeleton } from "@/features/user/components/UserPageSkeleton"
 import { IntentionCard } from "@/features/user/components/IntentionCard"
 import { MysteryCard } from "@/features/user/components/MysteryCard"
 import { RoseDialog } from "@/features/user/components/RoseDialog"
 import { UserHeader } from "@/features/user/components/UserHeader"
 import { NoAssignmentCard } from "@/features/user/components/NoAssignmentCard"
 import { IndulgenceCard } from "@/features/user/components/IndulgenceCard"
-import { NotificationCard } from "@/features/notifications/components/NotificationCard"
 // Hooks & Utils
 import { useUserData } from "@/features/user/hooks/useUserData"
 import { useMysteryChangeTimer } from "@/features/user/hooks/useMysteryChangeTimer"
@@ -58,7 +57,7 @@ export default function UserPage() {
   })
 
   if (loading) {
-    return <LoadingScreen fullScreen text="Ładowanie..." />
+    return <UserPageSkeleton />
   }
 
   if (!mystery) {
@@ -69,7 +68,7 @@ export default function UserPage() {
     <div className="min-h-screen w-full bg-background flex flex-col pb-safe">
       <UserHeader profile={profile} onOpenRose={() => setIsRoseOpen(true)} />
 
-      <main className="flex-1 w-full max-w-lg mx-auto px-4 py-5 md:px-8 md:py-8 flex flex-col gap-4">
+      <main className="flex-1 w-full max-w-lg mx-auto px-5 py-2 md:px-8 md:py-4 flex flex-col divide-y">
         {/* KARTA ODPUSTU — tylko w dniu odpustu */}
         {todayIndulgences.length > 0 && <IndulgenceCard indulgences={todayIndulgences} />}
 
@@ -90,15 +89,14 @@ export default function UserPage() {
           timeLeft={timeLeft}
           onAcknowledge={acknowledgeMystery}
         />
-
-        {/* POWIADOMIENIA PUSH */}
-        <NotificationCard />
       </main>
 
       {/* DIALOG RÓŻY */}
       <RoseDialog
         open={isRoseOpen}
         onOpenChange={setIsRoseOpen}
+        fullName={profile?.full_name}
+        login={profile?.login}
         groupName={profile?.groups?.name}
         members={roseMembers}
         loading={roseLoading}

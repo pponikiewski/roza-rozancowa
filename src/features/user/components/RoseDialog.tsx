@@ -1,14 +1,18 @@
 import { memo, useState } from "react"
-import { Rose, Loader2, ScrollText, KeyRound } from "lucide-react"
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/shared/components/ui/dialog"
-import { Badge } from "@/shared/components/ui/badge"
+import { Sheet, SheetContent, SheetTitle, SheetDescription } from "@/shared/components/ui/sheet"
 import { Button } from "@/shared/components/ui/button"
+import { Skeleton } from "@/shared/components/ui/skeleton"
 import { ChangePasswordDialog } from "@/features/user/components/ChangePasswordDialog"
+import { AppearanceSettings } from "@/features/user/components/AppearanceSettings"
+import { NotificationSettings } from "@/features/notifications/components/NotificationSettings"
+import { useLogout } from "@/features/auth"
 import type { RoseMember } from "@/features/user/types/user.types"
 
 interface RoseDialogProps {
   open: boolean
   onOpenChange: (open: boolean) => void
+  fullName?: string
+  login?: string
   groupName?: string
   members: RoseMember[]
   loading: boolean
@@ -16,97 +20,119 @@ interface RoseDialogProps {
 }
 
 /**
- * Dialog wyświetlający skład Różańcowej Róży - listę członków z ich tajemnicami
+ * Panel wysuwany od dołu po kliknięciu w swoje imię:
+ * konto (zmiana hasła, wylogowanie), wygląd (motyw, wielkość tekstu), skład Róży z aktualnymi tajemnicami
+ * i na końcu powiadomienia
  * Zmemoizowany - rerenderuje tylko gdy zmienia się stan open, lista członków lub loading
  */
 export const RoseDialog = memo(function RoseDialog({
   open,
   onOpenChange,
+  fullName,
+  login,
   groupName,
   members,
   loading,
   currentUserId,
 }: RoseDialogProps) {
   const [isPasswordDialogOpen, setIsPasswordDialogOpen] = useState(false)
+  const handleLogout = useLogout()
 
   return (
     <>
-      <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent className="max-w-md max-h-[85vh] flex flex-col p-0 gap-0 overflow-hidden">
-          <div className="p-6 pb-4 border-b">
-            <DialogHeader className="text-left">
-              <DialogTitle className="flex items-center gap-2">
-                <Rose className="h-5 w-5 text-primary" />
-                {groupName || "Moja Róża"}
-              </DialogTitle>
-              <DialogDescription>Skład Twojej róży i aktualne tajemnice.</DialogDescription>
-            </DialogHeader>
-          </div>
+      <Sheet open={open} onOpenChange={onOpenChange}>
+        <SheetContent
+          side="bottom"
+          // pt-12: pasek na krzyżyk zamykania, treść przewija się pod nim, a nie pod krzyżykiem
+          className="mx-auto flex max-h-[90dvh] flex-col gap-0 rounded-t-xl p-0 pt-12"
+          // Fokus na panel, a nie na pierwszy przycisk - inaczej "Zmień hasło" wygląda na zaznaczone
+          onOpenAutoFocus={(e) => {
+            e.preventDefault()
+            ;(e.currentTarget as HTMLElement).focus()
+          }}
+        >
+          {/* Konto, wygląd i skład Róży przewijają się razem */}
+          <div className="scrollbar-subtle mx-auto min-h-0 w-full max-w-lg pb-[env(safe-area-inset-bottom)]">
+            {/* MOJE KONTO */}
+            <section className="border-b px-5 pb-5">
+              <SheetTitle className="text-xl font-semibold leading-tight">
+                {fullName || "Moje konto"}
+              </SheetTitle>
+              <SheetDescription className={login ? "mt-1 text-sm" : "sr-only"}>
+                {login ? `Login: ${login}` : "Twoje konto i skład Róży"}
+              </SheetDescription>
+              <div className="mt-4 grid grid-cols-2 gap-2">
+                <Button variant="outline" onClick={() => setIsPasswordDialogOpen(true)}>
+                  Zmień hasło
+                </Button>
+                <Button variant="outline" onClick={handleLogout}>
+                  Wyloguj się
+                </Button>
+              </div>
+            </section>
 
-        <div className="flex-1 min-h-0 scrollbar-subtle">
-          {loading ? (
-            <div className="flex flex-col items-center justify-center p-12 gap-3 text-muted-foreground">
-              <Loader2 className="h-6 w-6 animate-spin text-primary" />
-              <span className="text-sm">Pobieranie danych róży...</span>
-            </div>
-          ) : (
-            <div className="flex flex-col divide-y">
-              {members.length === 0 ? (
-                <div className="p-8 text-center text-sm text-muted-foreground">
-                  Brak danych. Upewnij się, że jesteś przypisany do grupy.
-                </div>
-              ) : (
-                members.map((member) => (
-                  <div
-                    key={member.id}
-                    className={`flex items-center p-4 gap-3 transition-colors ${
-                      member.id === currentUserId ? "bg-primary-soft" : "hover:bg-accent/60"
-                    }`}
-                  >
-                    <div className="flex flex-col items-center justify-center h-9 w-9 min-w-[2.25rem] rounded-full bg-muted text-sm font-semibold text-foreground tabular-nums">
-                      {member.rose_pos || "-"}
-                    </div>
-                    <div className="flex flex-col min-w-0">
-                      <div className="flex items-center gap-2">
-                        <span
-                          className={`text-[0.9375rem] font-semibold truncate ${
-                            member.id === currentUserId ? "text-primary" : "text-foreground"
-                          }`}
-                        >
-                          {member.full_name}
-                        </span>
-                        {member.id === currentUserId && (
-                          <Badge variant="default" className="px-2 py-0 text-xs">
-                            Ty
-                          </Badge>
-                        )}
+            {/* WYGLĄD */}
+            <section className="border-b px-5 py-4">
+              <h3 className="mb-2 text-base font-semibold">Wygląd</h3>
+              <AppearanceSettings />
+            </section>
+
+            {/* SKŁAD RÓŻY */}
+            <section>
+              <div className="px-5 pb-2 pt-5">
+                <h3 className="text-base font-semibold">{groupName || "Moja Róża"}</h3>
+                <p className="text-sm text-muted-foreground">Skład Twojej Róży i aktualne tajemnice.</p>
+              </div>
+
+              <div className="px-5 pb-6">
+                {loading ? (
+                  <div className="divide-y" aria-busy="true">
+                    <span className="sr-only">Pobieranie danych Róży...</span>
+                    {Array.from({ length: 5 }, (_, i) => (
+                      <div key={i} className="flex items-center gap-3 py-2.5">
+                        <Skeleton className="h-4 w-6" />
+                        <div className="flex-1 space-y-1.5">
+                          <Skeleton className="h-4 w-2/5" />
+                          <Skeleton className="h-3.5 w-3/5" />
+                        </div>
                       </div>
-                      <span className="text-sm text-muted-foreground truncate flex items-center gap-1.5 mt-0.5">
-                        <ScrollText className="h-3.5 w-3.5 flex-shrink-0" />
-                        {member.current_mystery_name}
-                      </span>
-                    </div>
+                    ))}
                   </div>
-                ))
-              )}
-            </div>
-          )}
-        </div>
+                ) : members.length === 0 ? (
+                  <p className="py-6 text-center text-sm text-muted-foreground">
+                    Nie należysz jeszcze do żadnej Róży. Skontaktuj się z administratorem.
+                  </p>
+                ) : (
+                  <ol className="divide-y">
+                    {members.map((member) => {
+                      const isMe = member.id === currentUserId
+                      return (
+                        <li key={member.id} className="flex items-center gap-3 py-2.5">
+                          <span className="w-6 flex-shrink-0 text-right text-[0.9375rem] font-semibold tabular-nums text-muted-foreground">
+                            {member.rose_pos || "-"}
+                          </span>
+                          <div className="flex min-w-0 flex-col">
+                            <span className={`truncate text-[0.9375rem] font-semibold ${isMe ? "text-primary" : "text-foreground"}`}>
+                              {member.full_name}
+                              {isMe && <span className="font-normal text-muted-foreground"> (Ty)</span>}
+                            </span>
+                            <span className="truncate text-sm text-muted-foreground">
+                              {member.current_mystery_name}
+                            </span>
+                          </div>
+                        </li>
+                      )
+                    })}
+                  </ol>
+                )}
+              </div>
+            </section>
 
-          {/* Footer z opcją zmiany hasła */}
-          <div className="p-4 border-t">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => setIsPasswordDialogOpen(true)}
-              className="w-full text-muted-foreground hover:text-foreground"
-            >
-              <KeyRound className="h-4 w-4 mr-2" />
-              Zmień hasło
-            </Button>
+            {/* POWIADOMIENIA - na samym dole */}
+            <NotificationSettings />
           </div>
-        </DialogContent>
-      </Dialog>
+        </SheetContent>
+      </Sheet>
       <ChangePasswordDialog
         open={isPasswordDialogOpen}
         onOpenChange={setIsPasswordDialogOpen}

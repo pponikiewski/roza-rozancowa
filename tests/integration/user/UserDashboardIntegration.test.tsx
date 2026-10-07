@@ -103,7 +103,7 @@ describe('Integracja: Panel Użytkownika (UserPage)', () => {
     const user = userEvent.setup()
 
     // Oczekujemy, że przycisk się załaduje
-    const confirmButton = await screen.findByRole('button', { name: /Zapoznałem|potwierdź/i })
+    const confirmButton = await screen.findByRole('button', { name: /potwierdzam zapoznanie/i })
     expect(confirmButton).toBeInTheDocument()
     expect(confirmButton).not.toBeDisabled()
 

@@ -1,5 +1,4 @@
 import { memo } from "react"
-import { HandHeart } from "lucide-react"
 import { CardLabel } from "@/shared/components/common/CardLabel"
 import { ResizableText } from "@/shared/components/common/ResizableText"
 
@@ -15,8 +14,8 @@ interface IntentionCardProps {
  */
 export const IntentionCard = memo(function IntentionCard({ title, content, month }: IntentionCardProps) {
   return (
-    <section className="rounded-xl border bg-card p-5 shadow-sm">
-      <CardLabel icon={HandHeart} className="mb-3">Intencja na {month}</CardLabel>
+    <section className="py-6">
+      <CardLabel className="mb-2">Intencja na {month}</CardLabel>
       {title && (
         <h3 className="text-base font-semibold leading-snug mb-1.5 text-foreground">{title}</h3>
       )}

@@ -6,6 +6,9 @@ interface ResizableTextProps extends React.HTMLAttributes<HTMLElement> {
   as?: React.ElementType
 }
 
+/**
+ * Tekst powiększany kliknięciem (3 poziomy, potem wraca do bazowego)
+ */
 export function ResizableText({
   children,
   className,
@@ -19,8 +22,8 @@ export function ResizableText({
   const sizeClasses = {
     0: "", // Base size (original)
     // In Ultra mode, base size is already large. We start scaling from text-xl to ensure visible difference.
-    1: isUltra ? "text-xl leading-loose font-semibold" : "text-base leading-relaxed font-medium",
-    2: isUltra ? "text-2xl leading-loose font-bold" : "text-lg leading-loose font-semibold"
+    1: isUltra ? "text-xl leading-loose font-semibold" : "text-lg leading-relaxed font-medium",
+    2: isUltra ? "text-2xl leading-loose font-bold" : "text-xl leading-loose font-semibold"
   }
 
   const toggleSize = (e: React.MouseEvent) => {
@@ -33,11 +36,11 @@ export function ResizableText({
       {...props}
       onClick={toggleSize}
       className={cn(
-        "cursor-pointer transition-all duration-200 select-none hover:opacity-80 active:scale-[0.99]",
+        "cursor-pointer transition-all duration-200",
         className,
         sizeClasses[level as keyof typeof sizeClasses]
       )}
-      title="Kliknij tekst, aby go powiększyć (3 poziomy)"
+      title="Kliknij tekst, aby go powiększyć"
     >
       {children}
     </Component>

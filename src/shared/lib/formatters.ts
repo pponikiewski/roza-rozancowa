@@ -27,6 +27,16 @@ export function formatDayMonth(day: number, month: number): string {
 }
 
 /**
+ * Zwraca czas do zmiany tajemnic po polsku, np. "12 dni 5 godz. 41 min"
+ * (dni pomijane, gdy zostało mniej niż doba)
+ */
+export function formatTimeLeft({ days, hours, minutes }: { days: number; hours: number; minutes: number }): string {
+  const parts = [`${hours} godz.`, `${minutes} min`]
+  if (days > 0) parts.unshift(`${days} ${days === 1 ? 'dzień' : 'dni'}`)
+  return parts.join(' ')
+}
+
+/**
  * Zwraca aktualny rok
  */
 export function getCurrentYear(): number {

@@ -29,7 +29,7 @@ describe('MysteryCard', () => {
       <MysteryCard {...defaultProps} onAcknowledge={onAcknowledge} />
     )
     
-    await user.click(screen.getByRole('button', { name: /zapoznałem się/i }))
+    await user.click(screen.getByRole('button', { name: /potwierdzam zapoznanie/i }))
     
     expect(onAcknowledge).toHaveBeenCalledTimes(1)
   })
