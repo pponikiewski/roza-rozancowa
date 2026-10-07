@@ -102,27 +102,21 @@ export function IndulgenceFormDialog({
       </div>
 
       <div className="space-y-2">
-        <Label>Data</Label>
-        <div className="flex flex-col gap-2 text-sm">
-          <label className="flex items-center gap-2 cursor-pointer select-none">
-            <input type="radio" value="fixed" className="h-4 w-4 accent-primary" {...register("dateKind")} />
-            Stała data
-          </label>
-          <label className="flex items-center gap-2 cursor-pointer select-none">
-            <input type="radio" value="easter" className="h-4 w-4 accent-primary" {...register("dateKind")} />
-            Wielkanoc (data liczona automatycznie co roku)
-          </label>
-        </div>
-
-        {!isEasterKind && (
-          <div className="space-y-2 pt-1">
-            <Input id="indulgence-date" type="date" aria-label="Data odpustu" {...register("date")} />
+        <Label htmlFor="indulgence-date">Data</Label>
+        {isEasterKind ? (
+          // Wielkanoc (z listy startowej) — data liczona automatycznie, bez edycji
+          <p className="text-sm text-muted-foreground rounded-md border bg-muted/30 px-3 py-2">
+            Wielkanoc — data liczona automatycznie co roku.
+          </p>
+        ) : (
+          <>
+            <Input id="indulgence-date" type="date" {...register("date")} />
             {errors.date && <p className="text-sm text-destructive">{errors.date.message}</p>}
             <label className="flex items-center gap-2 text-sm cursor-pointer select-none">
               <input type="checkbox" className="h-4 w-4 accent-primary" {...register("repeatYearly")} />
               Powtarzaj co roku
             </label>
-          </div>
+          </>
         )}
       </div>
 
