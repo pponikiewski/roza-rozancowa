@@ -1,10 +1,11 @@
 import { Outlet, NavLink } from "react-router-dom"
 import { Button } from "@/shared/components/ui/button"
 import { Sheet, SheetContent, SheetTitle, SheetTrigger } from "@/shared/components/ui/sheet"
-import { Users, HandHeart, Menu, Rose, CalendarHeart, ChevronUp, Settings } from "lucide-react"
+import { Menu, ChevronUp } from "lucide-react"
 import { useId, useState } from "react"
 import { cn } from "@/shared/lib/utils"
 import { AppearanceSettings } from "@/shared/components/common/AppearanceSettings"
+import { Collapsible } from "@/shared/components/common/Collapsible"
 import { useMysteryChangeTimer } from "@/features/user/hooks/useMysteryChangeTimer"
 import { useLogout } from "@/features/auth"
 import { ROUTES } from "@/shared/lib/constants"
@@ -31,11 +32,11 @@ function NavContent({ timeLeft, targetDate, onNavClick }: NavContentProps) {
       </div>
       <nav className="flex-1 space-y-1 p-3">
         {[
-          { to: ROUTES.ADMIN.MEMBERS, icon: Users, label: "Użytkownicy" },
-          { to: ROUTES.ADMIN.INTENTIONS, icon: HandHeart, label: "Intencja" },
-          { to: ROUTES.ADMIN.ROSES, icon: Rose, label: "Róże" },
-          { to: ROUTES.ADMIN.INDULGENCES, icon: CalendarHeart, label: "Odpusty" },
-        ].map(({ to, icon: Icon, label }) => (
+          { to: ROUTES.ADMIN.MEMBERS, label: "Użytkownicy" },
+          { to: ROUTES.ADMIN.INTENTIONS, label: "Intencja" },
+          { to: ROUTES.ADMIN.ROSES, label: "Róże" },
+          { to: ROUTES.ADMIN.INDULGENCES, label: "Odpusty" },
+        ].map(({ to, label }) => (
           <NavLink
             key={to}
             to={to}
@@ -45,7 +46,6 @@ function NavContent({ timeLeft, targetDate, onNavClick }: NavContentProps) {
               }`
             }
           >
-            <Icon className="h-5 w-5" />
             {label}
           </NavLink>
         ))}
@@ -62,23 +62,15 @@ function NavContent({ timeLeft, targetDate, onNavClick }: NavContentProps) {
       </div>
 
       <div className="border-t p-3">
-        {/* Ustawienia rozwijane w górę, wewnątrz menu (grid-rows animuje wysokość) */}
-        <div
-          id={settingsId}
-          className={cn(
-            "grid motion-safe:transition-[grid-template-rows] motion-safe:duration-200 motion-safe:ease-out",
-            settingsOpen ? "grid-rows-[1fr]" : "grid-rows-[0fr]"
-          )}
-        >
-          <div className="overflow-hidden" inert={!settingsOpen}>
-            <div className="space-y-4 px-2 pb-4 pt-2">
-              <AppearanceSettings />
-              <Button variant="outline" className="w-full" onClick={handleLogout}>
-                Wyloguj się
-              </Button>
-            </div>
+        {/* Ustawienia rozwijane w górę, wewnątrz menu */}
+        <Collapsible open={settingsOpen} id={settingsId}>
+          <div className="space-y-4 px-2 pb-4 pt-2">
+            <AppearanceSettings />
+            <Button variant="outline" className="w-full" onClick={handleLogout}>
+              Wyloguj się
+            </Button>
           </div>
-        </div>
+        </Collapsible>
         {/* Ten sam wygląd co pozycje menu powyżej */}
         <button
           type="button"
@@ -90,7 +82,6 @@ function NavContent({ timeLeft, targetDate, onNavClick }: NavContentProps) {
             settingsOpen ? "bg-accent text-foreground" : "text-muted-foreground hover:bg-accent hover:text-foreground"
           )}
         >
-          <Settings className="h-5 w-5" />
           <span className="flex-1 text-left">Ustawienia</span>
           <ChevronUp className={cn("h-4 w-4 motion-safe:transition-transform", !settingsOpen && "rotate-180")} />
         </button>
