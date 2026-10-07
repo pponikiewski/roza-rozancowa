@@ -16,7 +16,7 @@ export function MembersTable({ members, onSelect, getMysteryName }: MembersTable
   return (
     <div className="border rounded-md overflow-hidden">
       <Table>
-        <TableHeader className="bg-muted/50">
+        <TableHeader className="bg-muted/60">
           <TableRow className="hover:bg-transparent">
             <TableHead className="pl-6 w-[40%]">Członek</TableHead>
             <TableHead className="w-[45%]">Tajemnica</TableHead>
@@ -29,14 +29,14 @@ export function MembersTable({ members, onSelect, getMysteryName }: MembersTable
             return (
               <TableRow
                 key={member.id}
-                className="cursor-pointer hover:bg-muted/50 transition-colors"
+                className="cursor-pointer hover:bg-accent/60 transition-colors"
                 onClick={() => onSelect(member)}
               >
                 <TableCell className="pl-6">
                   <div className="flex items-center gap-2">
                     <span className="font-medium">{member.full_name}</span>
                     {member.role === 'admin' && (
-                      <Badge variant="secondary" className="text-[10px] px-1 h-5">
+                      <Badge variant="secondary" className="text-xs px-1 h-5">
                         Admin
                       </Badge>
                     )}
@@ -47,7 +47,7 @@ export function MembersTable({ members, onSelect, getMysteryName }: MembersTable
                 </TableCell>
                 <TableCell className="text-right pr-6">
                   {hasAck ? (
-                    <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400">
+                    <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium bg-success-soft text-success">
                       <CheckCircle2 className="h-3 w-3" /> Potwierdzone
                     </div>
                   ) : (

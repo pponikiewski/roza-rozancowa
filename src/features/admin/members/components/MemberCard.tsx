@@ -18,7 +18,7 @@ export function MemberCard({ member, onSelect, getMysteryName }: MemberCardProps
       onClick={() => onSelect(member)}
       className="relative overflow-hidden flex items-center justify-between p-4 bg-card border rounded-xl shadow-sm active:scale-[0.98] transition-all cursor-pointer"
     >
-      <div className={`absolute left-0 top-0 bottom-0 w-1 ${hasAck ? 'bg-green-500' : 'bg-muted'}`} />
+      <div className={`absolute left-0 top-0 bottom-0 w-1 ${hasAck ? 'bg-success' : 'bg-muted'}`} />
       <div className="flex items-center gap-3 pl-2">
         <div>
           <div className="font-semibold text-sm">{member.full_name}</div>
@@ -30,9 +30,9 @@ export function MemberCard({ member, onSelect, getMysteryName }: MemberCardProps
       </div>
       <div className="flex flex-col items-end">
         {hasAck ? (
-          <CheckCircle2 className="h-5 w-5 text-green-600" />
+          <CheckCircle2 className="h-5 w-5 text-success" />
         ) : (
-          <Circle className="h-5 w-5 text-muted-foreground/30" />
+          <Circle className="h-5 w-5 text-muted-foreground" />
         )}
       </div>
     </div>

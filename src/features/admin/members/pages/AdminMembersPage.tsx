@@ -119,10 +119,10 @@ export default function AdminMembersPage() {
           const completed = groupCompletedCounts[group.id] || 0
           return (
             <AccordionItem key={group.id} value={`group-${group.id}`} className="border rounded-xl bg-card px-1 overflow-hidden shadow-sm">
-              <AccordionTrigger className="hover:no-underline px-4 py-4 hover:bg-muted/50 transition-colors">
+              <AccordionTrigger className="hover:no-underline px-4 py-4 hover:bg-accent/60 transition-colors">
                 <div className="flex flex-col sm:flex-row sm:items-center w-full gap-2 sm:gap-4 text-left justify-between pr-4">
                   <div className="flex items-center gap-3">
-                    <div className="bg-primary/10 p-2 rounded-lg">
+                    <div className="bg-primary-soft p-2 rounded-lg">
                       <Users className="h-5 w-5 text-primary" />
                     </div>
                     <div>
@@ -135,8 +135,8 @@ export default function AdminMembersPage() {
                   <div className="flex items-center gap-3 bg-muted/30 px-4 py-2 rounded-xl border h-auto">
                     <div className="text-xs font-medium text-muted-foreground">Zapoznanie się z tajemnicą:</div>
                     <div className="text-sm font-bold flex items-center gap-1">
-                      <span className={completed === count && count > 0 ? "text-green-600" : ""}>{completed}</span>
-                      <span className="text-muted-foreground/50">/</span>
+                      <span className={completed === count && count > 0 ? "text-success" : ""}>{completed}</span>
+                      <span className="text-muted-foreground">/</span>
                       <span>{count}</span>
                     </div>
                   </div>

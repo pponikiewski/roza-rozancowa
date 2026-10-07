@@ -68,7 +68,7 @@ export function MemberDetailsDialog({
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent className="sm:max-w-lg p-0 gap-0 overflow-hidden border-0">
-        <div className="p-6 pb-6 bg-muted/30 border-b">
+        <div className="p-6 pb-6 border-b">
           <DialogHeader>
             <DialogTitle className="text-xl flex flex-col gap-2 items-start">
               <span className="text-lg font-bold leading-none">{member.full_name}</span>
@@ -77,7 +77,7 @@ export function MemberDetailsDialog({
                   {member.role === "admin" ? "Administrator" : "Użytkownik"}
                 </Badge>
                 <span className="hidden sm:inline-block w-1 h-1 rounded-full bg-muted-foreground/40" />
-                <span className="font-medium text-foreground/80">{member.groups ? member.groups.name : "Brak grupy"}</span>
+                <span className="font-medium text-foreground">{member.groups ? member.groups.name : "Brak grupy"}</span>
               </div>
             </DialogTitle>
             <DialogDescription className="sr-only">Szczegóły profilu użytkownika</DialogDescription>
@@ -88,7 +88,7 @@ export function MemberDetailsDialog({
           {/* Basic Info */}
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-1.5 col-span-2 sm:col-span-1">
-              <Label className="text-[10px] text-muted-foreground uppercase tracking-wider font-bold flex items-center gap-1.5">
+              <Label className="text-xs text-muted-foreground uppercase tracking-wider font-bold flex items-center gap-1.5">
                 <User className="h-3 w-3" /> Login
               </Label>
               {isEditingLogin ? (
@@ -135,7 +135,7 @@ export function MemberDetailsDialog({
               )}
             </div>
             <div className="space-y-1.5">
-              <Label className="text-[10px] text-muted-foreground uppercase tracking-wider font-bold flex items-center gap-1.5">
+              <Label className="text-xs text-muted-foreground uppercase tracking-wider font-bold flex items-center gap-1.5">
                 <CalendarClock className="h-3 w-3" /> Dołączył(a)
               </Label>
               <div className="font-medium text-sm p-2.5 bg-muted/40 rounded-md border border-transparent hover:border-border transition-colors">
@@ -146,7 +146,7 @@ export function MemberDetailsDialog({
 
           {/* Current Mystery */}
           <div className="space-y-1.5">
-            <Label className="text-[10px] text-muted-foreground uppercase tracking-wider font-bold flex items-center gap-1.5">
+            <Label className="text-xs text-muted-foreground uppercase tracking-wider font-bold flex items-center gap-1.5">
               <ScrollText className="h-3 w-3" /> Aktualna Tajemnica
             </Label>
             <div className="font-medium text-sm p-3 bg-primary/5 border border-primary/10 rounded-lg text-primary">
@@ -157,13 +157,13 @@ export function MemberDetailsDialog({
           {/* Acknowledgment Status */}
           <div
             className={`rounded-xl border p-4 transition-colors ${member.acknowledgments.length > 0
-              ? "bg-green-50/60 border-green-200 dark:bg-green-950/20 dark:border-green-900"
-              : "bg-muted/10 border-border"
+              ? "bg-success-soft border-success/40"
+              : "bg-muted/40 border-border"
               }`}
           >
             <div className="flex items-start gap-3">
               {member.acknowledgments.length > 0 ? (
-                <CheckCircle2 className="h-5 w-5 text-green-600 mt-0.5" />
+                <CheckCircle2 className="h-5 w-5 text-success mt-0.5" />
               ) : (
                 <Circle className="h-5 w-5 text-muted-foreground mt-0.5" />
               )}
@@ -171,7 +171,7 @@ export function MemberDetailsDialog({
                 <h4 className="font-semibold text-sm">Status zapoznania się z tajemnicą (Bieżący miesiąc)</h4>
                 {member.acknowledgments.length > 0 ? (
                   <div className="text-sm text-muted-foreground flex flex-col">
-                    <span className="text-green-700 dark:text-green-400 font-medium text-xs uppercase tracking-wide">
+                    <span className="text-success font-semibold text-xs uppercase tracking-wide">
                       Potwierdzone
                     </span>
                     <span className="flex items-center gap-1.5 mt-1 text-xs opacity-80">

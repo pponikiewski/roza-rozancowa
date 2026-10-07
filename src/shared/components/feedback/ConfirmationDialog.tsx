@@ -32,14 +32,14 @@ const variantStyles: Record<ConfirmationVariant, {
   defaultIcon: LucideIcon
 }> = {
   danger: {
-    iconBg: "bg-red-100 dark:bg-red-900/30",
-    iconColor: "text-red-600 dark:text-red-500",
+    iconBg: "bg-destructive-soft",
+    iconColor: "text-destructive",
     buttonVariant: "destructive",
     defaultIcon: Trash2,
   },
   warning: {
-    iconBg: "bg-amber-100 dark:bg-amber-900/30",
-    iconColor: "text-amber-600 dark:text-amber-500",
+    iconBg: "bg-warning-soft",
+    iconColor: "text-warning",
     buttonVariant: "default",
     defaultIcon: AlertCircle,
   },

@@ -58,7 +58,7 @@ export function IndulgenceList({ indulgences, loading, onEdit, onDelete }: Indul
                 <div className="flex-1 min-w-0">
                   <div className="flex flex-wrap items-center gap-2 mb-0.5">
                     <span className="text-sm font-semibold">{getDateLabel(item)}</span>
-                    <Badge variant="outline" className="text-[10px]">
+                    <Badge variant="outline" className="text-xs">
                       {item.is_easter ? "święto ruchome" : item.year === null ? "co roku" : item.year}
                     </Badge>
                   </div>

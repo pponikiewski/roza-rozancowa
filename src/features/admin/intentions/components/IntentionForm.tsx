@@ -42,7 +42,7 @@ export function IntentionForm({ loading, saved, onSave }: IntentionFormProps) {
     <Card>
       <CardHeader>
         <div className="flex items-center gap-2">
-          <div className="p-2 bg-rose-100 dark:bg-rose-900/20 rounded-full text-rose-600">
+          <div className="p-2 bg-primary-soft rounded-full text-primary">
             <CalendarHeart className="h-6 w-6" />
           </div>
           <div>

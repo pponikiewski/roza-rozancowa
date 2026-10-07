@@ -35,16 +35,16 @@ function NavContent({ timeLeft, targetDate, onNavClick }: NavContentProps) {
             to={to}
             onClick={onNavClick}
             className={({ isActive }) =>
-              `flex items-center gap-3 px-3 py-2 rounded-md transition-colors text-sm font-medium ${isActive ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:bg-muted hover:text-foreground"
+              `flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors text-[0.9375rem] font-medium ${isActive ? "bg-primary-soft text-primary font-semibold" : "text-muted-foreground hover:bg-accent hover:text-foreground"
               }`
             }
           >
-            <Icon className="h-4 w-4" />
+            <Icon className="h-5 w-5" />
             {label}
           </NavLink>
         ))}
       </nav>
-      <div className="p-4 border-t bg-muted/20">
+      <div className="p-4 border-t bg-muted/40">
         <div className="flex flex-col gap-1.5">
           <div className="flex items-center gap-2 text-xs font-medium text-muted-foreground">
             <Timer className="h-3.5 w-3.5" />
@@ -54,7 +54,7 @@ function NavContent({ timeLeft, targetDate, onNavClick }: NavContentProps) {
             {timeLeft.days}d {timeLeft.hours}h {timeLeft.minutes}m
           </div>
           {targetDate && (
-            <div className="text-[10px] text-muted-foreground pl-5 pt-1">
+            <div className="text-xs text-muted-foreground pl-5 pt-1">
               {targetDate.toLocaleDateString("pl-PL", { day: "numeric", month: "long", year: "numeric" })}
             </div>
           )}
@@ -74,7 +74,7 @@ export default function AdminLayout() {
       <aside className="hidden md:flex w-64 border-r bg-card flex-col">
         <NavContent timeLeft={timeLeft} targetDate={targetDate} />
       </aside>
-      <div className="app-header md:hidden sticky top-0 z-40 bg-background/80 backdrop-blur-md border-b px-4 py-3 flex items-center justify-between shadow-sm">
+      <div className="app-header md:hidden sticky top-0 z-40 bg-card/90 backdrop-blur-md border-b px-4 py-3 flex items-center justify-between">
         <div className="header-user-info flex items-center gap-3">
           <Sheet open={open} onOpenChange={setOpen}>
             <SheetTrigger asChild>
@@ -90,13 +90,13 @@ export default function AdminLayout() {
             <img src="/roseb.svg" alt="Logo" className="h-8 w-8 object-contain" />
             <div className="flex flex-col">
               <span className="text-sm font-semibold leading-none">Główny Admin</span>
-              <span className="text-[10px] text-muted-foreground font-medium">Panel Zarządzania</span>
+              <span className="text-xs text-muted-foreground font-medium">Panel Zarządzania</span>
             </div>
           </div>
         </div>
         <HeaderControls />
       </div>
-      <main className="flex-1 overflow-auto bg-muted/10 p-4 md:p-8 relative">
+      <main className="flex-1 overflow-auto bg-background p-4 md:p-8 relative">
         <div className="hidden md:flex absolute top-4 right-4 z-10">
           <HeaderControls />
         </div>

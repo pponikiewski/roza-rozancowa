@@ -55,8 +55,8 @@ export class FeatureErrorBoundary extends Component<FeatureErrorBoundaryProps, S
       return (
         <div className="flex items-center justify-center p-8 min-h-[300px]">
           <div className="max-w-sm w-full border rounded-xl p-6 bg-card shadow-sm text-center space-y-4">
-            <div className="mx-auto bg-amber-100 dark:bg-amber-900/20 p-3 rounded-full w-fit">
-              <AlertTriangle className="h-6 w-6 text-amber-600 dark:text-amber-500" />
+            <div className="mx-auto bg-warning-soft p-3 rounded-full w-fit">
+              <AlertTriangle className="h-6 w-6 text-warning" />
             </div>
             <div>
               <h2 className="text-lg font-semibold tracking-tight mb-1">

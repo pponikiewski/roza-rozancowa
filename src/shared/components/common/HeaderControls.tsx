@@ -29,7 +29,7 @@ export function HeaderControls({ className }: HeaderControlsProps) {
           onClick={handleLogout}
           title="Wyloguj się"
           className={cn(
-            "bg-background/80 backdrop-blur-sm border-border shadow-sm hover:bg-destructive hover:text-white transition-colors",
+            "bg-background/80 backdrop-blur-sm border-border shadow-sm hover:bg-destructive hover:text-destructive-foreground hover:border-destructive transition-colors",
             isUltra && "px-4 gap-2 font-bold flex-1"
           )}
         >

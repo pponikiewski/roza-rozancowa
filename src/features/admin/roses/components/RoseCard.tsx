@@ -17,7 +17,7 @@ export function RoseCard({ group, onClick }: RoseCardProps) {
       className="flex items-center justify-between p-4 bg-card border rounded-xl shadow-sm hover:bg-accent/50 transition-all cursor-pointer active:scale-[0.99]"
     >
       <div className="flex items-center gap-4">
-        <div className="bg-primary/10 p-2.5 rounded-full text-primary shrink-0">
+        <div className="bg-primary-soft p-2.5 rounded-full text-primary shrink-0">
           <Rose className="h-5 w-5" />
         </div>
         <div className="flex flex-col">
@@ -29,7 +29,7 @@ export function RoseCard({ group, onClick }: RoseCardProps) {
           </span>
         </div>
       </div>
-      <ChevronRight className="h-5 w-5 text-muted-foreground/50" />
+      <ChevronRight className="h-5 w-5 text-muted-foreground" />
     </div>
   )
 }

@@ -51,7 +51,7 @@ export function RoseDetailsDialog({
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2 text-xl">
-            <div className="bg-primary/10 p-2 rounded-full text-primary">
+            <div className="bg-primary-soft p-2 rounded-full text-primary">
               <Rose className="h-5 w-5" />
             </div>
             {group.name}
