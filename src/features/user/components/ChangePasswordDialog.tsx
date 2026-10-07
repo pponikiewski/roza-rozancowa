@@ -73,7 +73,6 @@ export function ChangePasswordDialog({ open, onOpenChange }: ChangePasswordDialo
             <Label htmlFor="newPassword">Nowe hasło</Label>
             <PasswordInput
               id="newPassword"
-              placeholder="••••••••"
               autoComplete="new-password"
               {...register("newPassword")}
               disabled={loading}
@@ -88,7 +87,6 @@ export function ChangePasswordDialog({ open, onOpenChange }: ChangePasswordDialo
             <Label htmlFor="confirmPassword">Potwierdź hasło</Label>
             <PasswordInput
               id="confirmPassword"
-              placeholder="••••••••"
               autoComplete="new-password"
               {...register("confirmPassword")}
               disabled={loading}

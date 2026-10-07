@@ -38,7 +38,7 @@ describe('LoginPage', () => {
 
     expect(screen.getByRole('button', { name: /zaloguj się/i })).toBeInTheDocument()
     expect(screen.getByRole('textbox', { name: /login/i })).toBeInTheDocument()
-    expect(screen.getByPlaceholderText('••••••••')).toBeInTheDocument()
+    expect(screen.getByLabelText(/^hasło$/i)).toBeInTheDocument()
   })
 
   it('pomyślnie loguje użytkownika', async () => {
@@ -54,7 +54,7 @@ describe('LoginPage', () => {
     )
 
     await user.type(screen.getByRole('textbox', { name: /login/i }), 'jan.kowalski')
-    await user.type(screen.getByPlaceholderText('••••••••'), 'password123')
+    await user.type(screen.getByLabelText(/^hasło$/i), 'password123')
     await user.click(screen.getByRole('button', { name: /zaloguj/i }))
 
     await waitFor(() => {
@@ -73,7 +73,7 @@ describe('LoginPage', () => {
     )
 
     await user.type(screen.getByRole('textbox', { name: /login/i }), 'zly.login')
-    await user.type(screen.getByPlaceholderText('••••••••'), 'wrongpass')
+    await user.type(screen.getByLabelText(/^hasło$/i), 'wrongpass')
     await user.click(screen.getByRole('button', { name: /zaloguj/i }))
 
     await waitFor(() => {

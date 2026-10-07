@@ -6,8 +6,8 @@ import { loginSchema, type LoginFormData } from "@/shared/validation/auth.schema
 import { Button } from "@/shared/components/ui/button"
 import { Input } from "@/shared/components/ui/input"
 import { Label } from "@/shared/components/ui/label"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/shared/components/ui/card"
-import { Loader2, Lock, User } from "lucide-react"
+import { Card, CardContent, CardDescription, CardHeader } from "@/shared/components/ui/card"
+import { Loader2 } from "lucide-react"
 import { toast } from "sonner"
 import { HeaderControls, PasswordInput } from "@/shared/components/common"
 import { useAuth } from "@/features/auth/context/AuthContext"
@@ -50,7 +50,7 @@ export default function LoginPage() {
   }
 
   return (
-    <main className="login-container min-h-screen flex flex-col items-center justify-center p-10 bg-background relative">
+    <main className="login-container min-h-screen flex flex-col items-center justify-center px-4 py-10 bg-background relative">
       <HeaderControls className="absolute top-4 right-4" />
 
       {/* LOGO / NAGŁÓWEK */}
@@ -62,58 +62,48 @@ export default function LoginPage() {
           fetchPriority="high"
         />
         <h1 className="text-3xl font-bold tracking-tight text-primary">Róża Różańcowa</h1>
-        <p className="text-muted-foreground text-sm">Aplikacja Żywego Różańca</p>
+        <p className="text-muted-foreground text-base">Aplikacja Żywego Różańca</p>
       </div>
 
       {/* KARTA LOGOWANIA */}
-      <Card className="w-full max-w-sm shadow-lg border-muted">
-        <CardHeader className="space-y-1">
-          <CardTitle className="text-2xl text-center">Zaloguj się</CardTitle>
-          <CardDescription className="text-center">
-            Wpisz login i hasło, aby sprawdzić tajemnicę
+      <Card className="w-full max-w-sm shadow-lg">
+        <CardHeader>
+          <CardDescription className="text-center text-base">
+            Wpisz login i hasło, aby sprawdzić tajemnicę.
           </CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="login">Login</Label>
-              <div className="relative">
-                <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                <Input
-                  id="login"
-                  placeholder="login"
-                  type="text"
-                  autoComplete="username"
-                  className="pl-9"
-                  {...register("login")}
-                  disabled={internalLoading || authLoading}
-                />
-              </div>
+              <Input
+                id="login"
+                type="text"
+                autoComplete="username"
+                autoCapitalize="none"
+                aria-invalid={!!errors.login}
+                {...register("login")}
+                disabled={internalLoading || authLoading}
+              />
               {errors.login && (
                 <p className="text-sm text-destructive">{errors.login.message}</p>
               )}
             </div>
             <div className="space-y-2">
-              <div className="flex items-center justify-between">
-                <Label htmlFor="password">Hasło</Label>
-              </div>
-              <div className="relative">
-                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground z-10" />
-                <PasswordInput
-                  id="password"
-                  placeholder="••••••••"
-                  autoComplete="current-password"
-                  className="pl-9"
-                  {...register("password")}
-                  disabled={internalLoading || authLoading}
-                  hasError={!!errors.password}
-                />
-              </div>
+              <Label htmlFor="password">Hasło</Label>
+              <PasswordInput
+                id="password"
+                autoComplete="current-password"
+                aria-invalid={!!errors.password}
+                {...register("password")}
+                disabled={internalLoading || authLoading}
+                hasError={!!errors.password}
+              />
               {errors.password && (
                 <p className="text-sm text-destructive">{errors.password.message}</p>
               )}
             </div>
-            <Button className="w-full" disabled={internalLoading || authLoading}>
+            <Button size="lg" className="w-full font-semibold" disabled={internalLoading || authLoading}>
               {(internalLoading || authLoading) && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               Zaloguj się
             </Button>
@@ -123,11 +113,11 @@ export default function LoginPage() {
 
       {/* SEKCJA CYTATU (FOOTER) */}
       <div className="mt-12 max-w-sm text-center px-4">
-        <blockquote className="italic text-muted-foreground">
-          &ldquo;{quote.text}&rdquo;
+        <blockquote className="italic text-[0.9375rem] leading-relaxed text-muted-foreground">
+          „{quote.text}”
         </blockquote>
-        <p className="text-xs text-primary mt-2 font-medium">
-          — {quote.author}
+        <p className="text-sm text-primary mt-2 font-semibold">
+          {quote.author}
         </p>
       </div>
 
