@@ -1,7 +1,7 @@
 import { Outlet, NavLink } from "react-router-dom"
 import { Button } from "@/shared/components/ui/button"
 import { Sheet, SheetContent, SheetTrigger } from "@/shared/components/ui/sheet"
-import { Users, HandHeart, LayoutDashboard, Menu, Rose, Timer } from "lucide-react"
+import { Users, HandHeart, LayoutDashboard, Menu, Rose, Timer, CalendarHeart } from "lucide-react"
 import { useState } from "react"
 import { HeaderControls } from "@/shared/components/common/HeaderControls"
 import { useMysteryChangeTimer } from "@/features/user/hooks/useMysteryChangeTimer"
@@ -28,6 +28,7 @@ function NavContent({ timeLeft, targetDate, onNavClick }: NavContentProps) {
           { to: ROUTES.ADMIN.MEMBERS, icon: Users, label: "Użytkownicy" },
           { to: ROUTES.ADMIN.INTENTIONS, icon: HandHeart, label: "Intencja" },
           { to: ROUTES.ADMIN.ROSES, icon: Rose, label: "Róże" },
+          { to: ROUTES.ADMIN.INDULGENCES, icon: CalendarHeart, label: "Odpusty" },
         ].map(({ to, icon: Icon, label }) => (
           <NavLink
             key={to}

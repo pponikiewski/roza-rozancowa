@@ -6,6 +6,7 @@ import { Loader2, Plus, Rose, RotateCw, Search } from "lucide-react"
 import { useAdminRoses } from "@/features/admin/roses/hooks/useAdminRoses"
 import { RoseCard, RoseDetailsDialog, RoseFormDialog } from "@/features/admin/roses/components"
 import type { Group } from "@/shared/types/domain.types"
+import type { RoseAdmission } from "@/features/admin/roses/types/rose.types"
 
 export default function AdminRosesPage() {
   const {
@@ -29,8 +30,8 @@ export default function AdminRosesPage() {
     setIsFormOpen(true)
   }
 
-  const handleSubmit = async (name: string) => {
-    const success = await saveGroup(name, editingGroup?.id)
+  const handleSubmit = async (name: string, admission: RoseAdmission) => {
+    const success = await saveGroup(name, editingGroup?.id, admission)
     if (success) setIsFormOpen(false)
     return success
   }

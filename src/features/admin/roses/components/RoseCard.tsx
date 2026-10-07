@@ -1,4 +1,5 @@
 import { ChevronRight, Rose } from "lucide-react"
+import { formatDayMonth } from "@/shared/lib/formatters"
 import type { Group } from "@/shared/types/domain.types"
 
 interface RoseCardProps {
@@ -21,7 +22,11 @@ export function RoseCard({ group, onClick }: RoseCardProps) {
         </div>
         <div className="flex flex-col">
           <span className="font-semibold text-base">{group.name}</span>
-          <span className="text-xs text-muted-foreground">Kliknij, aby zarządzać</span>
+          <span className="text-xs text-muted-foreground">
+            {group.admission_month && group.admission_day
+              ? `Przyjęcie do Stowarzyszenia: ${formatDayMonth(group.admission_day, group.admission_month)}`
+              : "Kliknij, aby zarządzać"}
+          </span>
         </div>
       </div>
       <ChevronRight className="h-5 w-5 text-muted-foreground/50" />

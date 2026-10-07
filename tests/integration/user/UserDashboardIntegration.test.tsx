@@ -34,6 +34,7 @@ vi.mock('@/features/user/api/user.service', () => ({
     checkAcknowledgment: vi.fn(),
     acknowledgeMystery: vi.fn(),
     getGroupMembersByUserId: vi.fn(),
+    getTodayIndulgences: vi.fn().mockResolvedValue([]),
   },
 }))
 

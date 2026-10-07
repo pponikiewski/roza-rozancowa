@@ -1,6 +1,8 @@
 import { supabase } from '@/shared/lib/supabase'
 import { mysteriesService } from '@/features/mysteries/api/mysteries.service'
-import type { Profile, Intention, RoseMember, Mystery } from '@/shared/types/domain.types'
+import { ADMISSION_INDULGENCE } from '@/shared/lib/constants'
+import { isEaster } from '@/shared/lib/liturgical'
+import type { Profile, Intention, RoseMember, Mystery, IndulgenceDay } from '@/shared/types/domain.types'
 
 /**
  * Typ odpowiedzi z Supabase dla profilu z relacją groups
@@ -46,6 +48,46 @@ export const userService = {
       .single()
 
     return (data as Intention) || null
+  },
+
+  /**
+   * Pobranie odpustów przypadających dzisiaj:
+   * stałe daty (co roku lub w bieżącym roku), Wielkanoc i dzień przyjęcia Róży użytkownika
+   */
+  async getTodayIndulgences(groupId: number | null): Promise<IndulgenceDay[]> {
+    const date = new Date()
+    const month = date.getMonth() + 1
+    const day = date.getDate()
+
+    const dateFilter = `and(month.eq.${month},day.eq.${day},or(year.is.null,year.eq.${date.getFullYear()}))`
+    const { data, error } = await supabase
+      .from('indulgence_days')
+      .select('id, name, description, month, day, year, is_easter')
+      .or(isEaster(date) ? `${dateFilter},is_easter.eq.true` : dateFilter)
+
+    if (error) throw error
+    const indulgences: IndulgenceDay[] = data || []
+
+    if (groupId) {
+      const { data: group } = await supabase
+        .from('groups')
+        .select('admission_month, admission_day')
+        .eq('id', groupId)
+        .maybeSingle()
+
+      if (group?.admission_month === month && group?.admission_day === day) {
+        indulgences.push({
+          id: -groupId,
+          ...ADMISSION_INDULGENCE,
+          month,
+          day,
+          year: null,
+          is_easter: false,
+        })
+      }
+    }
+
+    return indulgences
   },
 
   /**

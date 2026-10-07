@@ -1,6 +1,7 @@
 // User feature - public exports
 export { default as UserPage } from './pages/UserPage'
 export { IntentionCard } from './components/IntentionCard'
+export { IndulgenceCard } from './components/IndulgenceCard'
 export { MysteryCard } from './components/MysteryCard'
 export { RoseDialog } from './components/RoseDialog'
 export { UserHeader } from './components/UserHeader'

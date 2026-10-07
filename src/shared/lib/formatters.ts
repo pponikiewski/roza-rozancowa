@@ -19,6 +19,14 @@ export function getCurrentMonthName(): string {
 }
 
 /**
+ * Zwraca dzień i miesiąc po polsku, np. "7 października"
+ * (rok przestępny, żeby 29 lutego się nie przesunął)
+ */
+export function formatDayMonth(day: number, month: number): string {
+  return new Date(2000, month - 1, day).toLocaleDateString('pl-PL', { day: 'numeric', month: 'long' })
+}
+
+/**
  * Zwraca aktualny rok
  */
 export function getCurrentYear(): number {

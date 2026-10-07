@@ -12,6 +12,7 @@ export const ROUTES = {
     MEMBERS: '/admin/members',
     INTENTIONS: '/admin/intentions',
     ROSES: '/admin/roses',
+    INDULGENCES: '/admin/indulgences',
   }
 } as const
 
@@ -23,15 +24,23 @@ export const QUERY_KEYS = {
   INTENTION: ['intention'],
   ACKNOWLEDGMENT: (userId: string, mysteryId: number) => ['acknowledgment', userId, mysteryId],
   ROSE_MEMBERS: (groupId: number) => ['rose-members', groupId],
+  INDULGENCES_TODAY: (date: string) => ['indulgences-today', date],
   // Admin
   ADMIN_MEMBERS: ['admin-members'],
   ADMIN_INTENTIONS: ['admin-intentions'],
   ADMIN_INTENTIONS_HISTORY: ['admin-intentions-history'],
   ADMIN_ROSES: ['admin-roses'],
+  ADMIN_INDULGENCES: ['admin-indulgences'],
 } as const
 
 /** Sentinel value used by GroupSelect when no group is assigned */
 export const UNASSIGNED_GROUP_VALUE = "unassigned" as const
+
+/** Odpust w dniu przyjęcia Róży do Stowarzyszenia (data ustawiana osobno dla każdej Róży) */
+export const ADMISSION_INDULGENCE = {
+  name: 'Dzień przyjęcia do Stowarzyszenia Żywego Różańca',
+  description: 'Zwykłe warunki odpustu zupełnego: spowiedź sakramentalna, Komunia święta, modlitwa w intencjach Ojca Świętego oraz wolność od przywiązania do jakiegokolwiek grzechu, nawet powszedniego.',
+} as const
 
 /** Części różańca */
 export const ROSARY_PARTS = {

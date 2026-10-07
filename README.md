@@ -56,6 +56,8 @@ Aplikacja **Róża Różańcowa** digitalizuje ten proces, eliminując potrzebę
 - **Licznik czasu** — odliczanie do najbliższej zmiany tajemnic (pierwsza niedziela miesiąca)
 - **Widok Róży** — podgląd członków grupy z ich aktualnymi tajemnicami
 - **Intencja miesięczna** — wspólna intencja modlitewna dla całej grupy
+- **Powiadomienia push** — nowa tajemnica, nowa intencja i dni odpustu (Web Push, działa przy zamkniętej aplikacji)
+- **Dzień odpustu** — karta z warunkami uzyskania odpustu w dniu, w którym wypada
 
 #### 🛡️ Panel Administratora
 
@@ -305,11 +307,58 @@ Utwórz plik `.env` w głównym katalogu projektu:
 VITE_SUPABASE_URL=https://your-project.supabase.co
 VITE_SUPABASE_PUBLISHABLE_DEFAULT_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
 
+# Powiadomienia push - klucz publiczny VAPID (opcjonalne; bez niego karta powiadomień jest ukryta)
+VITE_VAPID_PUBLIC_KEY=BNc...
+
 # Tylko dla testów E2E (opcjonalne)
 VITE_SUPABASE_SERVICE_ROLE_KEY=...
 ```
 
 > ⚠️ **Uwaga:** Nigdy nie commituj pliku `.env` z prawdziwymi kluczami!
+
+### Powiadomienia push
+
+Wysyłkę obsługuje Edge Function `send-push`, uruchamiana przez `pg_cron` codziennie o 7:00 UTC. Typy powiadomień:
+
+| Powiadomienie | Kiedy |
+|---|---|
+| Nowa tajemnica (każdy dostaje swoją) | pierwsza niedziela miesiąca |
+| Nowa intencja | od razu po zapisaniu intencji na bieżący miesiąc (trigger) |
+| Dzień odpustu | w dniu z tabeli `indulgence_days` (panel admina → Odpusty); Wielkanoc liczona automatycznie |
+| Dzień przyjęcia do Stowarzyszenia | co roku w dniu ustawionym dla Róży (panel admina → Róże), tylko dla jej członków |
+
+Każde powiadomienie wychodzi tylko raz — klucz zapisywany jest w `push_notification_log`. Konfiguracja (jednorazowo):
+
+```bash
+# 1. Wygeneruj klucze VAPID
+npx web-push generate-vapid-keys
+
+# 2. Sekrety Edge Function (CRON_SECRET — dowolny losowy ciąg)
+npx supabase secrets set VAPID_PUBLIC_KEY=... VAPID_PRIVATE_KEY=... \
+  VAPID_SUBJECT=mailto:admin@example.com CRON_SECRET=...
+
+# 3. Wdrożenie migracji i funkcji
+npx supabase db push
+npx supabase functions deploy send-push
+```
+
+```sql
+-- 4. Sekrety w Vault (SQL Editor) — używane przez zadanie pg_cron
+select vault.create_secret('https://<project-ref>.supabase.co', 'project_url');
+select vault.create_secret('<ta sama wartość co CRON_SECRET>', 'push_cron_secret');
+```
+
+Na koniec (krok 5) dodaj `VITE_VAPID_PUBLIC_KEY` (klucz publiczny z kroku 1) do `.env` i zmiennych środowiskowych na Vercelu.
+
+Test ręczny wysyłki — `type`: `mystery` / `intention` / `indulgence`; `force: true` pomija datę i dziennik:
+
+```bash
+curl -X POST https://<project-ref>.supabase.co/functions/v1/send-push \
+  -H "x-cron-secret: <CRON_SECRET>" -H "Content-Type: application/json" \
+  -d '{"type": "mystery", "force": true}'
+```
+
+> 📱 Na iPhonie (iOS 16.4+) powiadomienia działają tylko po dodaniu aplikacji do ekranu początkowego. Karta na pulpicie pokazuje wtedy instrukcję.
 
 ---
 

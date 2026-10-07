@@ -4,6 +4,7 @@ import { toast } from "sonner"
 import { useQuery, useQueryClient } from "@tanstack/react-query"
 import { useTypedMutation } from "@/shared/hooks"
 import { QUERY_KEYS } from "@/shared/lib/constants"
+import type { RoseAdmission } from "@/features/admin/roses/types/rose.types"
 
 export function useAdminRoses() {
   const queryClient = useQueryClient()
@@ -14,16 +15,16 @@ export function useAdminRoses() {
   })
 
   const saveGroupMutation = useTypedMutation({
-    mutationFn: async ({ name, id }: { name: string; id?: number }) => {
+    mutationFn: async ({ name, id, admission }: { name: string; id?: number; admission: RoseAdmission }) => {
       if (id) {
-        await rosesService.updateGroup(id, name)
+        await rosesService.updateGroup(id, name, admission)
         return true // isEdit
       } else {
-        await rosesService.createGroup(name)
+        await rosesService.createGroup(name, admission)
         return false // isEdit
       }
     },
-    successMessage: (isEdit) => isEdit ? "Zaktualizowano nazwę Róży" : "Utworzono nową Różę",
+    successMessage: (isEdit) => isEdit ? "Zaktualizowano Różę" : "Utworzono nową Różę",
     errorMessage: "Wystąpił błąd",
     invalidateKeys: [QUERY_KEYS.ADMIN_ROSES]
   })
@@ -52,7 +53,8 @@ export function useAdminRoses() {
     actionLoading: [saveGroupMutation, deleteGroupMutation, rotateGroupMutation].some(m => m.isPending),
     groups: groups || [],
     fetchGroups: () => queryClient.invalidateQueries({ queryKey: QUERY_KEYS.ADMIN_ROSES }),
-    saveGroup: (name: string, id?: number) => saveGroupMutation.execute({ name, id }),
+    saveGroup: (name: string, id?: number, admission: RoseAdmission = null) =>
+      saveGroupMutation.execute({ name, id, admission }),
     deleteGroup: deleteGroupMutation.execute,
     rotateGroup: rotateGroupMutation.execute,
   }

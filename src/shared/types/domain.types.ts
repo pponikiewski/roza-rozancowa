@@ -16,6 +16,9 @@ export interface Group {
   id: number
   name: string
   created_at?: string
+  /** Dzień przyjęcia do Stowarzyszenia Żywego Różańca (odpust co roku) */
+  admission_month?: number | null
+  admission_day?: number | null
 }
 
 // ============================================================================
@@ -73,6 +76,25 @@ export interface IntentionHistory extends Intention {
   id: number
   month: number
   year: number
+}
+
+// ============================================================================
+// ODPUSTY
+// ============================================================================
+
+/**
+ * Dzień odpustu dla członków Róż
+ * - is_easter → Wielkanoc, data liczona co roku (month/day/year puste)
+ * - year === null → odpust co roku w danym dniu; year ustawiony → tylko w tym roku
+ */
+export interface IndulgenceDay {
+  id: number
+  name: string
+  description: string | null
+  month: number | null
+  day: number | null
+  year: number | null
+  is_easter: boolean
 }
 
 // ============================================================================

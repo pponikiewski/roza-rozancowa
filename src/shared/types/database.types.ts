@@ -45,19 +45,58 @@ export type Database = {
       }
       groups: {
         Row: {
+          admission_day: number | null
+          admission_month: number | null
           created_at: string
           id: number
           name: string
         }
         Insert: {
+          admission_day?: number | null
+          admission_month?: number | null
           created_at?: string
           id?: number
           name: string
         }
         Update: {
+          admission_day?: number | null
+          admission_month?: number | null
           created_at?: string
           id?: number
           name?: string
+        }
+        Relationships: []
+      }
+      indulgence_days: {
+        Row: {
+          created_at: string
+          day: number | null
+          description: string | null
+          id: number
+          is_easter: boolean
+          month: number | null
+          name: string
+          year: number | null
+        }
+        Insert: {
+          created_at?: string
+          day?: number | null
+          description?: string | null
+          id?: never
+          is_easter?: boolean
+          month?: number | null
+          name: string
+          year?: number | null
+        }
+        Update: {
+          created_at?: string
+          day?: number | null
+          description?: string | null
+          id?: never
+          is_easter?: boolean
+          month?: number | null
+          name?: string
+          year?: number | null
         }
         Relationships: []
       }
@@ -150,6 +189,59 @@ export type Database = {
           },
         ]
       }
+      push_notification_log: {
+        Row: {
+          key: string
+          sent_at: string
+        }
+        Insert: {
+          key: string
+          sent_at?: string
+        }
+        Update: {
+          key?: string
+          sent_at?: string
+        }
+        Relationships: []
+      }
+      push_subscriptions: {
+        Row: {
+          auth: string
+          created_at: string
+          endpoint: string
+          id: number
+          p256dh: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          auth: string
+          created_at?: string
+          endpoint: string
+          id?: never
+          p256dh: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          auth?: string
+          created_at?: string
+          endpoint?: string
+          id?: never
+          p256dh?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "push_subscriptions_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
@@ -170,6 +262,10 @@ export type Database = {
         Returns: number
       }
       rotate_group_members: { Args: { p_group_id: number }; Returns: undefined }
+      save_push_subscription: {
+        Args: { p_auth: string; p_endpoint: string; p_p256dh: string }
+        Returns: undefined
+      }
     }
     Enums: {
       [_ in never]: never

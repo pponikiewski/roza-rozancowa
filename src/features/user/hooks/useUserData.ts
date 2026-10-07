@@ -46,6 +46,15 @@ export function useUserData() {
       enabled: !!user && !!mystery
   })
 
+  // 5. Today's indulgences (nie blokuje ładowania panelu)
+  const todayKey = new Date().toDateString()
+  const groupId = profile?.groups?.id ?? null
+  const { data: todayIndulgences } = useQuery({
+      queryKey: [...QUERY_KEYS.INDULGENCES_TODAY(todayKey), groupId],
+      queryFn: () => userService.getTodayIndulgences(groupId),
+      enabled: !!user && !profileLoading
+  })
+
   // Mutation for acknowledgment
   const mutation = useMutation({
       mutationFn: async () => {
@@ -73,6 +82,7 @@ export function useUserData() {
     mystery: mystery || null,
     intention: intention || null,
     isAcknowledged: !!isAcknowledged,
+    todayIndulgences: todayIndulgences || [],
     acknowledgeMystery: mutation.mutate
   }
 }

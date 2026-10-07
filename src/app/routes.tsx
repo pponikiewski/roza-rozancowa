@@ -15,6 +15,7 @@ const AdminLayout = lazy(() => import("@/features/admin/layout/AdminLayout"))
 const AdminMembersPage = lazy(() => import("@/features/admin/members/pages/AdminMembersPage"))
 const AdminIntentionsPage = lazy(() => import("@/features/admin/intentions/pages/AdminIntentionsPage"))
 const AdminRosesPage = lazy(() => import("@/features/admin/roses/pages/AdminRosesPage"))
+const AdminIndulgencesPage = lazy(() => import("@/features/admin/indulgences/pages/AdminIndulgencesPage"))
 
 /**
  * Komponent definiujący wszystkie trasy aplikacji
@@ -59,6 +60,11 @@ export function AppRoutes() {
           <Route path="roses" element={
             <FeatureErrorBoundary featureName="Róże">
               <AdminRosesPage />
+            </FeatureErrorBoundary>
+          } />
+          <Route path="indulgences" element={
+            <FeatureErrorBoundary featureName="Odpusty">
+              <AdminIndulgencesPage />
             </FeatureErrorBoundary>
           } />
         </Route>
