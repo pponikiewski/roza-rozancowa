@@ -2,11 +2,10 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } f
 import { Button } from "@/shared/components/ui/button"
 import { Input } from "@/shared/components/ui/input"
 import { Label } from "@/shared/components/ui/label"
-import { Badge } from "@/shared/components/ui/badge"
 import { Separator } from "@/shared/components/ui/separator"
 import { GroupSelect } from "./GroupSelect"
+import { AckStatus } from "./AckStatus"
 import { PasswordInput } from "@/shared/components/common"
-import { CheckCircle2, Circle, ScrollText, CalendarClock, RefreshCcw, Trash2, User, Pencil } from "lucide-react"
 import type { AdminMember } from "@/features/admin/members/types/member.types"
 import type { Group } from "@/shared/types/domain.types"
 import { useMemberDialogState } from "@/features/admin/members/hooks/useMemberDialogState"
@@ -65,138 +64,101 @@ export function MemberDetailsDialog({
 
   if (!member) return null
 
+  const ack = member.acknowledgments[0]
+
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogContent className="sm:max-w-lg p-0 gap-0 overflow-hidden border-0">
-        <div className="p-6 pb-6 border-b">
-          <DialogHeader>
-            <DialogTitle className="text-xl flex flex-col gap-2 items-start">
-              <span className="text-lg font-bold leading-none">{member.full_name}</span>
-              <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
-                <Badge variant={member.role === "admin" ? "default" : "secondary"} className="px-2 py-0.5 font-normal h-auto">
-                  {member.role === "admin" ? "Administrator" : "Użytkownik"}
-                </Badge>
-                <span className="hidden sm:inline-block w-1 h-1 rounded-full bg-muted-foreground/40" />
-                <span className="font-medium text-foreground">{member.groups ? member.groups.name : "Brak grupy"}</span>
-              </div>
-            </DialogTitle>
-            <DialogDescription className="sr-only">Szczegóły profilu użytkownika</DialogDescription>
+      <DialogContent
+        className="sm:max-w-lg p-0 gap-0 overflow-hidden"
+        // Fokus na okno, a nie na pierwszy przycisk - inaczej "Zmień" przy loginie wygląda na zaznaczone
+        onOpenAutoFocus={(e) => {
+          e.preventDefault()
+          ;(e.currentTarget as HTMLElement).focus()
+        }}
+      >
+        <div className="p-6 pb-4 border-b">
+          <DialogHeader className="text-left">
+            <DialogTitle className="text-xl font-semibold leading-tight">{member.full_name}</DialogTitle>
+            <DialogDescription className="text-[0.9375rem]">
+              {member.groups ? member.groups.name : "Brak grupy"}
+              {member.role === "admin" && ", administrator"}
+            </DialogDescription>
           </DialogHeader>
         </div>
 
-        <div className="p-6 space-y-6 bg-card max-h-[80vh] scrollbar-subtle">
-          {/* Basic Info */}
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-1.5 col-span-2 sm:col-span-1">
-              <Label className="text-xs text-muted-foreground uppercase tracking-wider font-bold flex items-center gap-1.5">
-                <User className="h-3 w-3" /> Login
-              </Label>
-              {isEditingLogin ? (
-                <div className="space-y-2">
+        <div className="p-6 space-y-6 max-h-[75vh] scrollbar-subtle">
+          {/* Dane członka */}
+          <dl className="divide-y">
+            <div className="py-2.5">
+              <div className="flex items-center justify-between gap-4">
+                <dt className="text-sm text-muted-foreground">Login</dt>
+                {!isEditingLogin && (
+                  <dd className="flex min-w-0 items-center gap-1">
+                    <span className="truncate font-mono text-[0.9375rem]">
+                      {member.login || <span className="font-sans italic text-muted-foreground">brak</span>}
+                    </span>
+                    <Button size="sm" variant="ghost" className="text-primary" onClick={handleStartEditLogin}>
+                      Zmień
+                    </Button>
+                  </dd>
+                )}
+              </div>
+              {isEditingLogin && (
+                <dd className="mt-2 space-y-2">
                   <Input
                     value={editLogin}
                     onChange={(e) => handleLoginInputChange(e.target.value)}
-                    placeholder="Nowy login..."
-                    className="h-10 text-sm font-mono"
+                    aria-label="Nowy login"
+                    className="font-mono"
                     autoFocus
                   />
                   <div className="flex gap-2">
                     <Button
                       size="sm"
-                      variant="default"
-                      className="flex-1 h-8"
+                      className="flex-1"
                       disabled={actionLoading || !editLogin.trim() || editLogin.trim().length < 3 || editLogin === member.login}
                       onClick={handleSaveLogin}
                     >
                       {actionLoading ? "Zapisywanie..." : "Zapisz"}
                     </Button>
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      className="h-8"
-                      onClick={handleCancelEditLogin}
-                    >
+                    <Button size="sm" variant="outline" onClick={handleCancelEditLogin}>
                       Anuluj
                     </Button>
                   </div>
                   {editLogin.trim().length > 0 && editLogin.trim().length < 3 && (
-                    <p className="text-xs text-destructive">Login musi mieć min. 3 znaki</p>
+                    <p className="text-sm text-destructive">Login musi mieć min. 3 znaki</p>
                   )}
-                </div>
-              ) : (
-                <div
-                  className="font-medium text-sm p-2.5 bg-muted/40 rounded-md border border-transparent hover:border-primary/50 hover:bg-muted/60 transition-all cursor-pointer group flex items-center justify-between"
-                  title="Kliknij aby edytować login"
-                  onClick={handleStartEditLogin}
-                >
-                  <span className="font-mono">{member.login || <span className="text-muted-foreground italic font-sans">Brak</span>}</span>
-                  <Pencil className="h-3.5 w-3.5 text-primary opacity-0 group-hover:opacity-100 transition-opacity" />
-                </div>
+                </dd>
               )}
             </div>
-            <div className="space-y-1.5">
-              <Label className="text-xs text-muted-foreground uppercase tracking-wider font-bold flex items-center gap-1.5">
-                <CalendarClock className="h-3 w-3" /> Dołączył(a)
-              </Label>
-              <div className="font-medium text-sm p-2.5 bg-muted/40 rounded-md border border-transparent hover:border-border transition-colors">
-                {new Date(member.created_at).toLocaleDateString("pl-PL")}
-              </div>
-            </div>
-          </div>
 
-          {/* Current Mystery */}
-          <div className="space-y-1.5">
-            <Label className="text-xs text-muted-foreground uppercase tracking-wider font-bold flex items-center gap-1.5">
-              <ScrollText className="h-3 w-3" /> Aktualna Tajemnica
-            </Label>
-            <div className="font-medium text-sm p-3 bg-primary/5 border border-primary/10 rounded-lg text-primary">
-              {getMysteryName(member.current_mystery_id)}
+            <div className="flex items-center justify-between gap-4 py-2.5">
+              <dt className="text-sm text-muted-foreground">Dołączył(a)</dt>
+              <dd className="text-[0.9375rem]">{new Date(member.created_at).toLocaleDateString("pl-PL")}</dd>
             </div>
-          </div>
 
-          {/* Acknowledgment Status */}
-          <div
-            className={`rounded-xl border p-4 transition-colors ${member.acknowledgments.length > 0
-              ? "bg-success-soft border-success/40"
-              : "bg-muted/40 border-border"
-              }`}
-          >
-            <div className="flex items-start gap-3">
-              {member.acknowledgments.length > 0 ? (
-                <CheckCircle2 className="h-5 w-5 text-success mt-0.5" />
-              ) : (
-                <Circle className="h-5 w-5 text-muted-foreground mt-0.5" />
-              )}
-              <div className="space-y-1">
-                <h4 className="font-semibold text-sm">Status zapoznania się z tajemnicą (Bieżący miesiąc)</h4>
-                {member.acknowledgments.length > 0 ? (
-                  <div className="text-sm text-muted-foreground flex flex-col">
-                    <span className="text-success font-semibold text-xs uppercase tracking-wide">
-                      Potwierdzone
-                    </span>
-                    <span className="flex items-center gap-1.5 mt-1 text-xs opacity-80">
-                      <CalendarClock className="h-3 w-3" />
-                      {formatFullDate(member.acknowledgments[0].created_at)}
-                    </span>
-                  </div>
-                ) : (
-                  <p className="text-xs text-muted-foreground">
-                    Użytkownik nie potwierdził jeszcze zapoznania się z tajemnicą w tym miesiącu.
-                  </p>
-                )}
-              </div>
+            <div className="flex items-center justify-between gap-4 py-2.5">
+              <dt className="text-sm text-muted-foreground">Tajemnica</dt>
+              <dd className="text-right text-[0.9375rem] font-medium">{getMysteryName(member.current_mystery_id)}</dd>
             </div>
-          </div>
+
+            <div className="flex items-center justify-between gap-4 py-2.5">
+              <dt className="text-sm text-muted-foreground">W tym miesiącu</dt>
+              <dd className="text-right">
+                <AckStatus acknowledged={!!ack} />
+                {ack && <span className="block text-sm text-muted-foreground">{formatFullDate(ack.created_at)}</span>}
+              </dd>
+            </div>
+          </dl>
 
           <Separator />
 
-          {/* Management Section */}
+          {/* Zarządzanie */}
           <div className="space-y-4">
-            <h3 className="text-xs font-bold text-muted-foreground uppercase tracking-wider mb-3">Zarządzanie</h3>
+            <h3 className="text-base font-semibold">Zarządzanie</h3>
 
-            {/* Change Group */}
             <div className="grid gap-2">
-              <Label className="text-xs">Przypisanie do róży</Label>
+              <Label>Róża</Label>
               <div className="flex gap-2">
                 <GroupSelect
                   value={editGroupId}
@@ -204,52 +166,47 @@ export function MemberDetailsDialog({
                   groups={groups}
                   groupMemberCounts={groupMemberCounts}
                   currentGroupId={member.groups?.id}
-                  placeholder="-- Wybierz (lub usuń z grupy) --"
-                  unassignedLabel="-- Bez grupy (usuń) --"
-                  triggerClassName="h-9 w-full text-sm"
+                  placeholder="Wybierz Różę lub usuń z grupy"
+                  unassignedLabel="Bez grupy (usuń z Róży)"
+                  triggerClassName="w-full"
                 />
-                <Button onClick={handleUpdateGroup} disabled={actionLoading} size="sm" variant="secondary" className="shrink-0">
-                  <RefreshCcw className="h-3.5 w-3.5 mr-2" /> Zmień
+                <Button onClick={handleUpdateGroup} disabled={actionLoading} variant="secondary" className="shrink-0">
+                  Zmień
                 </Button>
               </div>
             </div>
 
-            {/* Change Password */}
             <div className="grid gap-2">
-              <Label className="text-xs">Zmiana hasła</Label>
+              <Label>Nowe hasło</Label>
               <div className="flex gap-2">
                 <PasswordInput
-                  placeholder="Wpisz nowe hasło (min. 6 znaków)..."
+                  aria-label="Nowe hasło"
                   value={newPassword}
                   onChange={(e) => handlePasswordChange(e.target.value)}
                   hasError={!!passwordError}
-                  className="h-9"
                 />
                 <Button
                   onClick={handleChangePassword}
                   disabled={actionLoading || !newPassword.trim()}
-                  size="sm"
                   variant="outline"
                   className="shrink-0"
                 >
                   Zapisz
                 </Button>
               </div>
-              {passwordError && (
-                <p className="text-xs text-destructive">{passwordError}</p>
+              {passwordError ? (
+                <p className="text-sm text-destructive">{passwordError}</p>
+              ) : (
+                <p className="text-sm text-muted-foreground">Minimum 6 znaków.</p>
               )}
             </div>
           </div>
 
           <Separator />
 
-          {/* Delete Section */}
-          <div className="flex justify-between items-center pt-2">
-            <div className="text-xs text-muted-foreground">
-              ID: <span className="font-mono">{member.id.substring(0, 8)}...</span>
-            </div>
-            <Button variant="destructive" size="sm" className="h-8 text-xs" onClick={handleDelete} disabled={actionLoading}>
-              <Trash2 className="h-3.5 w-3.5 mr-2" /> Usuń konto
+          <div className="flex justify-end">
+            <Button variant="destructive" onClick={handleDelete} disabled={actionLoading}>
+              Usuń konto
             </Button>
           </div>
         </div>

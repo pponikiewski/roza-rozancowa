@@ -1,4 +1,4 @@
-import { CheckCircle2, Circle, ScrollText } from "lucide-react"
+import { AckStatus } from "./AckStatus"
 import type { AdminMember } from "@/features/admin/members/types/member.types"
 
 interface MemberCardProps {
@@ -8,33 +8,20 @@ interface MemberCardProps {
 }
 
 /**
- * Karta członka - widok mobilny
+ * Wiersz członka - widok mobilny
  */
 export function MemberCard({ member, onSelect, getMysteryName }: MemberCardProps) {
-  const hasAck = member.acknowledgments.length > 0
-
   return (
-    <div
+    <button
+      type="button"
       onClick={() => onSelect(member)}
-      className="relative overflow-hidden flex items-center justify-between p-4 bg-card border rounded-xl shadow-sm active:scale-[0.98] transition-all cursor-pointer"
+      className="flex w-full items-center justify-between gap-3 py-3 text-left transition-colors hover:bg-accent/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
     >
-      <div className={`absolute left-0 top-0 bottom-0 w-1 ${hasAck ? 'bg-success' : 'bg-muted'}`} />
-      <div className="flex items-center gap-3 pl-2">
-        <div>
-          <div className="font-semibold text-sm">{member.full_name}</div>
-          <div className="text-xs text-muted-foreground line-clamp-1 flex items-center gap-1">
-            <ScrollText className="h-3 w-3" />
-            {getMysteryName(member.current_mystery_id)}
-          </div>
-        </div>
+      <div className="min-w-0">
+        <div className="truncate text-[0.9375rem] font-semibold">{member.full_name}</div>
+        <div className="truncate text-sm text-muted-foreground">{getMysteryName(member.current_mystery_id)}</div>
       </div>
-      <div className="flex flex-col items-end">
-        {hasAck ? (
-          <CheckCircle2 className="h-5 w-5 text-success" />
-        ) : (
-          <Circle className="h-5 w-5 text-muted-foreground" />
-        )}
-      </div>
-    </div>
+      <AckStatus acknowledged={member.acknowledgments.length > 0} className="flex-shrink-0" />
+    </button>
   )
 }

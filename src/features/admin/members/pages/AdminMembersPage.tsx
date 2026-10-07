@@ -1,10 +1,8 @@
 import { useState, useMemo } from "react"
 import { Button } from "@/shared/components/ui/button"
 import { Input } from "@/shared/components/ui/input"
-import { Badge } from "@/shared/components/ui/badge"
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/shared/components/ui/accordion"
 import { ConfirmationDialog, useConfirmation } from "@/shared/components/feedback"
-import { UserPlus, Search, Users, AlertCircle } from "lucide-react"
 import { useAdminMembers } from "@/features/admin/members/hooks/useAdminMembers"
 import { MembersList } from "@/features/admin/members/components/MembersList"
 import { CreateUserDialog } from "@/features/admin/members/components/CreateUserDialog"
@@ -54,7 +52,13 @@ export default function AdminMembersPage() {
       description: <>Czy na pewno chcesz trwale usunąć konto <b>{fullName}</b>?</>,
       confirmText: "Potwierdź usunięcie",
       variant: "danger",
-      onConfirm: () => deleteUser(userId),
+      onConfirm: async () => {
+        // Po usunięciu zamknij szczegóły - konta już nie ma
+        const success = await deleteUser(userId)
+        if (success) {
+          setSelectedMember(null)
+        }
+      },
     })
   }
 
@@ -94,73 +98,59 @@ export default function AdminMembersPage() {
   }, [members])
 
   return (
-    <div className="space-y-6 pb-24 max-w-6xl mx-auto p-6 pt-6">
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 border-b pb-6">
+    <div className="space-y-6 pb-24 max-w-6xl mx-auto">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div className="space-y-1">
-          <h1 className="text-2xl font-bold tracking-tight flex items-center gap-2">
-            <Users className="h-6 w-6 text-primary" /> Struktura Róż
-          </h1>
-          <p className="text-sm text-muted-foreground">Zarządzaj członkami, monitoruj modlitwę i edytuj dane.</p>
+          <h1 className="text-2xl font-bold tracking-tight">Użytkownicy</h1>
+          <p className="text-[0.9375rem] text-muted-foreground">Członkowie Róż i to, kto zapoznał się z tajemnicą w tym miesiącu.</p>
         </div>
-        <Button onClick={() => setIsAddOpen(true)} className="w-full md:w-auto shadow-md gap-2 font-semibold">
-          <UserPlus className="h-4 w-4" /> Dodaj Członka
+        <Button onClick={() => setIsAddOpen(true)} className="w-full md:w-auto font-semibold">
+          Dodaj członka
         </Button>
       </div>
 
-      <div className="relative w-full max-w-md">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-        <Input placeholder="Szukaj..." className="pl-9 h-10" value={search} onChange={(e) => setSearch(e.target.value)} />
-      </div>
+      <Input
+        placeholder="Szukaj po imieniu i nazwisku"
+        aria-label="Szukaj po imieniu i nazwisku"
+        className="w-full max-w-md"
+        value={search}
+        onChange={(e) => setSearch(e.target.value)}
+      />
 
-      <Accordion type="multiple" className="w-full space-y-4" defaultValue={groups.length > 0 ? [`group-${groups[0].id}`] : []}>
+      <Accordion type="multiple" className="w-full border-t" defaultValue={groups.length > 0 ? [`group-${groups[0].id}`] : []}>
         {groups.map((group) => {
           const groupMembers = groupedData.map.get(group.id) || []
           const count = groupMemberCounts[group.id] || 0
           const completed = groupCompletedCounts[group.id] || 0
           return (
-            <AccordionItem key={group.id} value={`group-${group.id}`} className="border rounded-xl bg-card px-1 overflow-hidden shadow-sm">
-              <AccordionTrigger className="hover:no-underline px-4 py-4 hover:bg-accent/60 transition-colors">
-                <div className="flex flex-col sm:flex-row sm:items-center w-full gap-2 sm:gap-4 text-left justify-between pr-4">
-                  <div className="flex items-center gap-3">
-                    <div className="bg-primary-soft p-2 rounded-lg">
-                      <Users className="h-5 w-5 text-primary" />
-                    </div>
-                    <div>
-                      <span className="font-semibold text-lg block leading-none mb-1">{group.name}</span>
-                      <div className="text-xs text-muted-foreground flex items-center gap-2">
-                        <span>{count}/20 członków</span>
-                      </div>
-                    </div>
+            <AccordionItem key={group.id} value={`group-${group.id}`}>
+              <AccordionTrigger className="hover:no-underline py-4">
+                <div className="flex flex-col sm:flex-row sm:items-center w-full gap-1 sm:gap-4 text-left justify-between pr-4">
+                  <div>
+                    <span className="block text-lg font-semibold leading-tight">{group.name}</span>
+                    <span className="text-sm text-muted-foreground">{count}/20 członków</span>
                   </div>
-                  <div className="flex items-center gap-3 bg-muted/30 px-4 py-2 rounded-xl border h-auto">
-                    <div className="text-xs font-medium text-muted-foreground">Zapoznanie się z tajemnicą:</div>
-                    <div className="text-sm font-bold flex items-center gap-1">
-                      <span className={completed === count && count > 0 ? "text-success" : ""}>{completed}</span>
-                      <span className="text-muted-foreground">/</span>
-                      <span>{count}</span>
-                    </div>
-                  </div>
+                  <span className="text-sm text-muted-foreground">
+                    Zapoznało się:{" "}
+                    <span className={`font-semibold tabular-nums ${completed === count && count > 0 ? "text-success" : "text-foreground"}`}>
+                      {completed}/{count}
+                    </span>
+                  </span>
                 </div>
               </AccordionTrigger>
-              <AccordionContent className="px-4 pb-4 pt-2 border-t border-dashed">
+              <AccordionContent className="pb-4">
                 <MembersList list={groupMembers} onSelect={setSelectedMember} getMysteryName={getMysteryName} />
               </AccordionContent>
             </AccordionItem>
           )
         })}
-        <AccordionItem value="unassigned" className="border rounded-xl bg-muted/20 border-dashed px-1">
-          <AccordionTrigger className="hover:no-underline px-4 py-4">
-            <div className="flex items-center gap-3 text-muted-foreground">
-              <div className="bg-muted p-2 rounded-lg">
-                <AlertCircle className="h-5 w-5" />
-              </div>
-              <span className="font-semibold">Osoby nieprzypisane</span>
-              <Badge variant="secondary" className="ml-2">
-                {groupedData.unassigned.length}
-              </Badge>
-            </div>
+        <AccordionItem value="unassigned">
+          <AccordionTrigger className="hover:no-underline py-4">
+            <span className="text-lg font-semibold text-muted-foreground">
+              Osoby nieprzypisane ({groupedData.unassigned.length})
+            </span>
           </AccordionTrigger>
-          <AccordionContent className="px-4 pb-4 pt-2 border-t border-dashed">
+          <AccordionContent className="pb-4">
             <MembersList list={groupedData.unassigned} onSelect={setSelectedMember} getMysteryName={getMysteryName} />
           </AccordionContent>
         </AccordionItem>
