@@ -1,10 +1,12 @@
 import { Outlet, NavLink } from "react-router-dom"
 import { Button } from "@/shared/components/ui/button"
-import { Sheet, SheetContent, SheetTrigger } from "@/shared/components/ui/sheet"
-import { Users, HandHeart, LayoutDashboard, Menu, Rose, Timer, CalendarHeart } from "lucide-react"
-import { useState } from "react"
-import { HeaderControls } from "@/shared/components/common/HeaderControls"
+import { Sheet, SheetContent, SheetTitle, SheetTrigger } from "@/shared/components/ui/sheet"
+import { Users, HandHeart, Menu, Rose, CalendarHeart, ChevronUp, Settings } from "lucide-react"
+import { useId, useState } from "react"
+import { cn } from "@/shared/lib/utils"
+import { AppearanceSettings } from "@/shared/components/common/AppearanceSettings"
 import { useMysteryChangeTimer } from "@/features/user/hooks/useMysteryChangeTimer"
+import { useLogout } from "@/features/auth"
 import { ROUTES } from "@/shared/lib/constants"
 import { formatTimeLeft } from "@/shared/lib/formatters"
 
@@ -14,17 +16,20 @@ interface NavContentProps {
   onNavClick?: () => void
 }
 
-// Komponent renderujący zawartość paska nawigacyjnego (logo, linki, licznik)
+// Zawartość menu: nazwa panelu, linki, licznik do zmiany tajemnic
+// i ustawienia (wygląd, wylogowanie) rozwijane w górę na dole menu
 function NavContent({ timeLeft, targetDate, onNavClick }: NavContentProps) {
+  const handleLogout = useLogout()
+  const [settingsOpen, setSettingsOpen] = useState(false)
+  const settingsId = useId()
+
   return (
-    <div className="flex flex-col h-full">
-      <div className="p-6 border-b">
-        <h2 className="text-xl font-bold flex items-center gap-2">
-          <LayoutDashboard className="h-6 w-6 text-primary" />
-          Admin Panel
-        </h2>
+    <div className="flex h-full flex-col overflow-y-auto">
+      <div className="flex items-center gap-3 border-b px-5 py-5">
+        <img src="/roseb.svg" alt="" className="h-8 w-8 object-contain" />
+        <span className="text-base font-semibold leading-tight">Panel administratora</span>
       </div>
-      <nav className="flex-1 p-4 space-y-2">
+      <nav className="flex-1 space-y-1 p-3">
         {[
           { to: ROUTES.ADMIN.MEMBERS, icon: Users, label: "Użytkownicy" },
           { to: ROUTES.ADMIN.INTENTIONS, icon: HandHeart, label: "Intencja" },
@@ -45,62 +50,89 @@ function NavContent({ timeLeft, targetDate, onNavClick }: NavContentProps) {
           </NavLink>
         ))}
       </nav>
-      <div className="p-4 border-t bg-muted/40">
-        <div className="flex flex-col gap-1.5">
-          <div className="flex items-center gap-2 text-xs font-medium text-muted-foreground">
-            <Timer className="h-3.5 w-3.5" />
-            <span>Do zmiany tajemnic:</span>
-          </div>
-          <div className="text-sm font-mono font-semibold tabular-nums pl-5">
-            {formatTimeLeft(timeLeft)}
-          </div>
-          {targetDate && (
-            <div className="text-xs text-muted-foreground pl-5 pt-1">
-              {targetDate.toLocaleDateString("pl-PL", { day: "numeric", month: "long", year: "numeric" })}
-            </div>
+
+      <div className="border-t px-5 py-4">
+        <p className="text-sm text-muted-foreground">Do zmiany tajemnic</p>
+        <p className="mt-0.5 font-semibold tabular-nums">{formatTimeLeft(timeLeft)}</p>
+        {targetDate && (
+          <p className="text-sm text-muted-foreground">
+            {targetDate.toLocaleDateString("pl-PL", { day: "numeric", month: "long", year: "numeric" })}
+          </p>
+        )}
+      </div>
+
+      <div className="border-t p-3">
+        {/* Ustawienia rozwijane w górę, wewnątrz menu (grid-rows animuje wysokość) */}
+        <div
+          id={settingsId}
+          className={cn(
+            "grid motion-safe:transition-[grid-template-rows] motion-safe:duration-200 motion-safe:ease-out",
+            settingsOpen ? "grid-rows-[1fr]" : "grid-rows-[0fr]"
           )}
+        >
+          <div className="overflow-hidden" inert={!settingsOpen}>
+            <div className="space-y-4 px-2 pb-4 pt-2">
+              <AppearanceSettings />
+              <Button variant="outline" className="w-full" onClick={handleLogout}>
+                Wyloguj się
+              </Button>
+            </div>
+          </div>
         </div>
+        {/* Ten sam wygląd co pozycje menu powyżej */}
+        <button
+          type="button"
+          aria-expanded={settingsOpen}
+          aria-controls={settingsId}
+          onClick={() => setSettingsOpen((v) => !v)}
+          className={cn(
+            "flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-[0.9375rem] font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+            settingsOpen ? "bg-accent text-foreground" : "text-muted-foreground hover:bg-accent hover:text-foreground"
+          )}
+        >
+          <Settings className="h-5 w-5" />
+          <span className="flex-1 text-left">Ustawienia</span>
+          <ChevronUp className={cn("h-4 w-4 motion-safe:transition-transform", !settingsOpen && "rotate-180")} />
+        </button>
       </div>
     </div>
   )
 }
 
-// Główny komponent układu panelu administratora, zarządzający stanem nawigacji i licznikiem czasu
+// Układ panelu administratora: menu boczne na komputerze, wysuwane menu na telefonie
 export default function AdminLayout() {
   const [open, setOpen] = useState(false)
   const { timeLeft, targetDate } = useMysteryChangeTimer()
 
   return (
     <div className="flex h-screen w-full bg-background flex-col md:flex-row">
-      <aside className="hidden md:flex w-64 border-r bg-card flex-col">
+      <aside className="hidden md:flex w-72 border-r bg-card flex-col">
         <NavContent timeLeft={timeLeft} targetDate={targetDate} />
       </aside>
-      <div className="app-header md:hidden sticky top-0 z-40 bg-card/90 backdrop-blur-md border-b px-4 py-3 flex items-center justify-between">
-        <div className="header-user-info flex items-center gap-3">
-          <Sheet open={open} onOpenChange={setOpen}>
-            <SheetTrigger asChild>
-              <Button variant="ghost" size="icon" className="-ml-2">
-                <Menu className="h-5 w-5" />
-              </Button>
-            </SheetTrigger>
-            <SheetContent side="left" className="p-0 w-64">
-              <NavContent timeLeft={timeLeft} targetDate={targetDate} onNavClick={() => setOpen(false)} />
-            </SheetContent>
-          </Sheet>
-          <div className="flex items-center gap-3">
-            <img src="/roseb.svg" alt="Logo" className="h-8 w-8 object-contain" />
-            <div className="flex flex-col">
-              <span className="text-sm font-semibold leading-none">Główny Admin</span>
-              <span className="text-xs text-muted-foreground font-medium">Panel Zarządzania</span>
-            </div>
-          </div>
-        </div>
-        <HeaderControls />
+      <div className="app-header md:hidden sticky top-0 z-40 bg-card/90 backdrop-blur-md border-b px-4 py-3 flex items-center gap-2">
+        <Sheet open={open} onOpenChange={setOpen}>
+          <SheetTrigger asChild>
+            <Button variant="ghost" size="icon" className="-ml-2" aria-label="Otwórz menu">
+              <Menu className="h-5 w-5" />
+            </Button>
+          </SheetTrigger>
+          <SheetContent
+            side="left"
+            className="p-0 w-72"
+            // Fokus na menu, a nie na krzyżyk zamykania
+            onOpenAutoFocus={(e) => {
+              e.preventDefault()
+              ;(e.currentTarget as HTMLElement).focus()
+            }}
+          >
+            <SheetTitle className="sr-only">Menu</SheetTitle>
+            <NavContent timeLeft={timeLeft} targetDate={targetDate} onNavClick={() => setOpen(false)} />
+          </SheetContent>
+        </Sheet>
+        <img src="/roseb.svg" alt="" className="h-8 w-8 object-contain" />
+        <span className="text-base font-semibold">Panel administratora</span>
       </div>
-      <main className="flex-1 overflow-auto bg-background p-4 md:p-8 relative">
-        <div className="hidden md:flex absolute top-4 right-4 z-10">
-          <HeaderControls />
-        </div>
+      <main className="flex-1 overflow-auto bg-background p-4 md:p-8">
         <Outlet />
       </main>
     </div>

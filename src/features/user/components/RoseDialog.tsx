@@ -3,7 +3,7 @@ import { Sheet, SheetContent, SheetTitle, SheetDescription } from "@/shared/comp
 import { Button } from "@/shared/components/ui/button"
 import { Skeleton } from "@/shared/components/ui/skeleton"
 import { ChangePasswordDialog } from "@/features/user/components/ChangePasswordDialog"
-import { AppearanceSettings } from "@/features/user/components/AppearanceSettings"
+import { AppearanceSettings } from "@/shared/components/common/AppearanceSettings"
 import { NotificationSettings } from "@/features/notifications/components/NotificationSettings"
 import { useLogout } from "@/features/auth"
 import type { RoseMember } from "@/features/user/types/user.types"
