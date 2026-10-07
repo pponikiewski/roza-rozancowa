@@ -33,10 +33,10 @@ export const RoseDialog = memo(function RoseDialog({
     <>
       <Dialog open={open} onOpenChange={onOpenChange}>
         <DialogContent className="max-w-md max-h-[85vh] flex flex-col p-0 gap-0 overflow-hidden">
-          <div className="p-6 pb-4 border-b bg-muted/20">
-            <DialogHeader>
+          <div className="p-6 pb-4 border-b">
+            <DialogHeader className="text-left">
               <DialogTitle className="flex items-center gap-2">
-                <Rose className="h-5 w-5 text-rose-500" />
+                <Rose className="h-5 w-5 text-primary" />
                 {groupName || "Moja Róża"}
               </DialogTitle>
               <DialogDescription>Skład Twojej róży i aktualne tajemnice.</DialogDescription>
@@ -60,29 +60,29 @@ export const RoseDialog = memo(function RoseDialog({
                   <div
                     key={member.id}
                     className={`flex items-center p-4 gap-3 transition-colors ${
-                      member.id === currentUserId ? "bg-primary/5" : "hover:bg-muted/50"
+                      member.id === currentUserId ? "bg-primary-soft" : "hover:bg-accent/60"
                     }`}
                   >
-                    <div className="flex flex-col items-center justify-center h-8 w-8 min-w-[2rem] rounded-full bg-background border text-xs font-semibold text-muted-foreground shadow-sm">
+                    <div className="flex flex-col items-center justify-center h-9 w-9 min-w-[2.25rem] rounded-full bg-muted text-sm font-semibold text-foreground tabular-nums">
                       {member.rose_pos || "-"}
                     </div>
                     <div className="flex flex-col min-w-0">
                       <div className="flex items-center gap-2">
                         <span
-                          className={`text-sm font-medium truncate ${
+                          className={`text-[0.9375rem] font-semibold truncate ${
                             member.id === currentUserId ? "text-primary" : "text-foreground"
                           }`}
                         >
                           {member.full_name}
                         </span>
                         {member.id === currentUserId && (
-                          <Badge variant="secondary" className="text-[10px] px-1 h-4">
+                          <Badge variant="default" className="px-2 py-0 text-xs">
                             Ty
                           </Badge>
                         )}
                       </div>
-                      <span className="text-xs text-muted-foreground truncate flex items-center gap-1 mt-0.5">
-                        <ScrollText className="h-3 w-3" />
+                      <span className="text-sm text-muted-foreground truncate flex items-center gap-1.5 mt-0.5">
+                        <ScrollText className="h-3.5 w-3.5 flex-shrink-0" />
                         {member.current_mystery_name}
                       </span>
                     </div>
@@ -94,7 +94,7 @@ export const RoseDialog = memo(function RoseDialog({
         </div>
 
           {/* Footer z opcją zmiany hasła */}
-          <div className="p-4 border-t bg-muted/10">
+          <div className="p-4 border-t">
             <Button
               variant="ghost"
               size="sm"

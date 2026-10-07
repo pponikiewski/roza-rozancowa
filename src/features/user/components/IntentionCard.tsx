@@ -1,4 +1,6 @@
 import { memo } from "react"
+import { HandHeart } from "lucide-react"
+import { CardLabel } from "@/shared/components/common/CardLabel"
 import { ResizableText } from "@/shared/components/common/ResizableText"
 
 interface IntentionCardProps {
@@ -13,20 +15,14 @@ interface IntentionCardProps {
  */
 export const IntentionCard = memo(function IntentionCard({ title, content, month }: IntentionCardProps) {
   return (
-    <div className="bg-gradient-to-br from-rose-50 to-white dark:from-rose-950/30 dark:to-background border border-rose-100 dark:border-rose-900/50 rounded-xl p-5 shadow-sm">
-      <div>
-        <div className="flex items-center gap-2 mb-2">
-          <span className="bg-rose-100 dark:bg-rose-900/40 text-rose-600 dark:text-rose-300 text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider">
-            Intencja na {month}
-          </span>
-        </div>
-        {title && (
-          <h3 className="text-sm font-semibold mb-1 text-foreground/90">{title}</h3>
-        )}
-        <ResizableText className="text-sm text-muted-foreground/90 italic leading-relaxed">
-          "{content}"
-        </ResizableText>
-      </div>
-    </div>
+    <section className="rounded-xl border bg-card p-5 shadow-sm">
+      <CardLabel icon={HandHeart} className="mb-3">Intencja na {month}</CardLabel>
+      {title && (
+        <h3 className="text-base font-semibold leading-snug mb-1.5 text-foreground">{title}</h3>
+      )}
+      <ResizableText className="text-[0.9375rem] text-foreground leading-relaxed">
+        „{content}”
+      </ResizableText>
+    </section>
   )
 })

@@ -58,7 +58,7 @@ export default function UserPage() {
   })
 
   if (loading) {
-    return <LoadingScreen fullScreen text="Ładowanie..." className="bg-muted/30" />
+    return <LoadingScreen fullScreen text="Ładowanie..." />
   }
 
   if (!mystery) {
@@ -66,10 +66,10 @@ export default function UserPage() {
   }
 
   return (
-    <div className="min-h-screen w-full bg-muted/20 flex flex-col pb-safe">
+    <div className="min-h-screen w-full bg-background flex flex-col pb-safe">
       <UserHeader profile={profile} onOpenRose={() => setIsRoseOpen(true)} />
 
-      <main className="flex-1 w-full max-w-lg mx-auto p-8 md:p-8 flex flex-col gap-5">
+      <main className="flex-1 w-full max-w-lg mx-auto px-4 py-5 md:px-8 md:py-8 flex flex-col gap-4">
         {/* KARTA ODPUSTU — tylko w dniu odpustu */}
         {todayIndulgences.length > 0 && <IndulgenceCard indulgences={todayIndulgences} />}
 

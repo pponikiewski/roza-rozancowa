@@ -1,4 +1,5 @@
 // Common components - public exports
+export { CardLabel } from './CardLabel'
 export { HeaderControls } from './HeaderControls'
 export { ModeToggle } from './ModeToggle'
 export { PasswordInput, type PasswordInputProps } from './PasswordInput'
