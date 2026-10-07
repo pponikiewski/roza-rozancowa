@@ -32,8 +32,8 @@ export default defineConfig({
         name: 'Moja róża',
         short_name: 'Moja róża',
         description: 'Aplikacja do zarządzania Różami Różańcowymi',
-        theme_color: '#1a1a1b',
-        background_color: '#1a1a1b',
+        theme_color: '#151619',
+        background_color: '#151619',
         display: 'standalone',
         orientation: 'portrait',
         icons: [
