@@ -2,7 +2,6 @@ import { memo } from "react"
 import { Loader2 } from "lucide-react"
 import { Button } from "@/shared/components/ui/button"
 import { ResizableText } from "@/shared/components/common/ResizableText"
-import { getOptimizedImageUrl } from "@/shared/lib/utils"
 import { formatTimeLeft } from "@/shared/lib/formatters"
 import type { Mystery } from "@/features/mysteries/types/mystery.types"
 
@@ -30,13 +29,7 @@ export const MysteryCard = memo(function MysteryCard({
       <div className="w-full flex items-center justify-center aspect-[3/4] max-h-[50vh]">
         {mystery.image_url ? (
           <img
-            src={getOptimizedImageUrl(mystery.image_url, 800)}
-            srcSet={`
-              ${getOptimizedImageUrl(mystery.image_url, 300)} 300w,
-              ${getOptimizedImageUrl(mystery.image_url, 500)} 500w,
-              ${getOptimizedImageUrl(mystery.image_url, 800)} 800w
-            `}
-            sizes="(max-width: 550px) 90vw, 500px"
+            src={mystery.image_url}
             alt={mystery.name}
             width={600}
             height={800}

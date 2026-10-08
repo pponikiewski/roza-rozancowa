@@ -29,11 +29,3 @@ export function getErrorMessage(error: unknown): string {
   }
   return "Wystąpił nieznany błąd"
 }
-
-/**
- * Optymalizuje URL obrazka z Supabase używając Image Transformations
- * Zamienia endpoint /object/ na /render/image/ i dodaje parametry
- */
-export function getOptimizedImageUrl(url: string, _width: number = 800): string {
-  return url;
-}

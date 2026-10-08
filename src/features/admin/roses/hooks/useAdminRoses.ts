@@ -26,14 +26,15 @@ export function useAdminRoses() {
     },
     successMessage: (isEdit) => isEdit ? "Zaktualizowano Różę" : "Utworzono nową Różę",
     errorMessage: "Wystąpił błąd",
-    invalidateKeys: [QUERY_KEYS.ADMIN_ROSES]
+    // Nazwa Róży widnieje też na liście członków
+    invalidateKeys: [QUERY_KEYS.ADMIN_ROSES, QUERY_KEYS.ADMIN_MEMBERS]
   })
 
   const deleteGroupMutation = useTypedMutation({
     mutationFn: (id: number) => rosesService.deleteGroup(id),
     successMessage: "Róża usunięta",
     errorMessage: "Błąd usuwania",
-    invalidateKeys: [QUERY_KEYS.ADMIN_ROSES],
+    invalidateKeys: [QUERY_KEYS.ADMIN_ROSES, QUERY_KEYS.ADMIN_MEMBERS],
     onErrorCallback: (err: unknown) => {
       const error = err as { code?: string; message?: string }
       if (error.code === '23503') {
@@ -45,7 +46,9 @@ export function useAdminRoses() {
   const rotateGroupMutation = useTypedMutation({
     mutationFn: (id: number) => rosesService.rotateGroup(id),
     successMessage: "Rotacja zakończona pomyślnie!",
-    errorMessage: "Błąd rotacji"
+    errorMessage: "Błąd rotacji",
+    // Rotacja zmienia tajemnice i kasuje potwierdzenia — lista członków musi się odświeżyć
+    invalidateKeys: [QUERY_KEYS.ADMIN_MEMBERS]
   })
 
   return {

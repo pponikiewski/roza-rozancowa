@@ -4,6 +4,9 @@ import type { PushStatus } from '@/features/notifications/types/push.types'
 const VAPID_PUBLIC_KEY = import.meta.env.VITE_VAPID_PUBLIC_KEY as string | undefined
 const SW_READY_TIMEOUT_MS = 10_000
 
+/** Subskrypcja już zapisana w bazie w tej sesji — nie zapisujemy jej przy każdym otwarciu panelu konta */
+let syncedEndpoint: string | null = null
+
 /**
  * Konwersja klucza VAPID (base64url) do formatu wymaganego przez PushManager
  */
@@ -59,6 +62,7 @@ async function saveSubscription(subscription: PushSubscription): Promise<void> {
     p_auth: keys.auth,
   })
   if (error) throw error
+  syncedEndpoint = endpoint
 }
 
 async function deleteSubscription(endpoint: string): Promise<void> {
@@ -88,7 +92,7 @@ export const pushService = {
     const subscription = await getSubscription()
     if (!subscription || Notification.permission !== 'granted') return 'off'
 
-    await saveSubscription(subscription)
+    if (subscription.endpoint !== syncedEndpoint) await saveSubscription(subscription)
     return 'on'
   },
 
@@ -120,6 +124,7 @@ export const pushService = {
       await deleteSubscription(subscription.endpoint)
       await subscription.unsubscribe()
     }
+    syncedEndpoint = null
     return 'off'
   },
 
@@ -133,6 +138,9 @@ export const pushService = {
       await pushService.disable()
     } catch {
       // Brak sieci / brak SW — subskrypcja zostanie przejęta przy następnym zapisie
+    } finally {
+      // Kolejny użytkownik tego urządzenia zapisze subskrypcję na siebie
+      syncedEndpoint = null
     }
   },
 }

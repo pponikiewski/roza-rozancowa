@@ -11,8 +11,11 @@ import { IndulgenceCard } from "@/features/user/components/IndulgenceCard"
 import { useUserData } from "@/features/user/hooks/useUserData"
 import { useMysteryChangeTimer } from "@/features/user/hooks/useMysteryChangeTimer"
 import { userService } from "@/features/user/api/user.service"
-import { getOptimizedImageUrl } from "@/shared/lib/utils"
 import { useQuery } from "@tanstack/react-query"
+import type { RoseMember } from "@/features/user/types/user.types"
+
+// Stała pusta lista — nowa tablica przy każdym renderze psułaby memo w RoseDialog
+const NO_MEMBERS: RoseMember[] = []
 
 /** Główny komponent panelu użytkownika - wyświetla przydzieloną tajemnicę, intencję oraz podgląd Róży */
 export default function UserPage() {
@@ -32,25 +35,20 @@ export default function UserPage() {
 
   const [isRoseOpen, setIsRoseOpen] = useState(false)
 
-  // Preload LCP image as soon as mystery data is available
+  // Obraz tajemnicy pobierany od razu, gdy znany jest adres (zanim zniknie szkielet strony)
   useEffect(() => {
     if (mystery?.image_url) {
       const link = document.createElement('link')
       link.rel = 'preload'
       link.as = 'image'
-      link.setAttribute('imagesrcset', [
-        `${getOptimizedImageUrl(mystery.image_url, 300)} 300w`,
-        `${getOptimizedImageUrl(mystery.image_url, 500)} 500w`,
-        `${getOptimizedImageUrl(mystery.image_url, 800)} 800w`,
-      ].join(', '))
-      link.setAttribute('imagesizes', '(max-width: 550px) 90vw, 500px')
+      link.href = mystery.image_url
       link.fetchPriority = 'high'
       document.head.appendChild(link)
       return () => { document.head.removeChild(link) }
     }
   }, [mystery?.image_url])
 
-  const { data: roseMembers = [], isLoading: roseLoading } = useQuery({
+  const { data: roseMembers = NO_MEMBERS, isLoading: roseLoading } = useQuery({
     queryKey: ["rose-members", profile?.groups?.id],
     queryFn: () => userService.getRoseMembers(profile!.groups!.id),
     enabled: isRoseOpen && !!profile?.groups?.id,

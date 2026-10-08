@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useState } from "react"
+import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react"
 
 type Theme = "dark" | "light" | "system"
 export type SeniorMode = "normal" | "senior" | "ultra"
@@ -75,24 +75,25 @@ export function ThemeProvider({
     localStorage.setItem("vite-ui-senior-mode", seniorMode)
   }, [seniorMode])
 
-  const toggleSeniorMode = () => {
+  const toggleSeniorMode = useCallback(() => {
     setSeniorMode((prev) => {
       if (prev === "normal") return "senior"
       if (prev === "senior") return "ultra"
       return "normal"
     })
-  }
+  }, [])
 
-  const value = {
-    theme,
-    setTheme: (theme: Theme) => {
-      localStorage.setItem(storageKey, theme)
-      setTheme(theme)
-    },
-    seniorMode,
-    setSeniorMode,
-    toggleSeniorMode,
-  }
+  const saveTheme = useCallback((theme: Theme) => {
+    localStorage.setItem(storageKey, theme)
+    setTheme(theme)
+  }, [storageKey])
+
+  // Stała wartość kontekstu — komponenty z useTheme (np. każdy ResizableText) renderują się
+  // tylko przy zmianie motywu lub wielkości tekstu
+  const value = useMemo(
+    () => ({ theme, setTheme: saveTheme, seniorMode, setSeniorMode, toggleSeniorMode }),
+    [theme, saveTheme, seniorMode, toggleSeniorMode]
+  )
 
   return (
     <ThemeProviderContext.Provider {...props} value={value}>

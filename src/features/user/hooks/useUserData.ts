@@ -19,6 +19,11 @@ export function useUserData() {
   const { user, loading: authLoading } = useAuth()
   const queryClient = useQueryClient()
 
+  // Aplikacja na telefonie potrafi wisieć w tle wiele dni — po powrocie do niej odśwież
+  // dane, które zmieniają się w czasie (tajemnica w 1. niedzielę, intencja, odpusty).
+  // Tylko gdy są starsze niż staleTime (5 min), więc bez zbędnych zapytań.
+  const refreshOnReturn = { refetchOnWindowFocus: true } as const
+
   // 1. Profil — zwykle już w cache (AuthContext pobiera go przy logowaniu razem z rolą)
   const { data: profile, isLoading: profileLoading } = useQuery({
      queryKey: QUERY_KEYS.PROFILE(user?.id || ''),
@@ -29,14 +34,16 @@ export function useUserData() {
   // 2. Intencja
   const { data: intention, isLoading: intentionLoading } = useQuery({
      queryKey: QUERY_KEYS.INTENTION,
-     queryFn: () => userService.getCurrentIntention()
+     queryFn: () => userService.getCurrentIntention(),
+     ...refreshOnReturn
   })
 
   // 3. ID tajemnicy — od niego zależą treść tajemnicy i status potwierdzenia
   const { data: mysteryId, isLoading: mysteryIdLoading } = useQuery({
       queryKey: QUERY_KEYS.MYSTERY_ID(user?.id || ''),
       queryFn: () => userService.getMysteryId(user!.id),
-      enabled: !!user
+      enabled: !!user,
+      ...refreshOnReturn
   })
 
   // 4a. Treść tajemnicy — stała, nie trzeba jej odświeżać
@@ -51,7 +58,8 @@ export function useUserData() {
   const { data: isAcknowledged, isLoading: ackLoading } = useQuery({
       queryKey: QUERY_KEYS.ACKNOWLEDGMENT(user?.id || '', mysteryId ?? 0),
       queryFn: () => userService.checkAcknowledgment(mysteryId!),
-      enabled: !!user && !!mysteryId
+      enabled: !!user && !!mysteryId,
+      ...refreshOnReturn
   })
 
   // 5. Dzisiejsze odpusty (nie blokują ładowania panelu)
@@ -60,20 +68,19 @@ export function useUserData() {
   const { data: todayIndulgences } = useQuery({
       queryKey: [...QUERY_KEYS.INDULGENCES_TODAY(todayKey), group?.id ?? null],
       queryFn: () => userService.getTodayIndulgences(group),
-      enabled: !!user && !profileLoading
+      enabled: !!user && !profileLoading,
+      ...refreshOnReturn
   })
 
-  // Mutation for acknowledgment
+  // Potwierdzenie tajemnicy — po sukcesie status ustawiany od razu, bez ponownego zapytania
   const mutation = useMutation({
       mutationFn: async () => {
           if (!user || !mystery) return
-          // Artificial delay for better UX
-          await new Promise(resolve => setTimeout(resolve, 300))
           await userService.acknowledgeMystery(mystery.id)
       },
       onSuccess: () => {
-          // Invalidate acknowledgment query to refetch and update UI to "true"
-          queryClient.invalidateQueries({ queryKey: ['acknowledgment'] })
+          if (!user || !mystery) return
+          queryClient.setQueryData(QUERY_KEYS.ACKNOWLEDGMENT(user.id, mystery.id), true)
       },
       onError: (error: Error) => {
           toast.error("Błąd", { description: error.message })

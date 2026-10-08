@@ -66,30 +66,15 @@ export default defineConfig({
         importScripts: ['push-sw.js'],
         runtimeCaching: [
           {
-            urlPattern: /^https:\/\/fonts\.googleapis\.com\/.*/i,
+            // Font Inter (własny serwer): nie w precache, bo przeglądarka pobiera tylko potrzebne
+            // zakresy znaków (latin, latin-ext) — trafiają do cache przy pierwszym użyciu
+            urlPattern: /\/assets\/inter-.*\.woff2$/i,
             handler: 'CacheFirst',
             options: {
-              cacheName: 'google-fonts-cache',
+              cacheName: 'fonts',
               expiration: {
                 maxEntries: 10,
-                maxAgeSeconds: 60 * 60 * 24 * 365 // <== 365 days
-              },
-              cacheableResponse: {
-                statuses: [0, 200]
-              }
-            }
-          },
-          {
-            urlPattern: /^https:\/\/fonts\.gstatic\.com\/.*/i,
-            handler: 'CacheFirst',
-            options: {
-              cacheName: 'gstatic-fonts-cache',
-              expiration: {
-                maxEntries: 10,
-                maxAgeSeconds: 60 * 60 * 24 * 365 // <== 365 days
-              },
-              cacheableResponse: {
-                statuses: [0, 200]
+                maxAgeSeconds: 60 * 60 * 24 * 365
               }
             }
           },
@@ -124,21 +109,17 @@ export default defineConfig({
     chunkSizeWarningLimit: 1000,
     rollupOptions: {
       output: {
-        manualChunks: {
-          'vendor-react': ['react', 'react-dom', 'react-router-dom'],
-          'vendor-query': ['@tanstack/react-query'],
-          'vendor-ui': ['lucide-react', 'sonner', 'clsx', 'tailwind-merge'],
-          'vendor-supabase': ['@supabase/supabase-js']
+        // Biblioteki w osobnych plikach, które rzadko się zmieniają — po wdrożeniu nowej wersji
+        // telefon pobiera tylko kod aplikacji. Funkcja zamiast listy pakietów, bo lista
+        // obejmowała tylko wejście pakietu (np. 'react-dom' bez 'react-dom/client' i 'scheduler')
+        manualChunks(id) {
+          const pkg = id.match(/[\\/]node_modules[\\/]((?:@[^\\/]+[\\/])?[^\\/]+)/)?.[1]?.replace('\\', '/')
+          if (!pkg) return
+          if (['react', 'react-dom', 'scheduler', 'react-router', 'react-router-dom'].includes(pkg)) return 'vendor-react'
+          if (pkg.startsWith('@tanstack/')) return 'vendor-query'
+          if (pkg.startsWith('@supabase/')) return 'vendor-supabase'
+          if (['lucide-react', 'sonner', 'clsx', 'tailwind-merge'].includes(pkg)) return 'vendor-ui'
         }
-      }
-    }
-  },
-  server: {
-    proxy: {
-      '/img-proxy': {
-        target: 'https://jjlxuqnwbakmiwqfycha.supabase.co/storage/v1/render/image/public',
-        changeOrigin: true,
-        rewrite: (path) => path.replace(/^\/img-proxy/, '')
       }
     }
   },
