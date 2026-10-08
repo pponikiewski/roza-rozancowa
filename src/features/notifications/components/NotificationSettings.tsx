@@ -1,9 +1,11 @@
 import { Loader2, Share } from "lucide-react"
 import { Button } from "@/shared/components/ui/button"
 import { usePushNotifications } from "@/features/notifications/hooks/usePushNotifications"
+import { NotificationPreferences } from "@/features/notifications/components/NotificationPreferences"
 
 /**
- * Sekcja powiadomień push w panelu konta (nowa tajemnica, intencja, dni odpustu)
+ * Sekcja powiadomień push w panelu konta (nowa tajemnica, intencja, dni odpustu,
+ * codzienne przypomnienie o modlitwie)
  * Ukryta, gdy urządzenie nie obsługuje Web Push
  */
 export function NotificationSettings() {
@@ -34,9 +36,14 @@ export function NotificationSettings() {
               {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : isOn ? "Wyłącz" : "Włącz"}
             </Button>
           </div>
-          <p className="mt-2 text-sm text-muted-foreground">
-            O nowej tajemnicy, nowej intencji i dniach, w których możesz zyskać odpust.
-          </p>
+          {isOn ? (
+            <NotificationPreferences />
+          ) : (
+            <p className="mt-2 text-sm text-muted-foreground">
+              O nowej tajemnicy, nowej intencji i dniach, w których możesz zyskać odpust.
+              Możesz też ustawić codzienne przypomnienie o modlitwie.
+            </p>
+          )}
         </>
       )}
 

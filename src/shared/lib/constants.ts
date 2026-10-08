@@ -26,6 +26,8 @@ export const QUERY_KEYS = {
   ACKNOWLEDGMENT: (userId: string, mysteryId: number) => ['acknowledgment', userId, mysteryId],
   ROSE_MEMBERS: (groupId: number) => ['rose-members', groupId],
   INDULGENCES_TODAY: (date: string) => ['indulgences-today', date],
+  PRAYER_REMINDER: (userId: string) => ['prayer-reminder', userId],
+  NOTIFICATION_PREFERENCES: (userId: string) => ['notification-preferences', userId],
   // Admin
   ADMIN_MEMBERS: ['admin-members'],
   ADMIN_INTENTIONS: ['admin-intentions'],

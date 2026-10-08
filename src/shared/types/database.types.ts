@@ -151,6 +151,64 @@ export type Database = {
         }
         Relationships: []
       }
+      notification_preferences: {
+        Row: {
+          indulgence: boolean
+          intention: boolean
+          mystery: boolean
+          user_id: string
+        }
+        Insert: {
+          indulgence?: boolean
+          intention?: boolean
+          mystery?: boolean
+          user_id?: string
+        }
+        Update: {
+          indulgence?: boolean
+          intention?: boolean
+          mystery?: boolean
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notification_preferences_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      prayer_reminders: {
+        Row: {
+          created_at: string
+          last_sent_on: string | null
+          remind_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          last_sent_on?: string | null
+          remind_at: string
+          user_id?: string
+        }
+        Update: {
+          created_at?: string
+          last_sent_on?: string | null
+          remind_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "prayer_reminders_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           created_at: string
@@ -250,6 +308,12 @@ export type Database = {
       acknowledge_mystery: {
         Args: { p_mystery_id: number }
         Returns: undefined
+      }
+      claim_due_prayer_reminders: {
+        Args: never
+        Returns: {
+          user_id: string
+        }[]
       }
       current_mystery_period_start: { Args: never; Returns: string }
       get_members_overview: {

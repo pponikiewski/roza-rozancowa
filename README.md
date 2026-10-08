@@ -56,7 +56,7 @@ Aplikacja **Róża Różańcowa** digitalizuje ten proces, eliminując potrzebę
 - **Licznik czasu** — odliczanie do najbliższej zmiany tajemnic (pierwsza niedziela miesiąca)
 - **Widok Róży** — podgląd członków grupy z ich aktualnymi tajemnicami
 - **Intencja miesięczna** — wspólna intencja modlitewna dla całej grupy
-- **Powiadomienia push** — nowa tajemnica, nowa intencja i dni odpustu (Web Push, działa przy zamkniętej aplikacji)
+- **Powiadomienia push** — nowa tajemnica, nowa intencja, dni odpustu i codzienne przypomnienie o modlitwie o wybranej godzinie (Web Push, działa przy zamkniętej aplikacji)
 - **Dzień odpustu** — karta z warunkami uzyskania odpustu w dniu, w którym wypada
 
 #### 🛡️ Panel Administratora
@@ -326,8 +326,9 @@ Wysyłkę obsługuje Edge Function `send-push`, uruchamiana przez `pg_cron` codz
 | Nowa intencja | od razu po zapisaniu intencji na bieżący miesiąc (trigger) |
 | Dzień odpustu | w dniu z tabeli `indulgence_days` (panel admina → Odpusty); Wielkanoc liczona automatycznie |
 | Dzień przyjęcia do Stowarzyszenia | co roku w dniu ustawionym dla Róży (panel admina → Róże), tylko dla jej członków |
+| Przypomnienie o modlitwie | codziennie o godzinie wybranej przez użytkownika (panel konta → Powiadomienia); osobne zadanie `pg_cron` co minutę |
 
-Każde powiadomienie wychodzi tylko raz — klucz zapisywany jest w `push_notification_log`. Konfiguracja (jednorazowo):
+Użytkownik wybiera w panelu konta, które powiadomienia chce dostawać (tabela `notification_preferences`; brak wiersza = wszystkie włączone). Każde powiadomienie wychodzi tylko raz — klucz zapisywany jest w `push_notification_log` (przypomnienia: kolumna `prayer_reminders.last_sent_on`). Konfiguracja (jednorazowo):
 
 ```bash
 # 1. Wygeneruj klucze VAPID
@@ -350,7 +351,7 @@ select vault.create_secret('<ta sama wartość co CRON_SECRET>', 'push_cron_secr
 
 Na koniec (krok 5) dodaj `VITE_VAPID_PUBLIC_KEY` (klucz publiczny z kroku 1) do `.env` i zmiennych środowiskowych na Vercelu.
 
-Test ręczny wysyłki — `type`: `mystery` / `intention` / `indulgence`; `force: true` pomija datę i dziennik:
+Test ręczny wysyłki — `type`: `mystery` / `intention` / `indulgence` / `reminder`; `force: true` pomija datę i dziennik (dla `reminder` — wysyła do wszystkich z włączonym przypomnieniem):
 
 ```bash
 curl -X POST https://<project-ref>.supabase.co/functions/v1/send-push \
@@ -634,7 +635,6 @@ npx supabase functions deploy update-user-password
 
 ### 🚧 W planach
 
-- [ ] **Powiadomienia push** — przypomnienia o modlitwie
 - [ ] **i18n** — wielojęzyczność (PL/EN)
 
 ### 💡 Pomysły na przyszłość

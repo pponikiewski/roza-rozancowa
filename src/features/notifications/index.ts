@@ -1,5 +1,11 @@
 // Notifications feature - public exports
 export { NotificationSettings } from './components/NotificationSettings'
+export { NotificationPreferences } from './components/NotificationPreferences'
+export { PrayerReminderSettings } from './components/PrayerReminderSettings'
 export { usePushNotifications } from './hooks/usePushNotifications'
+export { useNotificationPreferences } from './hooks/useNotificationPreferences'
+export { usePrayerReminder } from './hooks/usePrayerReminder'
 export { pushService } from './api/push.service'
+export { preferencesService } from './api/preferences.service'
+export { reminderService } from './api/reminder.service'
 export type * from './types/push.types'

@@ -9,13 +9,16 @@ import webpush from "npm:web-push@3.6.7"
  * - daily      — codziennie z pg_cron: tajemnica (1. niedziela), intencja (jeśli jeszcze nie ogłoszona),
  *                odpust (stała data, Wielkanoc lub dzień przyjęcia Róży — ten tylko dla jej członków)
  * - intention  — z triggera po zapisaniu intencji na bieżący miesiąc
+ * - reminder   — z pg_cron co minutę: przypomnienie o modlitwie dla "user_ids"
+ *                (zarezerwowanych przez claim_due_prayer_reminders; z "force": true — wszyscy z przypomnieniem)
  * - mystery / indulgence — ręczne wywołanie jednego typu (z "force": true pomija datę i dziennik — do testów)
  *
+ * Użytkownik może wyłączyć tajemnicę, intencję lub odpust (notification_preferences; brak wiersza = wszystkie).
  * Każde powiadomienie wychodzi raz — klucz zapisywany w push_notification_log przed wysyłką.
  * Autoryzacja: nagłówek x-cron-secret zgodny z sekretem CRON_SECRET.
  */
 
-type NotificationType = "daily" | "mystery" | "intention" | "indulgence"
+type NotificationType = "daily" | "mystery" | "intention" | "indulgence" | "reminder"
 
 interface PushSubscriptionRow {
   id: number
@@ -31,6 +34,11 @@ interface PushPayload {
   url: string
   tag: string
 }
+
+type PreferenceKind = "mystery" | "intention" | "indulgence"
+
+/** Czy użytkownik chce dostawać dany typ powiadomienia */
+type Wants = (userId: string) => boolean
 
 interface SendStats {
   sent: number
@@ -148,8 +156,29 @@ async function sendToAll(
   return stats
 }
 
-/** Nowa tajemnica — każdy dostaje swoją */
-async function sendMystery(supabase: SupabaseClient, subscriptions: PushSubscriptionRow[]): Promise<SendStats> {
+/** Wybór powiadomień użytkowników z subskrypcji; użytkownik bez wiersza dostaje wszystkie */
+async function loadPreferences(
+  supabase: SupabaseClient,
+  subscriptions: PushSubscriptionRow[],
+): Promise<(kind: PreferenceKind) => Wants> {
+  const userIds = [...new Set(subscriptions.map((s) => s.user_id))]
+  const { data, error } = await supabase
+    .from("notification_preferences")
+    .select("user_id, mystery, intention, indulgence")
+    .in("user_id", userIds)
+  if (error) throw error
+
+  const byUser = new Map(
+    (data ?? []).map((p: { user_id: string } & Record<PreferenceKind, boolean>) => [p.user_id, p]),
+  )
+  return (kind) => (userId) => byUser.get(userId)?.[kind] ?? true
+}
+
+/** Nazwa bieżącej tajemnicy każdego użytkownika z subskrypcji (brak pozycji w Róży = brak wpisu) */
+async function mysteryNamesByUser(
+  supabase: SupabaseClient,
+  subscriptions: PushSubscriptionRow[],
+): Promise<Map<string, string | undefined>> {
   const userIds = [...new Set(subscriptions.map((s) => s.user_id))]
   const { data: mysteryIds, error: rpcError } = await supabase
     .rpc("get_mystery_ids_for_users", { p_user_ids: userIds })
@@ -159,11 +188,21 @@ async function sendMystery(supabase: SupabaseClient, subscriptions: PushSubscrip
   if (error) throw error
 
   const nameById = new Map((mysteries ?? []).map((m: { id: number; name: string }) => [m.id, m.name]))
-  const nameByUser = new Map(
+  return new Map(
     (mysteryIds ?? []).map((r: { user_id: string; mystery_id: number }) => [r.user_id, nameById.get(r.mystery_id)]),
   )
+}
+
+/** Nowa tajemnica — każdy dostaje swoją */
+async function sendMystery(
+  supabase: SupabaseClient,
+  subscriptions: PushSubscriptionRow[],
+  wants: Wants,
+): Promise<SendStats> {
+  const nameByUser = await mysteryNamesByUser(supabase, subscriptions)
 
   return sendToAll(supabase, subscriptions, (sub) => {
+    if (!wants(sub.user_id)) return null
     const name = nameByUser.get(sub.user_id)
     // Użytkownik bez pozycji w Róży nie ma tajemnicy
     if (!name) return null
@@ -176,26 +215,56 @@ async function sendMystery(supabase: SupabaseClient, subscriptions: PushSubscrip
   })
 }
 
+/** Codzienne przypomnienie o modlitwie — z tajemnicą użytkownika, jeśli ją ma */
+async function sendReminder(supabase: SupabaseClient, subscriptions: PushSubscriptionRow[]): Promise<SendStats> {
+  const nameByUser = await mysteryNamesByUser(supabase, subscriptions)
+
+  return sendToAll(supabase, subscriptions, (sub) => {
+    const name = nameByUser.get(sub.user_id)
+    return {
+      title: "Czas na modlitwę różańcową",
+      body: name ? `Twoja tajemnica: ${name}.` : "Pamiętaj o dzisiejszej dziesiątce różańca.",
+      url: "/user",
+      tag: "reminder",
+    }
+  })
+}
+
+/** Odbiorcy przypomnienia: zarezerwowani przez cron albo (force) wszyscy z włączonym przypomnieniem */
+async function reminderUserIds(supabase: SupabaseClient, userIds: unknown, force: boolean): Promise<string[]> {
+  if (!force) {
+    return Array.isArray(userIds) ? userIds.filter((id): id is string => typeof id === "string") : []
+  }
+  const { data, error } = await supabase.from("prayer_reminders").select("user_id")
+  if (error) throw error
+  return (data ?? []).map((r: { user_id: string }) => r.user_id)
+}
+
 async function sendIntention(
   supabase: SupabaseClient,
   subscriptions: PushSubscriptionRow[],
   intention: { title: string | null; content: string },
   month: number,
+  wants: Wants,
 ): Promise<SendStats> {
-  return sendToAll(supabase, subscriptions, () => ({
-    title: `Nowa intencja na ${MONTHS[month - 1]}`,
-    body: truncate(intention.title || intention.content),
-    url: "/user",
-    tag: "intention",
-  }))
+  return sendToAll(supabase, subscriptions, (sub) => wants(sub.user_id)
+    ? {
+      title: `Nowa intencja na ${MONTHS[month - 1]}`,
+      body: truncate(intention.title || intention.content),
+      url: "/user",
+      tag: "intention",
+    }
+    : null)
 }
 
 async function sendIndulgence(
   supabase: SupabaseClient,
   subscriptions: PushSubscriptionRow[],
   namesFor: (userId: string) => string[],
+  wants: Wants,
 ): Promise<SendStats> {
   return sendToAll(supabase, subscriptions, (sub) => {
+    if (!wants(sub.user_id)) return null
     const names = namesFor(sub.user_id)
     if (names.length === 0) return null
     return {
@@ -229,6 +298,24 @@ serve(async (req) => {
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "",
     )
 
+    // Przypomnienie o modlitwie — tylko urządzenia wskazanych użytkowników
+    if (type === "reminder") {
+      const userIds = await reminderUserIds(supabase, body.user_ids, force)
+      if (userIds.length === 0) {
+        return new Response(JSON.stringify({ results: {} }), { headers: jsonHeaders })
+      }
+      const { data: subscriptions, error: subError } = await supabase
+        .from("push_subscriptions")
+        .select("id, user_id, endpoint, p256dh, auth")
+        .in("user_id", userIds)
+      if (subError) throw subError
+
+      const reminder = subscriptions && subscriptions.length > 0
+        ? await sendReminder(supabase, subscriptions)
+        : { sent: 0, failed: 0, removed: 0 }
+      return new Response(JSON.stringify({ results: { reminder } }), { headers: jsonHeaders })
+    }
+
     const { data: subscriptions, error: subError } = await supabase
       .from("push_subscriptions")
       .select("id, user_id, endpoint, p256dh, auth")
@@ -238,13 +325,14 @@ serve(async (req) => {
     }
 
     const today = warsawToday()
+    const wants = await loadPreferences(supabase, subscriptions)
     const results: Record<string, SendStats> = {}
 
     // Tajemnica — pierwsza niedziela miesiąca
     const isFirstSunday = today.isSunday && today.day <= 7
     if ((type === "mystery" && force) || (type === "daily" && isFirstSunday)) {
       if (await claim(supabase, `mystery:${today.ym}`, force)) {
-        results.mystery = await sendMystery(supabase, subscriptions)
+        results.mystery = await sendMystery(supabase, subscriptions, wants("mystery"))
       }
     }
 
@@ -259,7 +347,7 @@ serve(async (req) => {
       if (error) throw error
 
       if (intention && await claim(supabase, `intention:${today.ym}`, force)) {
-        results.intention = await sendIntention(supabase, subscriptions, intention, today.month)
+        results.intention = await sendIntention(supabase, subscriptions, intention, today.month, wants("intention"))
       }
     }
 
@@ -302,7 +390,7 @@ serve(async (req) => {
 
       const hasRecipients = globalNames.length > 0 || subscriptions.some((s) => admissionUsers.has(s.user_id))
       if (hasRecipients && await claim(supabase, `indulgence:${today.ymd}`, force)) {
-        results.indulgence = await sendIndulgence(supabase, subscriptions, namesFor)
+        results.indulgence = await sendIndulgence(supabase, subscriptions, namesFor, wants("indulgence"))
       }
     }
 
