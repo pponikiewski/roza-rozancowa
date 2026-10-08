@@ -3,26 +3,25 @@ import { Loader2 } from "lucide-react"
 import { Button } from "@/shared/components/ui/button"
 import { ResizableText } from "@/shared/components/common/ResizableText"
 import { ZoomableImage } from "@/shared/components/common/ZoomableImage"
-import { formatTimeLeft } from "@/shared/lib/formatters"
+import { MysteryChangeCountdown } from "@/features/user/components/MysteryChangeCountdown"
 import type { Mystery } from "@/features/mysteries/types/mystery.types"
 
 interface MysteryCardProps {
   mystery: Mystery
   isAcknowledged: boolean
   actionLoading: boolean
-  timeLeft: { days: number; hours: number; minutes: number }
   onAcknowledge: () => void
 }
 
 /**
  * Sekcja wyświetlająca tajemnicę różańcową z obrazem, medytacją i przyciskiem potwierdzenia
- * Zmemoizowana - rerenderuje tylko gdy zmienia się mystery, status potwierdzenia lub timer
+ * Zmemoizowana - rerenderuje tylko gdy zmienia się mystery lub status potwierdzenia
+ * (licznik do zmiany tajemnic odświeża się sam, w MysteryChangeCountdown)
  */
 export const MysteryCard = memo(function MysteryCard({
   mystery,
   isAcknowledged,
   actionLoading,
-  timeLeft,
   onAcknowledge,
 }: MysteryCardProps) {
   return (
@@ -35,6 +34,8 @@ export const MysteryCard = memo(function MysteryCard({
             width={600}
             height={800}
             fetchPriority="high"
+            // CORS: service worker zapisuje w cache zwykłą odpowiedź zamiast opaque (vite.config.ts)
+            crossOrigin="anonymous"
             className="h-full w-auto max-w-full object-contain rounded-lg"
           />
         ) : (
@@ -75,12 +76,7 @@ export const MysteryCard = memo(function MysteryCard({
           </Button>
         )}
 
-        <div className="flex flex-wrap items-center justify-center gap-x-2 gap-y-1 text-sm text-muted-foreground">
-          <span>Do zmiany tajemnic:</span>
-          <span className="font-semibold tabular-nums text-foreground">
-            {formatTimeLeft(timeLeft)}
-          </span>
-        </div>
+        <MysteryChangeCountdown />
       </div>
     </section>
   )

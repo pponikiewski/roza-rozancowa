@@ -13,14 +13,26 @@ import { ROUTES } from "@/shared/lib/constants"
 import { formatTimeLeft } from "@/shared/lib/formatters"
 
 interface NavContentProps {
-  timeLeft: { days: number; hours: number; minutes: number }
-  targetDate: Date | null
   onNavClick?: () => void
+}
+
+// Data i czas do zmiany tajemnic. Osobny komponent: odświeżanie co minutę renderuje tylko ten fragment
+function MysteryChangeInfo() {
+  const { timeLeft, targetDate } = useMysteryChangeTimer()
+
+  return (
+    <div className="border-t px-5 py-3 text-sm">
+      <p className="text-muted-foreground">
+        Zmiana tajemnic {targetDate.toLocaleDateString("pl-PL", { day: "numeric", month: "long" })}
+      </p>
+      <p className="font-medium tabular-nums">za {formatTimeLeft(timeLeft)}</p>
+    </div>
+  )
 }
 
 // Zawartość menu: nazwa panelu, linki, licznik do zmiany tajemnic
 // i ustawienia (wygląd, wylogowanie) rozwijane w górę na dole menu
-function NavContent({ timeLeft, targetDate, onNavClick }: NavContentProps) {
+function NavContent({ onNavClick }: NavContentProps) {
   const handleLogout = useLogout()
   const [settingsOpen, setSettingsOpen] = useState(false)
   const settingsId = useId()
@@ -52,13 +64,7 @@ function NavContent({ timeLeft, targetDate, onNavClick }: NavContentProps) {
         ))}
       </nav>
 
-      <div className="border-t px-5 py-3 text-sm">
-        <p className="text-muted-foreground">
-          Zmiana tajemnic
-          {targetDate && ` ${targetDate.toLocaleDateString("pl-PL", { day: "numeric", month: "long" })}`}
-        </p>
-        <p className="font-medium tabular-nums">za {formatTimeLeft(timeLeft)}</p>
-      </div>
+      <MysteryChangeInfo />
 
       <div className="border-t p-3">
         {/* Ustawienia rozwijane w górę, wewnątrz menu */}
@@ -92,14 +98,13 @@ function NavContent({ timeLeft, targetDate, onNavClick }: NavContentProps) {
 // Układ panelu administratora: menu boczne na komputerze, wysuwane menu na telefonie
 export default function AdminLayout() {
   const [open, setOpen] = useState(false)
-  const { timeLeft, targetDate } = useMysteryChangeTimer()
   const handleLogout = useLogout()
   useStatusBarColor("card")
 
   return (
     <div className="flex h-screen w-full bg-background flex-col md:flex-row">
       <aside className="hidden md:flex w-72 border-r bg-card flex-col">
-        <NavContent timeLeft={timeLeft} targetDate={targetDate} />
+        <NavContent />
       </aside>
       <div className="flex min-w-0 flex-1 flex-col">
         {/* Pasek górny: na telefonie menu i tytuł, na komputerze tylko wylogowanie (w prawym górnym rogu) */}
@@ -121,7 +126,7 @@ export default function AdminLayout() {
                 }}
               >
                 <SheetTitle className="sr-only">Menu</SheetTitle>
-                <NavContent timeLeft={timeLeft} targetDate={targetDate} onNavClick={() => setOpen(false)} />
+                <NavContent onNavClick={() => setOpen(false)} />
               </SheetContent>
             </Sheet>
             <img src="/logo-128.webp" alt="" width={32} height={32} className="h-8 w-8 object-contain" />

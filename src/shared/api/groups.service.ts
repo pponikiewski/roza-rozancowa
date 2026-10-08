@@ -18,18 +18,4 @@ export const groupsService = {
     if (error) throw error
     return data || []
   },
-
-  /**
-   * Pobranie grupy po ID
-   */
-  async getById(id: number): Promise<Group | null> {
-    const { data, error } = await supabase
-      .from('groups')
-      .select('*')
-      .eq('id', id)
-      .single()
-
-    if (error) throw error
-    return data
-  },
 }

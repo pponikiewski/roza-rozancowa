@@ -1,12 +1,16 @@
-import { memo, useState } from "react"
+import { lazy, memo, Suspense, useState } from "react"
 import { Sheet, SheetContent, SheetTitle, SheetDescription } from "@/shared/components/ui/sheet"
 import { Button } from "@/shared/components/ui/button"
 import { Skeleton } from "@/shared/components/ui/skeleton"
-import { ChangePasswordDialog } from "@/features/user/components/ChangePasswordDialog"
 import { AppearanceSettings } from "@/shared/components/common/AppearanceSettings"
 import { NotificationSettings } from "@/features/notifications/components/NotificationSettings"
 import { useLogout } from "@/features/auth"
 import type { RoseMember } from "@/features/user/types/user.types"
+
+// Formularz (react-hook-form + zod) ładowany przy pierwszym otwarciu, a nie przy starcie panelu
+const ChangePasswordDialog = lazy(() =>
+  import("@/features/user/components/ChangePasswordDialog").then((m) => ({ default: m.ChangePasswordDialog }))
+)
 
 interface RoseDialogProps {
   open: boolean
@@ -36,6 +40,14 @@ export const RoseDialog = memo(function RoseDialog({
   currentUserId,
 }: RoseDialogProps) {
   const [isPasswordDialogOpen, setIsPasswordDialogOpen] = useState(false)
+  // Raz otwarty zostaje zamontowany — animacja zamknięcia działa normalnie
+  const [passwordDialogMounted, setPasswordDialogMounted] = useState(false)
+
+  const openPasswordDialog = () => {
+    setPasswordDialogMounted(true)
+    setIsPasswordDialogOpen(true)
+  }
+
   const handleLogout = useLogout()
 
   return (
@@ -62,7 +74,7 @@ export const RoseDialog = memo(function RoseDialog({
                 {login ? `Login: ${login}` : "Twoje konto i skład Róży"}
               </SheetDescription>
               <div className="mt-4 grid grid-cols-2 gap-2">
-                <Button variant="outline" onClick={() => setIsPasswordDialogOpen(true)}>
+                <Button variant="outline" onClick={openPasswordDialog}>
                   Zmień hasło
                 </Button>
                 <Button variant="outline" onClick={handleLogout}>
@@ -133,10 +145,14 @@ export const RoseDialog = memo(function RoseDialog({
           </div>
         </SheetContent>
       </Sheet>
-      <ChangePasswordDialog
-        open={isPasswordDialogOpen}
-        onOpenChange={setIsPasswordDialogOpen}
-      />
+      {passwordDialogMounted && (
+        <Suspense fallback={null}>
+          <ChangePasswordDialog
+            open={isPasswordDialogOpen}
+            onOpenChange={setIsPasswordDialogOpen}
+          />
+        </Suspense>
+      )}
     </>
   )
 })

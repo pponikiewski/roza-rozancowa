@@ -12,7 +12,6 @@ describe('MysteryCard', () => {
     mystery: mockMystery,
     isAcknowledged: false,
     actionLoading: false,
-    timeLeft: { days: 25, hours: 14, minutes: 30 },
     onAcknowledge: vi.fn(),
   }
 

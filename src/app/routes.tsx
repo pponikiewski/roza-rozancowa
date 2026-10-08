@@ -3,12 +3,14 @@ import { Routes, Route, Navigate } from "react-router-dom"
 import { ProtectedRoute, AdminRoute, GuestRoute } from "@/features/auth/components/ProtectedRoute"
 import { useNavigateOnAuthChange } from "@/features/auth/hooks/useNavigateOnAuthChange"
 import { FeatureErrorBoundary } from "@/shared/components/layout/FeatureErrorBoundary"
-import { LoadingScreen } from "@/shared/components/feedback"
+import { AppSplash, LoadingScreen } from "@/shared/components/feedback"
 import { ROUTES } from "@/shared/lib/constants"
 
-// Eager-loaded pages (primary entry points)
-import LoginPage from "@/features/auth/pages/LoginPage"
+// Panel użytkownika od razu — to pierwszy ekran przy prawie każdym uruchomieniu
 import UserPage from "@/features/user/pages/UserPage"
+
+// Logowanie osobno: zalogowany (większość uruchomień) nie wczytuje formularza z react-hook-form i zod
+const LoginPage = lazy(() => import("@/features/auth/pages/LoginPage"))
 
 // Lazy-loaded admin pages
 const AdminLayout = lazy(() => import("@/features/admin/layout/AdminLayout"))
@@ -28,7 +30,11 @@ export function AppRoutes() {
     <Routes>
       {/* Public routes */}
       <Route element={<GuestRoute />}>
-        <Route path={ROUTES.HOME} element={<LoginPage />} />
+        <Route path={ROUTES.HOME} element={
+          <Suspense fallback={<AppSplash />}>
+            <LoginPage />
+          </Suspense>
+        } />
       </Route>
       <Route path={ROUTES.LOGIN} element={<Navigate to={ROUTES.HOME} replace />} />
 

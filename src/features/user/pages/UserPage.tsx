@@ -9,9 +9,9 @@ import { NoAssignmentCard } from "@/features/user/components/NoAssignmentCard"
 import { IndulgenceCard } from "@/features/user/components/IndulgenceCard"
 // Hooks & Utils
 import { useUserData } from "@/features/user/hooks/useUserData"
-import { useMysteryChangeTimer } from "@/features/user/hooks/useMysteryChangeTimer"
 import { userService } from "@/features/user/api/user.service"
 import { useQuery } from "@tanstack/react-query"
+import { QUERY_KEYS } from "@/shared/lib/constants"
 import type { RoseMember } from "@/features/user/types/user.types"
 
 // Stała pusta lista — nowa tablica przy każdym renderze psułaby memo w RoseDialog
@@ -31,8 +31,6 @@ export default function UserPage() {
     acknowledgeMystery
   } = useUserData()
 
-  const { timeLeft } = useMysteryChangeTimer()
-
   const [isRoseOpen, setIsRoseOpen] = useState(false)
 
   // Obraz tajemnicy pobierany od razu, gdy znany jest adres (zanim zniknie szkielet strony)
@@ -43,13 +41,15 @@ export default function UserPage() {
       link.as = 'image'
       link.href = mystery.image_url
       link.fetchPriority = 'high'
+      // Ten sam tryb co <img> w MysteryCard — inaczej przeglądarka pobrałaby obraz drugi raz
+      link.crossOrigin = 'anonymous'
       document.head.appendChild(link)
       return () => { document.head.removeChild(link) }
     }
   }, [mystery?.image_url])
 
   const { data: roseMembers = NO_MEMBERS, isLoading: roseLoading } = useQuery({
-    queryKey: ["rose-members", profile?.groups?.id],
+    queryKey: QUERY_KEYS.ROSE_MEMBERS(profile?.groups?.id ?? 0),
     queryFn: () => userService.getRoseMembers(profile!.groups!.id),
     enabled: isRoseOpen && !!profile?.groups?.id,
   })
@@ -84,7 +84,6 @@ export default function UserPage() {
           mystery={mystery}
           isAcknowledged={isAcknowledged}
           actionLoading={actionLoading}
-          timeLeft={timeLeft}
           onAcknowledge={acknowledgeMystery}
         />
       </main>

@@ -60,7 +60,8 @@ export default defineConfig({
         ]
       },
       workbox: {
-        globPatterns: ['**/*.{js,css,html,svg,png,webp,ico}'],
+        // woff2: dwa pliki Inter (40 KB), potrzebne na każdym ekranie — dostępne offline od razu
+        globPatterns: ['**/*.{js,css,html,svg,png,webp,ico,woff2}'],
         // Ikony 512 px są potrzebne tylko przy instalacji aplikacji, nie offline
         // Obrazki startowe iOS też: system pobiera je raz, przy dodaniu do ekranu głównego
         globIgnores: ['**/icon-512.png', '**/icon-maskable-512.png', '**/splash/**'],
@@ -68,29 +69,20 @@ export default defineConfig({
         importScripts: ['push-sw.js'],
         runtimeCaching: [
           {
-            // Font Inter (własny serwer): nie w precache, bo przeglądarka pobiera tylko potrzebne
-            // zakresy znaków (latin, latin-ext) — trafiają do cache przy pierwszym użyciu
-            urlPattern: /\/assets\/inter-.*\.woff2$/i,
-            handler: 'CacheFirst',
-            options: {
-              cacheName: 'fonts',
-              expiration: {
-                maxEntries: 10,
-                maxAgeSeconds: 60 * 60 * 24 * 365
-              }
-            }
-          },
-          {
+            // Obrazy tajemnic ładowane z crossOrigin="anonymous" (Storage wysyła CORS), więc w cache
+            // są zwykłe odpowiedzi 200, a nie "opaque" — Chrome liczy każdą opaque jako ok. 7 MB miejsca.
+            // Nowa nazwa cache: stary (supabase-images) miał odpowiedzi opaque, nieużywalne dla
+            // żądań CORS — usuwa go registerServiceWorker
             urlPattern: /^https:\/\/jjlxuqnwbakmiwqfycha\.supabase\.co\/storage\/.*/i,
             handler: 'CacheFirst',
             options: {
-              cacheName: 'supabase-images',
+              cacheName: 'mystery-images',
               expiration: {
                 maxEntries: 50,
-                maxAgeSeconds: 60 * 60 * 24 * 30 // <== 30 days
+                maxAgeSeconds: 60 * 60 * 24 * 30 // 30 dni
               },
               cacheableResponse: {
-                statuses: [0, 200]
+                statuses: [200]
               }
             }
           }

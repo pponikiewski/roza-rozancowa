@@ -10,6 +10,10 @@ const UPDATE_CHECK_INTERVAL_MS = 60 * 60 * 1000
  * Nowa wersja jest sprawdzana przy starcie, po powrocie do aplikacji (np. z ekranu głównego) i co godzinę.
  */
 export function registerServiceWorker() {
+  // Cache z poprzednich wersji: font (teraz w precache) i obrazy zapisane jako odpowiedzi opaque
+  window.caches?.delete('fonts').catch(() => {})
+  window.caches?.delete('supabase-images').catch(() => {})
+
   registerSW({
     immediate: true,
     onRegisteredSW(swUrl, registration) {

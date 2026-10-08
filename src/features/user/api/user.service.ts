@@ -34,7 +34,7 @@ export const userService = {
       .select('title, content')
       .eq('month', date.getMonth() + 1)
       .eq('year', date.getFullYear())
-      .single()
+      .maybeSingle()
 
     return (data as Intention) || null
   },

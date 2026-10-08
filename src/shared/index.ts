@@ -9,7 +9,7 @@ export * from './context'
 // Lib utilities
 export { queryClient } from './lib/queryClient'
 export { supabase } from './lib/supabase'
-export { ROUTES, QUERY_KEYS, ROSARY_PARTS, ROSARY_QUOTES } from './lib/constants'
+export { ROUTES, QUERY_KEYS, ROSARY_QUOTES } from './lib/constants'
 export * from './lib/utils'
 
 // Types

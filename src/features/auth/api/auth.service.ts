@@ -1,5 +1,5 @@
 import { supabase } from '@/shared/lib/supabase'
-import type { User, Session } from '@supabase/supabase-js'
+import type { Session } from '@supabase/supabase-js'
 
 /**
  * Serwis obsługujący autentykację użytkowników
@@ -27,22 +27,6 @@ export const authService = {
   async signOut() {
     const { error } = await supabase.auth.signOut()
     if (error) throw error
-  },
-
-  /**
-   * Pobranie aktywnej sesji
-   */
-  async getSession(): Promise<Session | null> {
-    const { data: { session } } = await supabase.auth.getSession()
-    return session
-  },
-
-  /**
-   * Pobranie aktualnego użytkownika
-   */
-  async getCurrentUser(): Promise<User | null> {
-    const { data: { user } } = await supabase.auth.getUser()
-    return user
   },
 
   /**

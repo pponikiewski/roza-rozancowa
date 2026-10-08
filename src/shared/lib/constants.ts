@@ -18,7 +18,6 @@ export const ROUTES = {
 
 /** Klucze dla React Query */
 export const QUERY_KEYS = {
-  AUTH: ['auth'],
   PROFILE: (userId: string) => ['profile', userId],
   MYSTERY_ID: (userId: string) => ['mystery-id', userId],
   MYSTERY: (mysteryId: number) => ['mystery', mysteryId],
@@ -30,7 +29,6 @@ export const QUERY_KEYS = {
   NOTIFICATION_PREFERENCES: (userId: string) => ['notification-preferences', userId],
   // Admin
   ADMIN_MEMBERS: ['admin-members'],
-  ADMIN_INTENTIONS: ['admin-intentions'],
   ADMIN_INTENTIONS_HISTORY: ['admin-intentions-history'],
   ADMIN_ROSES: ['admin-roses'],
   ADMIN_INDULGENCES: ['admin-indulgences'],
@@ -43,14 +41,6 @@ export const UNASSIGNED_GROUP_VALUE = "unassigned" as const
 export const ADMISSION_INDULGENCE = {
   name: 'Dzień przyjęcia do Stowarzyszenia Żywego Różańca',
   description: 'Zwykłe warunki odpustu zupełnego: spowiedź sakramentalna, Komunia święta, modlitwa w intencjach Ojca Świętego oraz wolność od przywiązania do jakiegokolwiek grzechu, nawet powszedniego.',
-} as const
-
-/** Części różańca */
-export const ROSARY_PARTS = {
-  JOYFUL: 'Radosne',
-  LUMINOUS: 'Światła',
-  SORROWFUL: 'Bolesne',
-  GLORIOUS: 'Chwalebne'
 } as const
 
 /** Cytaty różańcowe */

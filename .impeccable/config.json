@@ -1,0 +1,14 @@
+{
+  "detector": {
+    "ignoreRules": [],
+    "ignoreFiles": [],
+    "ignoreValues": [
+      {
+        "rule": "overused-font",
+        "value": "inter",
+        "createdAt": "2026-10-08T22:06:17.687Z",
+        "reason": "Claude: Inter is the project's established typeface (tailwind.config.js, earlier self-hosted font commit 2c2758a); this change only subset the existing files for size, not a new font choice"
+      }
+    ]
+  }
+}

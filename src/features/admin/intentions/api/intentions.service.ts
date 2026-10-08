@@ -20,21 +20,6 @@ export const intentionsService = {
   },
 
   /**
-   * Pobranie intencji na bieżący miesiąc
-   */
-  async getCurrentIntention() {
-    const date = new Date()
-    const { data } = await supabase
-      .from('intentions')
-      .select('*')
-      .eq('month', date.getMonth() + 1)
-      .eq('year', date.getFullYear())
-      .maybeSingle()
-
-    return data
-  },
-
-  /**
    * Zapisanie/aktualizacja intencji na bieżący miesiąc
    */
   async saveIntention(title: string, content: string): Promise<void> {

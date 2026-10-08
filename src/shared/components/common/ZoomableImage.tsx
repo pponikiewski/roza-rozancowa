@@ -96,6 +96,8 @@ export function ZoomableImage({ src, alt, className, ...props }: ZoomableImagePr
             <img
               src={src}
               alt={alt}
+              // Ten sam tryb co miniatura — obraz z cache, bez ponownego pobrania
+              crossOrigin={props.crossOrigin}
               onClick={toggleZoom}
               style={zoom ? { width: zoom.width, height: zoom.height } : undefined}
               className={cn(

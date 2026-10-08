@@ -56,17 +56,4 @@ export const rosesService = {
     const { error } = await supabase.rpc('rotate_group_members', { p_group_id: id })
     if (error) throw error
   },
-
-
-  /**
-   * Aktualizacja pozycji członka w róży
-   */
-  async updateRosePosition(userId: string, newPosition: number): Promise<void> {
-    const { error } = await supabase
-      .from('profiles')
-      .update({ rose_pos: newPosition })
-      .eq('id', userId)
-
-    if (error) throw error
-  },
 }
