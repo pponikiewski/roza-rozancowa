@@ -4,13 +4,12 @@ import type { AdminMember } from "@/features/admin/members/types/member.types"
 interface MemberCardProps {
   member: AdminMember
   onSelect: (member: AdminMember) => void
-  getMysteryName: (id: number | null) => string
 }
 
 /**
  * Wiersz członka - widok mobilny
  */
-export function MemberCard({ member, onSelect, getMysteryName }: MemberCardProps) {
+export function MemberCard({ member, onSelect }: MemberCardProps) {
   return (
     <button
       type="button"
@@ -19,9 +18,9 @@ export function MemberCard({ member, onSelect, getMysteryName }: MemberCardProps
     >
       <div className="min-w-0">
         <div className="truncate text-[0.9375rem] font-semibold">{member.full_name}</div>
-        <div className="truncate text-sm text-muted-foreground">{getMysteryName(member.current_mystery_id)}</div>
+        <div className="truncate text-sm text-muted-foreground">{member.current_mystery_name ?? "Brak przydziału"}</div>
       </div>
-      <AckStatus acknowledged={member.acknowledgments.length > 0} className="flex-shrink-0" />
+      <AckStatus acknowledged={!!member.acknowledged_at} className="flex-shrink-0" />
     </button>
   )
 }

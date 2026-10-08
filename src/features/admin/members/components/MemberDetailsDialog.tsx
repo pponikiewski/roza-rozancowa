@@ -18,7 +18,6 @@ interface MemberDetailsDialogProps {
   onChangePassword: (userId: string, newPassword: string) => Promise<boolean | void>
   onUpdateLogin: (userId: string, newLogin: string) => Promise<unknown>
   onDeleteUser: (userId: string, fullName: string) => void
-  getMysteryName: (id: number | null) => string
   groups: Group[]
   groupMemberCounts: Record<number, number>
   actionLoading: boolean
@@ -36,7 +35,6 @@ export function MemberDetailsDialog({
   onChangePassword,
   onUpdateLogin,
   onDeleteUser,
-  getMysteryName,
   groups,
   groupMemberCounts,
   actionLoading,
@@ -63,8 +61,6 @@ export function MemberDetailsDialog({
     new Date(d).toLocaleString("pl-PL", { day: "numeric", month: "long", hour: "2-digit", minute: "2-digit" })
 
   if (!member) return null
-
-  const ack = member.acknowledgments[0]
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
@@ -139,14 +135,16 @@ export function MemberDetailsDialog({
 
             <div className="flex items-center justify-between gap-4 py-2.5">
               <dt className="text-sm text-muted-foreground">Tajemnica</dt>
-              <dd className="text-right text-[0.9375rem] font-medium">{getMysteryName(member.current_mystery_id)}</dd>
+              <dd className="text-right text-[0.9375rem] font-medium">{member.current_mystery_name ?? "Brak przydziału"}</dd>
             </div>
 
             <div className="flex items-center justify-between gap-4 py-2.5">
               <dt className="text-sm text-muted-foreground">W tym miesiącu</dt>
               <dd className="text-right">
-                <AckStatus acknowledged={!!ack} />
-                {ack && <span className="block text-sm text-muted-foreground">{formatFullDate(ack.created_at)}</span>}
+                <AckStatus acknowledged={!!member.acknowledged_at} />
+                {member.acknowledged_at && (
+                  <span className="block text-sm text-muted-foreground">{formatFullDate(member.acknowledged_at)}</span>
+                )}
               </dd>
             </div>
           </dl>

@@ -15,7 +15,6 @@ export default function AdminMembersPage() {
     loading,
     actionLoading,
     groups,
-    mysteries,
     members,
     createUser,
     updateGroup,
@@ -29,8 +28,6 @@ export default function AdminMembersPage() {
   const [search, setSearch] = useState("")
   const [isAddOpen, setIsAddOpen] = useState(false)
   const [selectedMember, setSelectedMember] = useState<AdminMember | null>(null)
-
-  const getMysteryName = (id: number | null) => mysteries.find((m) => m.id === id)?.name || (id ? `Tajemnica #${id}` : "Brak przydziału")
 
   const handleCreateUser = async (data: CreateUserFormData) => {
     const success = await createUser(data)
@@ -90,7 +87,7 @@ export default function AdminMembersPage() {
   const groupCompletedCounts = useMemo(() => {
     const counts: Record<number, number> = {}
     members.forEach((member) => {
-      if (member.groups?.id && member.role !== "admin" && member.acknowledgments.length > 0) {
+      if (member.groups?.id && member.role !== "admin" && member.acknowledged_at) {
         counts[member.groups.id] = (counts[member.groups.id] || 0) + 1
       }
     })
@@ -139,7 +136,7 @@ export default function AdminMembersPage() {
                 </div>
               </AccordionTrigger>
               <AccordionContent className="pb-4">
-                <MembersList list={groupMembers} onSelect={setSelectedMember} getMysteryName={getMysteryName} />
+                <MembersList list={groupMembers} onSelect={setSelectedMember} />
               </AccordionContent>
             </AccordionItem>
           )
@@ -151,7 +148,7 @@ export default function AdminMembersPage() {
             </span>
           </AccordionTrigger>
           <AccordionContent className="pb-4">
-            <MembersList list={groupedData.unassigned} onSelect={setSelectedMember} getMysteryName={getMysteryName} />
+            <MembersList list={groupedData.unassigned} onSelect={setSelectedMember} />
           </AccordionContent>
         </AccordionItem>
       </Accordion>
@@ -173,7 +170,6 @@ export default function AdminMembersPage() {
         onChangePassword={changePassword}
         onUpdateLogin={updateLogin}
         onDeleteUser={handleDeleteUser}
-        getMysteryName={getMysteryName}
         groups={groups}
         groupMemberCounts={groupMemberCounts}
         actionLoading={actionLoading}

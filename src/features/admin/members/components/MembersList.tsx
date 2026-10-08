@@ -5,7 +5,6 @@ import type { AdminMember } from "@/features/admin/members/types/member.types"
 interface MembersListProps {
   list: AdminMember[]
   onSelect: (member: AdminMember) => void
-  getMysteryName: (id: number | null) => string
 }
 
 /**
@@ -13,7 +12,7 @@ interface MembersListProps {
  * - Widok mobilny: wiersze z podstawowymi informacjami (MemberCard)
  * - Widok desktop: tabela z pełnymi danymi (MembersTable)
  */
-export function MembersList({ list, onSelect, getMysteryName }: MembersListProps) {
+export function MembersList({ list, onSelect }: MembersListProps) {
   if (list.length === 0) {
     return <p className="py-4 text-sm text-muted-foreground">Brak członków w tej grupie.</p>
   }
@@ -27,7 +26,6 @@ export function MembersList({ list, onSelect, getMysteryName }: MembersListProps
             key={member.id}
             member={member}
             onSelect={onSelect}
-            getMysteryName={getMysteryName}
           />
         ))}
       </div>
@@ -37,7 +35,6 @@ export function MembersList({ list, onSelect, getMysteryName }: MembersListProps
         <MembersTable
           members={list}
           onSelect={onSelect}
-          getMysteryName={getMysteryName}
         />
       </div>
     </div>

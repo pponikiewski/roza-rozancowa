@@ -1,5 +1,6 @@
 import { supabase } from '@/shared/lib/supabase'
 import { mysteriesService } from '@/features/mysteries/api/mysteries.service'
+import { membersOverviewService } from '@/shared/api'
 import { ADMISSION_INDULGENCE } from '@/shared/lib/constants'
 import { isEaster } from '@/shared/lib/liturgical'
 import type { Group, Profile, Intention, RoseMember, Mystery, IndulgenceDay } from '@/shared/types/domain.types'
@@ -100,27 +101,16 @@ export const userService = {
   },
 
   /**
-   * Pobranie członków róży wraz z ich tajemnicami
-   * Zoptymalizowane - używa enrichUsersWithMysteries
+   * Skład Róży z aktualnymi tajemnicami, według pozycji (jedno zapytanie)
    */
   async getRoseMembers(groupId: number): Promise<RoseMember[]> {
-    const { data: members, error } = await supabase
-      .from('profiles')
-      .select('id, full_name, rose_pos')
-      .eq('group_id', groupId)
-      .order('rose_pos', { ascending: true })
+    const members = await membersOverviewService.get(groupId)
 
-    if (error) throw error
-    if (!members || members.length === 0) return []
-
-    // Użyj wspólnej funkcji do wzbogacenia o tajemnice
-    const enriched = await mysteriesService.enrichUsersWithMysteries(members, { includeName: true })
-
-    return enriched.map(m => ({
+    return members.map(m => ({
       id: m.id,
       full_name: m.full_name,
       rose_pos: m.rose_pos,
-      current_mystery_name: m.current_mystery_name!
+      current_mystery_name: m.current_mystery_name ?? 'Brak przydziału'
     }))
   },
 }

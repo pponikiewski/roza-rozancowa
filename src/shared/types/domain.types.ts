@@ -102,6 +102,24 @@ export interface IndulgenceDay {
 // ============================================================================
 
 /**
+ * Członek z bieżącą tajemnicą i statusem potwierdzenia (wiersz z RPC get_members_overview)
+ * acknowledged_at jest widoczne tylko dla własnego konta lub admina (RLS)
+ */
+export interface MemberOverview {
+  id: string
+  full_name: string
+  login: string | null
+  role: 'admin' | 'user'
+  rose_pos: number | null
+  created_at: string
+  group_id: number | null
+  group_name: string | null
+  current_mystery_id: number | null
+  current_mystery_name: string | null
+  acknowledged_at: string | null
+}
+
+/**
  * Członek róży z przypisaną tajemnicą (widok użytkownika)
  */
 export interface RoseMember {

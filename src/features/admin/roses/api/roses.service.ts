@@ -1,5 +1,4 @@
 import { supabase } from '@/shared/lib/supabase'
-import { mysteriesService } from '@/features/mysteries/api/mysteries.service'
 import type { RoseAdmission } from '@/features/admin/roses/types/rose.types'
 
 const toAdmissionColumns = (admission: RoseAdmission) => ({
@@ -58,38 +57,6 @@ export const rosesService = {
     if (error) throw error
   },
 
-  /**
-   * Pobranie szczegółów róży (członków z ich tajemnicami)
-   * Używa enrichUsersWithMysteries + custom logika acknowledgments
-   */
-  async getRoseDetails(groupId: number) {
-    const { data: members, error } = await supabase
-      .from('profiles')
-      .select('id, full_name, rose_pos, acknowledgments(created_at, mystery_id)')
-      .eq('group_id', groupId)
-      .order('rose_pos')
-
-    if (error) throw error
-    if (!members || members.length === 0) return []
-
-    // Wzbogać o tajemnice używając wspólnej funkcji
-    const enriched = await mysteriesService.enrichUsersWithMysteries(members, { includeName: true })
-
-    return enriched.map((m) => {
-      const hasAcknowledged = m.current_mystery_id
-        ? m.acknowledgments.some((ack) => ack.mystery_id === m.current_mystery_id)
-        : false
-
-      return {
-        id: m.id,
-        full_name: m.full_name,
-        rose_pos: m.rose_pos,
-        current_mystery_id: m.current_mystery_id,
-        current_mystery_name: m.current_mystery_name!,
-        has_acknowledged: hasAcknowledged
-      }
-    })
-  },
 
   /**
    * Aktualizacja pozycji członka w róży

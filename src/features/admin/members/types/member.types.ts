@@ -5,8 +5,10 @@ import type { Profile } from '@/shared/types/domain.types'
  */
 export interface AdminMember extends Profile {
   created_at: string
-  acknowledgments: { created_at: string; mystery_id: number }[]
   current_mystery_id: number | null
+  current_mystery_name: string | null
+  /** Kiedy potwierdził(a) bieżącą tajemnicę; null = jeszcze nie */
+  acknowledged_at: string | null
 }
 
 export interface CreateMemberDTO {

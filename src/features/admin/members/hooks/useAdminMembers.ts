@@ -1,5 +1,4 @@
 import { membersService } from "@/features/admin/members/api/members.service"
-import { mysteriesService } from "@/features/mysteries/api/mysteries.service"
 import { groupsService } from "@/shared/api"
 import type { CreateUserFormData } from "@/shared/validation/member.schema"
 import { useQuery } from "@tanstack/react-query"
@@ -7,17 +6,16 @@ import { useTypedMutation } from "@/shared/hooks"
 import { QUERY_KEYS, UNASSIGNED_GROUP_VALUE } from "@/shared/lib/constants"
 
 export function useAdminMembers() {
-  // Query for all data
-  const { data, isLoading } = useQuery({
+  // Członkowie z tajemnicą i statusem — jedno zapytanie, odświeżane po zmianach w członkach
+  const { data: members, isLoading: membersLoading } = useQuery({
     queryKey: QUERY_KEYS.ADMIN_MEMBERS,
-    queryFn: async () => {
-      const [groups, mysteries, members] = await Promise.all([
-        groupsService.getAll(),
-        mysteriesService.getAllMysteries(),
-        membersService.getAllMembers()
-      ])
-      return { groups, mysteries, members }
-    }
+    queryFn: () => membersService.getAllMembers()
+  })
+
+  // Lista Róż — ten sam cache co na stronie Róż, nie zmienia się przy zmianach w członkach
+  const { data: groups, isLoading: groupsLoading } = useQuery({
+    queryKey: QUERY_KEYS.ADMIN_ROSES,
+    queryFn: () => groupsService.getAll()
   })
 
   // Mutations
@@ -68,11 +66,10 @@ export function useAdminMembers() {
   const mutations = [createMutation, updateGroupMutation, changePasswordMutation, deleteMutation, updateLoginMutation]
 
   return {
-    loading: isLoading,
+    loading: membersLoading || groupsLoading,
     actionLoading: mutations.some(m => m.isPending),
-    groups: data?.groups || [],
-    mysteries: data?.mysteries || [],
-    members: data?.members || [],
+    groups: groups || [],
+    members: members || [],
     createUser: createMutation.execute,
     updateGroup: (userId: string, groupId: string) => updateGroupMutation.execute({ userId, groupId }),
     changePassword: (userId: string, newPassword: string) => changePasswordMutation.execute({ userId, newPassword }),

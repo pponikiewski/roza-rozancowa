@@ -1,51 +1,23 @@
 import { supabase } from '@/shared/lib/supabase'
-import { mysteriesService } from '@/features/mysteries/api/mysteries.service'
+import { membersOverviewService } from '@/shared/api'
 import { throwOnFunctionError } from '@/shared/lib/utils'
 import type { AdminMember, CreateMemberDTO } from '@/features/admin/members/types/member.types'
-
-interface RawMember extends Omit<AdminMember, 'current_mystery_id'> {
-  acknowledgments: { created_at: string; mystery_id: number }[]
-}
 
 /**
  * Serwis obsługujący zarządzanie członkami (admin)
  */
 export const membersService = {
   /**
-   * Pobranie wszystkich członków wraz z grupami i potwierdzeniami
-   * Zoptymalizowane - używa batch query zamiast N+1
+   * Wszyscy członkowie z Różą, bieżącą tajemnicą i statusem potwierdzenia (jedno zapytanie)
    */
   async getAllMembers(): Promise<AdminMember[]> {
-    const { data: allMembers, error } = await supabase
-      .from('profiles')
-      .select(`
-        id, full_name, login, role, rose_pos, created_at,
-        groups(id, name),
-        acknowledgments(created_at, mystery_id)
-      `)
-      .order('full_name', { ascending: true })
+    const rows = await membersOverviewService.get()
 
-    if (error) throw error
-    if (!allMembers || allMembers.length === 0) return []
-
-    // Batch: pobierz wszystkie mystery_id w jednym zapytaniu
-    const userIds = (allMembers as unknown as RawMember[]).map(m => m.id)
-    const mysteryIdsMap = await mysteriesService.getMysteryIdsForUsers(userIds)
-
-    const members = (allMembers as unknown as RawMember[]).map((m) => {
-      const currentMysteryId = mysteryIdsMap.get(m.id) ?? null
-      const relevantAcks = currentMysteryId
-        ? m.acknowledgments.filter((a) => Number(a.mystery_id) === Number(currentMysteryId))
-        : []
-
-      return {
-        ...m,
-        current_mystery_id: currentMysteryId,
-        acknowledgments: relevantAcks
-      } as AdminMember
-    })
-
-    return members
+    return rows.map(({ group_id, group_name, ...m }) => ({
+      ...m,
+      login: m.login ?? undefined,
+      groups: group_id ? { id: group_id, name: group_name ?? '' } : null,
+    }))
   },
 
   /**

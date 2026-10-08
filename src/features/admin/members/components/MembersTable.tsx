@@ -5,13 +5,12 @@ import type { AdminMember } from "@/features/admin/members/types/member.types"
 interface MembersTableProps {
   members: AdminMember[]
   onSelect: (member: AdminMember) => void
-  getMysteryName: (id: number | null) => string
 }
 
 /**
  * Tabela członków - widok desktop
  */
-export function MembersTable({ members, onSelect, getMysteryName }: MembersTableProps) {
+export function MembersTable({ members, onSelect }: MembersTableProps) {
   return (
     <Table>
       <TableHeader>
@@ -35,10 +34,10 @@ export function MembersTable({ members, onSelect, getMysteryName }: MembersTable
               )}
             </TableCell>
             <TableCell className="text-muted-foreground">
-              {getMysteryName(member.current_mystery_id)}
+              {member.current_mystery_name ?? "Brak przydziału"}
             </TableCell>
             <TableCell className="text-right">
-              <AckStatus acknowledged={member.acknowledgments.length > 0} />
+              <AckStatus acknowledged={!!member.acknowledged_at} />
             </TableCell>
           </TableRow>
         ))}

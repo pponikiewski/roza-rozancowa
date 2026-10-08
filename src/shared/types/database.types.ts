@@ -247,6 +247,22 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      get_members_overview: {
+        Args: { p_group_id?: number }
+        Returns: {
+          acknowledged_at: string
+          created_at: string
+          current_mystery_id: number
+          current_mystery_name: string
+          full_name: string
+          group_id: number
+          group_name: string
+          id: string
+          login: string
+          role: string
+          rose_pos: number
+        }[]
+      }
       get_my_group_id: { Args: never; Returns: number }
       get_mystery_id_for_user: { Args: { p_user_id: string }; Returns: number }
       get_mystery_ids_for_users: {
