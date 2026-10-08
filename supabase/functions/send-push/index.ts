@@ -156,16 +156,15 @@ async function sendToAll(
   return stats
 }
 
-/** Wybór powiadomień użytkowników z subskrypcji; użytkownik bez wiersza dostaje wszystkie */
-async function loadPreferences(
-  supabase: SupabaseClient,
-  subscriptions: PushSubscriptionRow[],
-): Promise<(kind: PreferenceKind) => Wants> {
-  const userIds = [...new Set(subscriptions.map((s) => s.user_id))]
+/**
+ * Wybór powiadomień użytkowników; użytkownik bez wiersza dostaje wszystkie.
+ * Cała tabela (wiersz na użytkownika) zamiast filtra .in() po user_id — lista UUID w adresie
+ * zapytania przy kilkuset użytkownikach przekracza limit długości URL
+ */
+async function loadPreferences(supabase: SupabaseClient): Promise<(kind: PreferenceKind) => Wants> {
   const { data, error } = await supabase
     .from("notification_preferences")
     .select("user_id, mystery, intention, indulgence")
-    .in("user_id", userIds)
   if (error) throw error
 
   const byUser = new Map(
@@ -325,7 +324,7 @@ serve(async (req) => {
     }
 
     const today = warsawToday()
-    const wants = await loadPreferences(supabase, subscriptions)
+    const wants = await loadPreferences(supabase)
     const results: Record<string, SendStats> = {}
 
     // Tajemnica — pierwsza niedziela miesiąca
