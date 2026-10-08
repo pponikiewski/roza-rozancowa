@@ -348,6 +348,7 @@
   /**
    * Ekran startowy: logo na środku, w tym samym miejscu co na obrazku startowym iOS
    * (public/splash) i w index.html — przejście z systemowego ekranu do aplikacji bez skoku.
+   * Logo 128 px: tyle samo pokazuje ekran startowy Chrome na Androidzie (ikona z manifestu)
    * Kółko ładowania pojawia się dopiero po chwili, przy szybkim starcie go nie widać
    */
   .app-splash {
@@ -360,13 +361,13 @@
   }
 
   .app-splash-logo {
-    width: 96px;
-    height: 96px;
+    width: 128px;
+    height: 128px;
   }
 
   .app-splash-loader {
     position: absolute;
-    top: calc(50% + 48px + 2rem);
+    top: calc(50% + 64px + 2rem);
     left: 50%;
     width: 1.5rem;
     height: 1.5rem;

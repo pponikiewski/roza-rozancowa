@@ -7,7 +7,7 @@
 export function AppSplash() {
   return (
     <div className="app-splash" role="status" aria-label="Ładowanie">
-      <img src="/logo-288.webp" alt="" width={96} height={96} className="app-splash-logo" />
+      <img src="/logo-384.webp" alt="" width={128} height={128} className="app-splash-logo" />
       <span className="app-splash-loader" />
     </div>
   )

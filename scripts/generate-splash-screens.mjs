@@ -1,6 +1,6 @@
 // Obrazki startowe iOS (apple-touch-startup-image) dla aplikacji dodanej do ekranu głównego.
 // Bez nich iPhone pokazuje przy starcie biały ekran. Układ jak .app-splash w src/index.css:
-// logo 96 px na środku, tło jak motyw ciemny (#151619, background_color w manifeście).
+// logo 128 px na środku, tło jak motyw ciemny (#151619, background_color w manifeście).
 // Uruchomienie po zmianie logo: node scripts/generate-splash-screens.mjs
 // Wypisuje znaczniki <link> do wklejenia w index.html
 import { chromium } from "@playwright/test"
@@ -10,7 +10,7 @@ import { fileURLToPath } from "node:url"
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "..")
 const outDir = join(root, "public", "splash")
-const logo = readFileSync(join(root, "public", "logo-288.webp")).toString("base64")
+const logo = readFileSync(join(root, "public", "logo-384.webp")).toString("base64")
 
 // Ekrany w orientacji pionowej: szerokość i wysokość w punktach CSS, gęstość pikseli
 const devices = [
@@ -41,7 +41,7 @@ const devices = [
 ]
 
 const html = `<!doctype html><html><body style="margin:0;height:100vh;display:flex;align-items:center;justify-content:center;background:#151619">
-<img src="data:image/webp;base64,${logo}" width="96" height="96" alt=""></body></html>`
+<img src="data:image/webp;base64,${logo}" width="128" height="128" alt=""></body></html>`
 
 mkdirSync(outDir, { recursive: true })
 // Chrome zainstalowany w systemie: nie trzeba pobierać przeglądarek Playwrighta
