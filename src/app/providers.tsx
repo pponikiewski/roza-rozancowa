@@ -18,7 +18,7 @@ export function Providers({ children }: ProvidersProps) {
       <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
         <AuthProvider>
           {children}
-          <Toaster position="top-center" richColors />
+          <Toaster position="top-center" />
         </AuthProvider>
       </ThemeProvider>
     </QueryClientProvider>
