@@ -8,6 +8,7 @@ import { AppearanceSettings } from "@/shared/components/common/AppearanceSetting
 import { Collapsible } from "@/shared/components/common/Collapsible"
 import { useMysteryChangeTimer } from "@/features/user/hooks/useMysteryChangeTimer"
 import { useLogout } from "@/features/auth"
+import { useStatusBarColor } from "@/shared/hooks/useStatusBarColor"
 import { ROUTES } from "@/shared/lib/constants"
 import { formatTimeLeft } from "@/shared/lib/formatters"
 
@@ -93,6 +94,7 @@ export default function AdminLayout() {
   const [open, setOpen] = useState(false)
   const { timeLeft, targetDate } = useMysteryChangeTimer()
   const handleLogout = useLogout()
+  useStatusBarColor("card")
 
   return (
     <div className="flex h-screen w-full bg-background flex-col md:flex-row">
@@ -101,7 +103,7 @@ export default function AdminLayout() {
       </aside>
       <div className="flex min-w-0 flex-1 flex-col">
         {/* Pasek górny: na telefonie menu i tytuł, na komputerze tylko wylogowanie (w prawym górnym rogu) */}
-        <header className="app-header sticky top-0 z-40 bg-card/90 backdrop-blur-md border-b px-4 py-3 md:px-8 md:py-[1.125rem] flex items-center gap-2">
+        <header className="app-header sticky top-0 z-40 bg-card/90 backdrop-blur-md border-b px-4 pt-[calc(0.75rem+env(safe-area-inset-top))] pb-3 md:px-8 md:py-[1.125rem] flex items-center gap-2">
           <div className="flex min-w-0 items-center gap-2 md:hidden">
             <Sheet open={open} onOpenChange={setOpen}>
               <SheetTrigger asChild>
@@ -111,7 +113,7 @@ export default function AdminLayout() {
               </SheetTrigger>
               <SheetContent
                 side="left"
-                className="p-0 w-72"
+                className="p-0 pt-[env(safe-area-inset-top)] pb-[env(safe-area-inset-bottom)] w-72"
                 // Fokus na menu, a nie na krzyżyk zamykania
                 onOpenAutoFocus={(e) => {
                   e.preventDefault()

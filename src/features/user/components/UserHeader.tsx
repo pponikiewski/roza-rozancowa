@@ -1,6 +1,7 @@
 import { ChevronRight, LogOut } from "lucide-react"
 import { Button } from "@/shared/components/ui/button"
 import { useLogout } from "@/features/auth"
+import { useStatusBarColor } from "@/shared/hooks/useStatusBarColor"
 import type { Profile } from "@/shared/types/domain.types"
 
 interface UserHeaderProps {
@@ -14,9 +15,10 @@ interface UserHeaderProps {
  */
 export function UserHeader({ profile, onOpenRose }: UserHeaderProps) {
   const handleLogout = useLogout()
+  useStatusBarColor("card")
 
   return (
-    <header className="app-header sticky top-0 z-10 bg-card/90 backdrop-blur-md border-b px-4 py-3 flex items-center gap-2">
+    <header className="app-header sticky top-0 z-10 bg-card/90 backdrop-blur-md border-b px-4 pt-[calc(0.75rem+env(safe-area-inset-top))] pb-3 flex items-center gap-2">
       <button
         type="button"
         className="header-user-info flex items-center gap-3 p-1.5 -ml-1.5 rounded-lg text-left hover:bg-accent transition-colors min-w-0 flex-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"

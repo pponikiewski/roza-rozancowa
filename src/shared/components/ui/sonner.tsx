@@ -12,6 +12,8 @@ const Toaster = ({ ...props }: ToasterProps) => {
       className="toaster group"
       // Wymuszamy bardzo wysoki z-index, aby toasty były nad Dialogami (z-index: 50)
       style={{ zIndex: 99999 }}
+      // Na telefonie powiadomienie pod paskiem statusu, nie na zegarze (aplikacja na ekranie głównym)
+      mobileOffset={{ top: "calc(env(safe-area-inset-top) + 16px)" }}
       toastOptions={{
         classNames: {
           toast:

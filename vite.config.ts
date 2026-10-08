@@ -33,6 +33,7 @@ export default defineConfig({
         name: 'Moja róża',
         short_name: 'Moja róża',
         description: 'Aplikacja do zarządzania Różami Różańcowymi',
+        lang: 'pl',
         theme_color: '#151619',
         background_color: '#151619',
         display: 'standalone',
@@ -61,7 +62,8 @@ export default defineConfig({
       workbox: {
         globPatterns: ['**/*.{js,css,html,svg,png,webp,ico}'],
         // Ikony 512 px są potrzebne tylko przy instalacji aplikacji, nie offline
-        globIgnores: ['**/icon-512.png', '**/icon-maskable-512.png'],
+        // Obrazki startowe iOS też: system pobiera je raz, przy dodaniu do ekranu głównego
+        globIgnores: ['**/icon-512.png', '**/icon-maskable-512.png', '**/splash/**'],
         // Obsługa zdarzeń push i kliknięcia w powiadomienie (public/push-sw.js)
         importScripts: ['push-sw.js'],
         runtimeCaching: [

@@ -3,7 +3,7 @@ import type { ReactNode } from "react"
 import { useQueryClient } from "@tanstack/react-query"
 import { authService } from "@/features/auth/api/auth.service"
 import { userService } from "@/features/user/api/user.service"
-import { LoadingScreen } from "@/shared/components/feedback"
+import { AppSplash } from "@/shared/components/feedback"
 import { QUERY_KEYS } from "@/shared/lib/constants"
 import type { User, Session } from "@supabase/supabase-js"
 
@@ -104,7 +104,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return (
         <AuthContext.Provider value={value}>
             {loading ? (
-                <LoadingScreen fullScreen />
+                <AppSplash />
             ) : (
                 children
             )}

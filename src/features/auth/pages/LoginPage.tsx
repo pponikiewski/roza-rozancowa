@@ -50,7 +50,7 @@ export default function LoginPage() {
   }
 
   return (
-    <main className="login-container min-h-screen flex flex-col items-center justify-center px-4 py-10 bg-background relative">
+    <main className="login-container min-h-screen flex flex-col items-center justify-center px-4 pt-10 pb-[calc(2.5rem+env(safe-area-inset-bottom))] bg-background relative">
       <HeaderControls className="absolute top-4 right-4" />
 
       {/* LOGO / NAGŁÓWEK */}

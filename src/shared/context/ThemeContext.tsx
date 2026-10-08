@@ -1,4 +1,5 @@
-import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react"
+import { createContext, useCallback, useContext, useLayoutEffect, useMemo, useState } from "react"
+import { setStatusBarColor } from "@/shared/lib/statusBar"
 
 type Theme = "dark" | "light" | "system"
 export type SeniorMode = "normal" | "senior" | "ultra"
@@ -44,7 +45,8 @@ export function ThemeProvider({
     () => (localStorage.getItem("vite-ui-senior-mode") as SeniorMode) || "normal"
   )
 
-  useEffect(() => {
+  // Klasy motywu w efekcie layoutu: zanim efekty komponentów (np. useStatusBarColor) odczytają kolory
+  useLayoutEffect(() => {
     const root = window.document.documentElement
 
     root.classList.remove("light", "dark")
@@ -56,13 +58,14 @@ export function ThemeProvider({
         : "light"
 
       root.classList.add(systemTheme)
-      return
+    } else {
+      root.classList.add(theme)
     }
 
-    root.classList.add(theme)
+    setStatusBarColor("background")
   }, [theme])
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     const root = window.document.documentElement
     root.classList.remove("senior-mode", "ultra-senior-mode")
     
@@ -73,6 +76,7 @@ export function ThemeProvider({
     }
     
     localStorage.setItem("vite-ui-senior-mode", seniorMode)
+    setStatusBarColor("background")
   }, [seniorMode])
 
   const toggleSeniorMode = useCallback(() => {

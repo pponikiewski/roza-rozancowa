@@ -229,7 +229,8 @@
     /* Login Page Mobile Fix (All Modes) */
     .login-container {
       justify-content: flex-start !important;
-      padding-top: 2rem !important;
+      /* Po instalacji na iPhonie treść zaczyna się pod paskiem statusu */
+      padding-top: calc(2rem + env(safe-area-inset-top)) !important;
     }
 
     .login-container .header-controls {
@@ -321,6 +322,8 @@
 
   body {
     @apply bg-background text-foreground font-sans antialiased;
+    /* Bez szarego prostokąta przy dotknięciu przycisku (aplikacja na ekranie głównym) */
+    -webkit-tap-highlight-color: transparent;
   }
 
   /* Override browser autofill styles to prevent background color change */
@@ -333,7 +336,48 @@
   }
 }
 
+@keyframes app-splash-spin {
+  to { transform: rotate(360deg); }
+}
+
+@keyframes app-splash-show {
+  to { opacity: 1; }
+}
+
 @layer components {
+  /**
+   * Ekran startowy: logo na środku, w tym samym miejscu co na obrazku startowym iOS
+   * (public/splash) i w index.html — przejście z systemowego ekranu do aplikacji bez skoku.
+   * Kółko ładowania pojawia się dopiero po chwili, przy szybkim starcie go nie widać
+   */
+  .app-splash {
+    position: fixed;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: hsl(var(--background));
+  }
+
+  .app-splash-logo {
+    width: 96px;
+    height: 96px;
+  }
+
+  .app-splash-loader {
+    position: absolute;
+    top: calc(50% + 48px + 2rem);
+    left: 50%;
+    width: 1.5rem;
+    height: 1.5rem;
+    margin-left: -0.75rem;
+    border: 2px solid hsl(var(--primary) / 0.2);
+    border-top-color: hsl(var(--primary));
+    border-radius: 9999px;
+    opacity: 0;
+    animation: app-splash-spin 0.9s linear infinite, app-splash-show 0.3s ease-out 0.8s forwards;
+  }
+
   /**
    * Reużywalna klasa dla subtelnego scrollbara
    * Używana w dialogach i panelach z przewijaną treścią
@@ -356,5 +400,11 @@
 
   .scrollbar-subtle::-webkit-scrollbar-thumb:hover {
     @apply bg-muted-foreground/30;
+  }
+}
+@layer utilities {
+  /* Odstęp od paska gestów iPhone'a (aplikacja na ekranie głównym, viewport-fit=cover) */
+  .pb-safe {
+    padding-bottom: env(safe-area-inset-bottom);
   }
 }
