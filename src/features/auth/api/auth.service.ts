@@ -46,19 +46,6 @@ export const authService = {
   },
 
   /**
-   * Sprawdzenie roli użytkownika
-   */
-  async checkUserRole(userId: string): Promise<'admin' | 'user'> {
-    const { data: profile } = await supabase
-      .from('profiles')
-      .select('role')
-      .eq('id', userId)
-      .single()
-
-    return profile?.role === 'admin' ? 'admin' : 'user'
-  },
-
-  /**
    * Subskrypcja zmian stanu autentykacji
    */
   onAuthStateChange(callback: (event: string, session: Session | null) => void) {

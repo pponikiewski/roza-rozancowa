@@ -2,37 +2,25 @@ import { supabase } from '@/shared/lib/supabase'
 import { mysteriesService } from '@/features/mysteries/api/mysteries.service'
 import { ADMISSION_INDULGENCE } from '@/shared/lib/constants'
 import { isEaster } from '@/shared/lib/liturgical'
-import type { Profile, Intention, RoseMember, Mystery, IndulgenceDay } from '@/shared/types/domain.types'
-
-/**
- * Typ odpowiedzi z Supabase dla profilu z relacją groups
- */
-interface ProfileResponse {
-  id: string
-  full_name: string
-  rose_pos: number | null
-  groups: { id: number; name: string } | null
-}
+import type { Group, Profile, Intention, RoseMember, Mystery, IndulgenceDay } from '@/shared/types/domain.types'
 
 /**
  * Serwis obsługujący panel użytkownika
  */
 export const userService = {
   /**
-   * Pobranie profilu użytkownika
+   * Pobranie profilu użytkownika wraz z rolą i Różą (z dniem przyjęcia — potrzebny do odpustu)
+   * Wywoływane raz przy logowaniu przez AuthContext, panel korzysta z cache
    */
   async getProfile(userId: string): Promise<Profile | null> {
-    const { data } = await supabase
+    const { data, error } = await supabase
       .from('profiles')
-      .select('id, full_name, login, rose_pos, groups(id, name)')
+      .select('id, full_name, login, role, rose_pos, groups(id, name, admission_month, admission_day)')
       .eq('id', userId)
-      .single()
+      .maybeSingle()
 
-    if (!data) return null
-    
-    // Type assertion do zdefiniowanego interfejsu zamiast any
-    const profileData = data as unknown as ProfileResponse
-    return profileData as Profile
+    if (error) throw error
+    return data as Profile | null
   },
 
   /**
@@ -54,7 +42,7 @@ export const userService = {
    * Pobranie odpustów przypadających dzisiaj:
    * stałe daty (co roku lub w bieżącym roku), Wielkanoc i dzień przyjęcia Róży użytkownika
    */
-  async getTodayIndulgences(groupId: number | null): Promise<IndulgenceDay[]> {
+  async getTodayIndulgences(group: Group | null): Promise<IndulgenceDay[]> {
     const date = new Date()
     const month = date.getMonth() + 1
     const day = date.getDate()
@@ -68,33 +56,33 @@ export const userService = {
     if (error) throw error
     const indulgences: IndulgenceDay[] = data || []
 
-    if (groupId) {
-      const { data: group } = await supabase
-        .from('groups')
-        .select('admission_month, admission_day')
-        .eq('id', groupId)
-        .maybeSingle()
-
-      if (group?.admission_month === month && group?.admission_day === day) {
-        indulgences.push({
-          id: -groupId,
-          ...ADMISSION_INDULGENCE,
-          month,
-          day,
-          year: null,
-          is_easter: false,
-        })
-      }
+    // Dzień przyjęcia Róży przychodzi razem z profilem — bez osobnego zapytania
+    if (group?.admission_month === month && group?.admission_day === day) {
+      indulgences.push({
+        id: -group.id,
+        ...ADMISSION_INDULGENCE,
+        month,
+        day,
+        year: null,
+        is_easter: false,
+      })
     }
 
     return indulgences
   },
 
   /**
-   * Pobranie tajemnicy użytkownika
+   * ID bieżącej tajemnicy użytkownika (wyliczane w bazie z pozycji w Róży i daty)
    */
-  async getUserMystery(userId: string): Promise<Mystery | null> {
-    return await mysteriesService.getMysteryForUser(userId)
+  async getMysteryId(userId: string): Promise<number | null> {
+    return await mysteriesService.getMysteryIdForUser(userId)
+  },
+
+  /**
+   * Treść tajemnicy po ID — pobierana równolegle ze statusem potwierdzenia
+   */
+  async getMystery(mysteryId: number): Promise<Mystery> {
+    return await mysteriesService.getMysteryById(mysteryId)
   },
 
   /**

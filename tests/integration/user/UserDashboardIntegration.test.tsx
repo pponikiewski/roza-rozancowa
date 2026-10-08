@@ -30,7 +30,8 @@ vi.mock('@/features/user/api/user.service', () => ({
   userService: {
     getProfile: vi.fn(),
     getCurrentIntention: vi.fn(),
-    getUserMystery: vi.fn(),
+    getMysteryId: vi.fn(),
+    getMystery: vi.fn(),
     checkAcknowledgment: vi.fn(),
     acknowledgeMystery: vi.fn(),
     getGroupMembersByUserId: vi.fn(),
@@ -64,7 +65,8 @@ describe('Integracja: Panel Użytkownika (UserPage)', () => {
     } as any)
 
     // 3. Osobista Tajemnica różańcowa wyliczona na ten miesiąc
-    vi.mocked(userService.getUserMystery).mockResolvedValue({
+    vi.mocked(userService.getMysteryId).mockResolvedValue(3)
+    vi.mocked(userService.getMystery).mockResolvedValue({
       id: 3,
       name: 'Narodzenie Pana Jezusa',
       part: 'Radosna',
@@ -94,7 +96,9 @@ describe('Integracja: Panel Użytkownika (UserPage)', () => {
 
     // Sprawdzamy, czy wywołano serwisy
     expect(userService.getProfile).toHaveBeenCalledTimes(1)
-    expect(userService.getUserMystery).toHaveBeenCalledTimes(1)
+    expect(userService.getMysteryId).toHaveBeenCalledTimes(1)
+    expect(userService.getMystery).toHaveBeenCalledWith(3)
+    expect(userService.checkAcknowledgment).toHaveBeenCalledWith(mockUser.id, 3)
     expect(userService.getCurrentIntention).toHaveBeenCalledTimes(1)
   })
 

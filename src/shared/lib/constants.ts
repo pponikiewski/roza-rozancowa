@@ -20,7 +20,8 @@ export const ROUTES = {
 export const QUERY_KEYS = {
   AUTH: ['auth'],
   PROFILE: (userId: string) => ['profile', userId],
-  MYSTERY: (userId: string) => ['mystery', userId],
+  MYSTERY_ID: (userId: string) => ['mystery-id', userId],
+  MYSTERY: (mysteryId: number) => ['mystery', mysteryId],
   INTENTION: ['intention'],
   ACKNOWLEDGMENT: (userId: string, mysteryId: number) => ['acknowledgment', userId, mysteryId],
   ROSE_MEMBERS: (groupId: number) => ['rose-members', groupId],

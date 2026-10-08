@@ -1,8 +1,10 @@
-import { createContext, useContext, useEffect, useState, useCallback } from "react"
+import { createContext, useContext, useEffect, useState, useCallback, useMemo, useRef } from "react"
 import type { ReactNode } from "react"
-import { supabase } from "@/shared/lib/supabase"
+import { useQueryClient } from "@tanstack/react-query"
 import { authService } from "@/features/auth/api/auth.service"
+import { userService } from "@/features/user/api/user.service"
 import { LoadingScreen } from "@/shared/components/feedback"
+import { QUERY_KEYS } from "@/shared/lib/constants"
 import type { User, Session } from "@supabase/supabase-js"
 
 interface AuthContextType {
@@ -18,48 +20,34 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined)
 export { AuthContext } // Export AuthContext
 
 export function AuthProvider({ children }: { children: ReactNode }) {
+    const queryClient = useQueryClient()
     const [user, setUser] = useState<User | null>(null)
     const [session, setSession] = useState<Session | null>(null)
     const [loading, setLoading] = useState(true)
     const [isAdmin, setIsAdmin] = useState(false)
+    // Użytkownik, dla którego ustalono rolę (undefined = sesja jeszcze nie sprawdzona)
+    const currentUserId = useRef<string | null | undefined>(undefined)
 
     /**
-     * Sprawdzenie roli admina dla użytkownika
+     * Sprawdzenie roli admina. Pobiera cały profil i zapisuje go w cache React Query,
+     * więc panel użytkownika nie pyta o profil drugi raz
      */
-    const checkAdminRole = useCallback(async (userId: string, isMounted: () => boolean) => {
+    const loadRole = useCallback(async (userId: string) => {
+        let admin = false
         try {
-            const role = await authService.checkUserRole(userId)
-            if (isMounted()) {
-                setIsAdmin(role === 'admin')
-            }
+            const profile = await queryClient.fetchQuery({
+                queryKey: QUERY_KEYS.PROFILE(userId),
+                queryFn: () => userService.getProfile(userId),
+            })
+            admin = profile?.role === 'admin'
         } catch {
             // Błąd sprawdzania roli — użytkownik nie dostanie uprawnień admina
-        } finally {
-            if (isMounted()) {
-                setLoading(false)
-            }
         }
-    }, [])
-
-    /**
-     * Centralna funkcja do obsługi sesji - deduplikuje logikę używaną
-     * przez getSession() i onAuthStateChange()
-     * @param isMounted - funkcja sprawdzająca czy komponent jest zamontowany
-     */
-    const handleSession = useCallback(async (session: Session | null, isMounted: () => boolean) => {
-        if (!isMounted()) return
-        
-        setSession(session)
-        setUser(session?.user ?? null)
-
-        if (session?.user) {
-            setLoading(true)
-            await checkAdminRole(session.user.id, isMounted)
-        } else {
-            setIsAdmin(false)
-            setLoading(false)
-        }
-    }, [checkAdminRole])
+        // W międzyczasie mógł zalogować się ktoś inny
+        if (currentUserId.current !== userId) return
+        setIsAdmin(admin)
+        setLoading(false)
+    }, [queryClient])
 
     /**
      * Czyści Supabase tokens z localStorage - fix dla "ghost sessions" na mobile
@@ -73,26 +61,30 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
 
     useEffect(() => {
-        let mounted = true
-        const isMounted = () => mounted
-
-        // Check active session on mount
-        supabase.auth.getSession().then(({ data: { session } }) => {
-            handleSession(session, isMounted)
-        })
-
-        // Listen for changes on auth state (logged in, signed out, etc.)
+        // Pierwsze zdarzenie to INITIAL_SESSION, więc osobne getSession() nie jest potrzebne
         const { data: { subscription } } = authService.onAuthStateChange((_event, session) => {
-            handleSession(session, isMounted)
+            const userId = session?.user?.id ?? null
+            setSession(session)
+            setUser(session?.user ?? null)
+
+            // Odświeżenie tokenu lub powrót do aplikacji — ten sam użytkownik, rola się nie zmienia.
+            // Bez ekranu ładowania, inaczej cała aplikacja montowałaby się od nowa
+            if (userId === currentUserId.current) return
+            currentUserId.current = userId
+
+            if (userId) {
+                setLoading(true)
+                loadRole(userId)
+            } else {
+                setIsAdmin(false)
+                setLoading(false)
+            }
         })
 
-        return () => {
-            mounted = false
-            subscription.unsubscribe()
-        }
-    }, [handleSession])
+        return () => subscription.unsubscribe()
+    }, [loadRole])
 
-    const signOut = async () => {
+    const signOut = useCallback(async () => {
         try {
             await authService.signOut()
         } catch {
@@ -102,15 +94,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             clearSupabaseStorage()
             // State will be cleared by onAuthStateChange listener
         }
-    }
+    }, [])
 
-    const value = {
-        user,
-        session,
-        loading,
-        isAdmin,
-        signOut
-    }
+    const value = useMemo(
+        () => ({ user, session, loading, isAdmin, signOut }),
+        [user, session, loading, isAdmin, signOut]
+    )
 
     return (
         <AuthContext.Provider value={value}>

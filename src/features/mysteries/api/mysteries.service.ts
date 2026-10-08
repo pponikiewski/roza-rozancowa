@@ -48,16 +48,6 @@ export const mysteriesService = {
   },
 
   /**
-   * Pobranie tajemnicy dla użytkownika (z obliczeniem ID)
-   */
-  async getMysteryForUser(userId: string) {
-    const mysteryId = await this.getMysteryIdForUser(userId)
-    if (!mysteryId) return null
-
-    return await this.getMysteryById(mysteryId)
-  },
-
-  /**
    * Potwierdzenie zapoznania się z tajemnicą
    */
   async acknowledgeMystery(userId: string, mysteryId: number) {

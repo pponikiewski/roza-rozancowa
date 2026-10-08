@@ -19,39 +19,47 @@ export function useUserData() {
   const { user, loading: authLoading } = useAuth()
   const queryClient = useQueryClient()
 
-  // 1. Fetch Profile
+  // 1. Profil — zwykle już w cache (AuthContext pobiera go przy logowaniu razem z rolą)
   const { data: profile, isLoading: profileLoading } = useQuery({
      queryKey: QUERY_KEYS.PROFILE(user?.id || ''),
      queryFn: () => userService.getProfile(user!.id),
      enabled: !!user
   })
 
-  // 2. Fetch Intention
+  // 2. Intencja
   const { data: intention, isLoading: intentionLoading } = useQuery({
      queryKey: QUERY_KEYS.INTENTION,
      queryFn: () => userService.getCurrentIntention()
   })
 
-  // 3. Fetch Mystery with logic
-  const { data: mystery, isLoading: mysteryLoading } = useQuery({
-      queryKey: QUERY_KEYS.MYSTERY(user?.id || ''),
-      queryFn: () => userService.getUserMystery(user!.id),
+  // 3. ID tajemnicy — od niego zależą treść tajemnicy i status potwierdzenia
+  const { data: mysteryId, isLoading: mysteryIdLoading } = useQuery({
+      queryKey: QUERY_KEYS.MYSTERY_ID(user?.id || ''),
+      queryFn: () => userService.getMysteryId(user!.id),
       enabled: !!user
   })
 
-  // 4. Check Acknowledgment
-  const { data: isAcknowledged, isLoading: ackLoading } = useQuery({
-      queryKey: QUERY_KEYS.ACKNOWLEDGMENT(user?.id || '', mystery?.id || 0),
-      queryFn: () => userService.checkAcknowledgment(user!.id, mystery!.id),
-      enabled: !!user && !!mystery
+  // 4a. Treść tajemnicy — stała, nie trzeba jej odświeżać
+  const { data: mystery, isLoading: mysteryLoading } = useQuery({
+      queryKey: QUERY_KEYS.MYSTERY(mysteryId ?? 0),
+      queryFn: () => userService.getMystery(mysteryId!),
+      enabled: !!mysteryId,
+      staleTime: Infinity
   })
 
-  // 5. Today's indulgences (nie blokuje ładowania panelu)
+  // 4b. Status potwierdzenia — równolegle z treścią tajemnicy
+  const { data: isAcknowledged, isLoading: ackLoading } = useQuery({
+      queryKey: QUERY_KEYS.ACKNOWLEDGMENT(user?.id || '', mysteryId ?? 0),
+      queryFn: () => userService.checkAcknowledgment(user!.id, mysteryId!),
+      enabled: !!user && !!mysteryId
+  })
+
+  // 5. Dzisiejsze odpusty (nie blokują ładowania panelu)
   const todayKey = new Date().toDateString()
-  const groupId = profile?.groups?.id ?? null
+  const group = profile?.groups ?? null
   const { data: todayIndulgences } = useQuery({
-      queryKey: [...QUERY_KEYS.INDULGENCES_TODAY(todayKey), groupId],
-      queryFn: () => userService.getTodayIndulgences(groupId),
+      queryKey: [...QUERY_KEYS.INDULGENCES_TODAY(todayKey), group?.id ?? null],
+      queryFn: () => userService.getTodayIndulgences(group),
       enabled: !!user && !profileLoading
   })
 
@@ -73,7 +81,7 @@ export function useUserData() {
   })
 
   // Consolidated loading state
-  const isLoading = authLoading || profileLoading || mysteryLoading || ackLoading || intentionLoading
+  const isLoading = authLoading || profileLoading || mysteryIdLoading || mysteryLoading || ackLoading || intentionLoading
 
   return {
     loading: isLoading,
