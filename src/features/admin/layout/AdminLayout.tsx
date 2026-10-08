@@ -1,7 +1,7 @@
 import { Outlet, NavLink } from "react-router-dom"
 import { Button } from "@/shared/components/ui/button"
 import { Sheet, SheetContent, SheetTitle, SheetTrigger } from "@/shared/components/ui/sheet"
-import { Menu, ChevronUp } from "lucide-react"
+import { Menu, ChevronUp, LogOut } from "lucide-react"
 import { useId, useState } from "react"
 import { cn } from "@/shared/lib/utils"
 import { AppearanceSettings } from "@/shared/components/common/AppearanceSettings"
@@ -92,38 +92,50 @@ function NavContent({ timeLeft, targetDate, onNavClick }: NavContentProps) {
 export default function AdminLayout() {
   const [open, setOpen] = useState(false)
   const { timeLeft, targetDate } = useMysteryChangeTimer()
+  const handleLogout = useLogout()
 
   return (
     <div className="flex h-screen w-full bg-background flex-col md:flex-row">
       <aside className="hidden md:flex w-72 border-r bg-card flex-col">
         <NavContent timeLeft={timeLeft} targetDate={targetDate} />
       </aside>
-      <div className="app-header md:hidden sticky top-0 z-40 bg-card/90 backdrop-blur-md border-b px-4 py-3 flex items-center gap-2">
-        <Sheet open={open} onOpenChange={setOpen}>
-          <SheetTrigger asChild>
-            <Button variant="ghost" size="icon" className="-ml-2" aria-label="Otwórz menu">
-              <Menu className="h-5 w-5" />
+      <div className="flex min-w-0 flex-1 flex-col">
+        {/* Pasek górny: na telefonie menu i tytuł, na komputerze tylko wylogowanie (w prawym górnym rogu) */}
+        <header className="app-header sticky top-0 z-40 bg-card/90 backdrop-blur-md border-b px-4 py-3 md:px-8 md:py-[1.125rem] flex items-center gap-2">
+          <div className="flex min-w-0 items-center gap-2 md:hidden">
+            <Sheet open={open} onOpenChange={setOpen}>
+              <SheetTrigger asChild>
+                <Button variant="ghost" size="icon" className="-ml-2" aria-label="Otwórz menu">
+                  <Menu className="h-5 w-5" />
+                </Button>
+              </SheetTrigger>
+              <SheetContent
+                side="left"
+                className="p-0 w-72"
+                // Fokus na menu, a nie na krzyżyk zamykania
+                onOpenAutoFocus={(e) => {
+                  e.preventDefault()
+                  ;(e.currentTarget as HTMLElement).focus()
+                }}
+              >
+                <SheetTitle className="sr-only">Menu</SheetTitle>
+                <NavContent timeLeft={timeLeft} targetDate={targetDate} onNavClick={() => setOpen(false)} />
+              </SheetContent>
+            </Sheet>
+            <img src="/logo-128.webp" alt="" width={32} height={32} className="h-8 w-8 object-contain" />
+            <span className="truncate text-base font-semibold">Panel administratora</span>
+          </div>
+          <div className="header-controls ml-auto flex flex-shrink-0">
+            <Button variant="outline" size="sm" onClick={handleLogout} className="gap-1.5">
+              <LogOut className="h-4 w-4" />
+              Wyloguj
             </Button>
-          </SheetTrigger>
-          <SheetContent
-            side="left"
-            className="p-0 w-72"
-            // Fokus na menu, a nie na krzyżyk zamykania
-            onOpenAutoFocus={(e) => {
-              e.preventDefault()
-              ;(e.currentTarget as HTMLElement).focus()
-            }}
-          >
-            <SheetTitle className="sr-only">Menu</SheetTitle>
-            <NavContent timeLeft={timeLeft} targetDate={targetDate} onNavClick={() => setOpen(false)} />
-          </SheetContent>
-        </Sheet>
-        <img src="/logo-128.webp" alt="" width={32} height={32} className="h-8 w-8 object-contain" />
-        <span className="text-base font-semibold">Panel administratora</span>
+          </div>
+        </header>
+        <main className="flex-1 overflow-auto bg-background p-4 md:p-8">
+          <Outlet />
+        </main>
       </div>
-      <main className="flex-1 overflow-auto bg-background p-4 md:p-8">
-        <Outlet />
-      </main>
     </div>
   )
 }
