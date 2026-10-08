@@ -49,42 +49,79 @@ export const membersService = {
 
   /**
    * Aktualizacja loginu członka
-   * Aktualizuje login w profiles oraz email w auth.users (format: login@noemail.local)
+   * Aktualizuje login w profiles oraz email w auth.users (format: login@noemail.local).
+   * Logowanie korzysta z emaila w auth.users — gdy jego zmiana się nie uda, login w profiles
+   * wraca do poprzedniego, żeby oba miejsca się nie rozjechały.
    */
   async updateMemberLogin(userId: string, newLogin: string): Promise<void> {
+    const login = newLogin.trim()
+
     // Walidacja loginu
-    if (!newLogin || newLogin.length < 3) {
+    if (login.length < 3) {
       throw new Error('Login musi mieć minimum 3 znaki')
     }
 
-    // Sprawdź czy login jest unikalny
-    const { data: existing } = await supabase
+    // Obecny login — do przywrócenia, gdyby zmiana w auth się nie udała
+    const { data: current, error: currentError } = await supabase
       .from('profiles')
-      .select('id')
-      .eq('login', newLogin)
-      .neq('id', userId)
-      .maybeSingle()
+      .select('login')
+      .eq('id', userId)
+      .single()
 
-    if (existing) {
-      throw new Error('Ten login jest już zajęty')
+    if (currentError) throw currentError
+    const previousLogin = current.login
+    const loginChanged = previousLogin !== login
+
+    if (loginChanged) {
+      // Sprawdź czy login jest unikalny
+      const { data: existing, error: existingError } = await supabase
+        .from('profiles')
+        .select('id')
+        .eq('login', login)
+        .neq('id', userId)
+        .maybeSingle()
+
+      if (existingError) throw existingError
+      if (existing) {
+        throw new Error('Ten login jest już zajęty')
+      }
+
+      // Aktualizuj login w profiles (RLS bez uprawnień nie zgłasza błędu, tylko nic nie zmienia)
+      const { data: updated, error: profileError } = await supabase
+        .from('profiles')
+        .update({ login })
+        .eq('id', userId)
+        .select('id')
+
+      if (profileError) throw profileError
+      if (!updated?.length) throw new Error('Nie udało się zmienić loginu')
     }
 
-    // Aktualizuj login w profiles
-    const { error: profileError } = await supabase
-      .from('profiles')
-      .update({ login: newLogin })
-      .eq('id', userId)
-
-    if (profileError) throw profileError
-
-    // Aktualizuj wewnętrzny email w auth.users (Supabase Auth wymaga emaila)
-    const newInternalEmail = `${newLogin}@noemail.local`
+    // Aktualizuj wewnętrzny email w auth.users (Supabase Auth wymaga emaila).
+    // Przy tym samym loginie tylko wyrównuje auth z profilem.
     const { data, error } = await supabase.functions.invoke('update-user-login', {
-      body: { user_id: userId, new_internal_email: newInternalEmail }
+      body: { user_id: userId, new_internal_email: `${login}@noemail.local` }
     })
 
-    // Jeśli nie udało się zaktualizować auth, cofnij zmianę w profiles
-    throwOnFunctionError(error, data, 'Błąd aktualizacji loginu')
+    try {
+      throwOnFunctionError(error, data, 'Błąd aktualizacji loginu')
+    } catch (authError) {
+      if (!loginChanged) throw authError
+
+      // Logowanie nadal działa na stary login — przywróć go w profiles
+      const { error: revertError } = await supabase
+        .from('profiles')
+        .update({ login: previousLogin })
+        .eq('id', userId)
+
+      if (revertError) {
+        throw new Error(
+          `Nie udało się zmienić loginu. Logowanie działa na stary login (${previousLogin}), ` +
+          `a w profilu został nowy. Zapisz login ponownie.`
+        )
+      }
+      throw authError
+    }
   },
 
   /**
