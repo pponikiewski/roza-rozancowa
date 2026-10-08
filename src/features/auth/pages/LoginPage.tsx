@@ -56,8 +56,10 @@ export default function LoginPage() {
       {/* LOGO / NAGŁÓWEK */}
       <div className="mb-8 text-center space-y-2 flex flex-col items-center">
         <img
-          src="/roseb.svg"
+          src="/logo-288.webp"
           alt="Logo"
+          width={96}
+          height={96}
           className="w-24 h-24 mb-2"
           fetchPriority="high"
         />

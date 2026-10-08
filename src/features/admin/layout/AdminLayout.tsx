@@ -27,7 +27,7 @@ function NavContent({ timeLeft, targetDate, onNavClick }: NavContentProps) {
   return (
     <div className="flex h-full flex-col overflow-y-auto">
       <div className="flex items-center gap-3 border-b px-5 py-5">
-        <img src="/roseb.svg" alt="" className="h-8 w-8 object-contain" />
+        <img src="/logo-128.webp" alt="" width={32} height={32} className="h-8 w-8 object-contain" />
         <span className="text-base font-semibold leading-tight">Panel administratora</span>
       </div>
       <nav className="flex-1 space-y-1 p-3">
@@ -118,7 +118,7 @@ export default function AdminLayout() {
             <NavContent timeLeft={timeLeft} targetDate={targetDate} onNavClick={() => setOpen(false)} />
           </SheetContent>
         </Sheet>
-        <img src="/roseb.svg" alt="" className="h-8 w-8 object-contain" />
+        <img src="/logo-128.webp" alt="" width={32} height={32} className="h-8 w-8 object-contain" />
         <span className="text-base font-semibold">Panel administratora</span>
       </div>
       <main className="flex-1 overflow-auto bg-background p-4 md:p-8">

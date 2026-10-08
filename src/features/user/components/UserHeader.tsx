@@ -19,7 +19,7 @@ export function UserHeader({ profile, onOpenRose }: UserHeaderProps) {
         onClick={onOpenRose}
         aria-label={`${profile?.full_name ?? ""}. Konto, wygląd i skład Róży ${profile?.groups?.name ?? ""}`.trim()}
       >
-        <img src="/roseb.svg" alt="" className="h-10 w-10 object-contain flex-shrink-0" />
+        <img src="/logo-128.webp" alt="" width={40} height={40} className="h-10 w-10 object-contain flex-shrink-0" />
         <div className="flex flex-col min-w-0">
           <span className="text-base font-semibold leading-tight truncate">
             {profile?.full_name}

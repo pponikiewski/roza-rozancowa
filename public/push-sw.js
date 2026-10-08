@@ -13,7 +13,7 @@ self.addEventListener('push', (event) => {
   event.waitUntil(
     self.registration.showNotification(title, {
       body: data.body,
-      icon: '/rose.webp',
+      icon: '/notification-icon.png',
       tag: data.tag,
       data: { url: data.url || '/' },
     })

@@ -27,7 +27,8 @@ export default defineConfig({
     inlineCssPlugin(),
     VitePWA({
       registerType: 'autoUpdate',
-      includeAssets: ['favicon.ico', 'rose.svg', 'roseb.svg'],
+      // Pliki z public/ trafiają do precache przez workbox.globPatterns
+      includeManifestIcons: false,
       manifest: {
         name: 'Moja róża',
         short_name: 'Moja róża',
@@ -38,21 +39,29 @@ export default defineConfig({
         orientation: 'portrait',
         icons: [
           {
-            src: '/roseb.svg',
-            sizes: 'any',
-            type: 'image/svg+xml',
+            src: '/icon-192.png',
+            sizes: '192x192',
+            type: 'image/png',
             purpose: 'any'
           },
           {
-            src: '/roseb.svg',
-            sizes: 'any',
-            type: 'image/svg+xml',
+            src: '/icon-512.png',
+            sizes: '512x512',
+            type: 'image/png',
+            purpose: 'any'
+          },
+          {
+            src: '/icon-maskable-512.png',
+            sizes: '512x512',
+            type: 'image/png',
             purpose: 'maskable'
           }
         ]
       },
       workbox: {
-        globPatterns: ['**/*.{js,css,html,svg,png,ico}'],
+        globPatterns: ['**/*.{js,css,html,svg,png,webp,ico}'],
+        // Ikony 512 px są potrzebne tylko przy instalacji aplikacji, nie offline
+        globIgnores: ['**/icon-512.png', '**/icon-maskable-512.png'],
         // Obsługa zdarzeń push i kliknięcia w powiadomienie (public/push-sw.js)
         importScripts: ['push-sw.js'],
         runtimeCaching: [
