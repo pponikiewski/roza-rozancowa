@@ -10,6 +10,7 @@ import { ROUTES } from "@/shared/lib/constants"
  * - Użytkownik niezalogowany na chronionej stronie → /
  * - Admin na user dashboardzie → /admin
  * - User na admin panelu → /user
+ * (zalogowany na stronie logowania → GuestRoute)
  * 
  * @example
  * ```typescript
@@ -49,17 +50,9 @@ export function useNavigateOnAuthChange() {
       // User próbuje wejść na admin panel - redirect do dashboard
       if (!isAdmin && currentPath.startsWith(ROUTES.ADMIN.ROOT)) {
         navigate(ROUTES.DASHBOARD, { replace: true })
-        return
       }
 
-      // User/admin na stronie logowania - redirect do właściwej strony
-      if (currentPath === '/' || currentPath === '/login') {
-        if (isAdmin) {
-          navigate(ROUTES.ADMIN.ROOT, { replace: true })
-        } else {
-          navigate(ROUTES.DASHBOARD, { replace: true })
-        }
-      }
+      // Zalogowany na stronie logowania — przekierowuje GuestRoute (bez renderu formularza)
     }
   }, [user, isAdmin, loading, location.pathname, navigate])
 }

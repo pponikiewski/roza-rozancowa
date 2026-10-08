@@ -40,7 +40,7 @@ export default function LoginPage() {
     try {
       await authService.signIn(data.login, data.password)
       toast.success("Zalogowano pomyślnie")
-      // Redirect będzie obsłużony przez useNavigateOnAuthChange w App.tsx
+      // Przekierowanie do panelu: GuestRoute, gdy AuthContext ustali rolę
     } catch (error) {
       toast.error("Błąd logowania", {
         description: getErrorMessage(error) || "Sprawdź poprawność loginu i hasła."

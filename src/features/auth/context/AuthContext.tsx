@@ -3,6 +3,7 @@ import type { ReactNode } from "react"
 import { useQueryClient } from "@tanstack/react-query"
 import { authService } from "@/features/auth/api/auth.service"
 import { userService } from "@/features/user/api/user.service"
+import { prefetchUserDashboard } from "@/features/user/api/user.queries"
 import { AppSplash } from "@/shared/components/feedback"
 import { QUERY_KEYS } from "@/shared/lib/constants"
 import type { User, Session } from "@supabase/supabase-js"
@@ -75,6 +76,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             if (userId) {
                 setLoading(true)
                 loadRole(userId)
+                // Tajemnica i intencja równolegle z profilem — panel nie czeka na nie po ekranie ładowania
+                prefetchUserDashboard(queryClient, userId)
             } else {
                 setIsAdmin(false)
                 setLoading(false)
@@ -82,7 +85,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         })
 
         return () => subscription.unsubscribe()
-    }, [loadRole])
+    }, [loadRole, queryClient])
 
     const signOut = useCallback(async () => {
         try {

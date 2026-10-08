@@ -12,6 +12,18 @@ export const ProtectedRoute = () => {
   return user ? <Outlet /> : <Navigate to={ROUTES.HOME} replace />
 }
 
+// Strona logowania tylko dla niezalogowanych. Zalogowany (np. start aplikacji z ekranu głównego)
+// trafia od razu do swojego panelu — bez renderowania formularza i przekierowania w efekcie
+export const GuestRoute = () => {
+  const { user, loading, isAdmin } = useAuth()
+
+  if (loading) return <AppSplash />
+
+  if (user) return <Navigate to={isAdmin ? ROUTES.ADMIN.ROOT : ROUTES.DASHBOARD} replace />
+
+  return <Outlet />
+}
+
 // Komponent chroniący trasy administracyjne
 export const AdminRoute = () => {
   const { user, loading, isAdmin } = useAuth()

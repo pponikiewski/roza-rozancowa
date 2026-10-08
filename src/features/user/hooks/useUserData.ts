@@ -1,4 +1,5 @@
 import { userService } from "@/features/user/api/user.service"
+import { userQueries } from "@/features/user/api/user.queries"
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 import { useAuth } from "@/features/auth/context/AuthContext"
 import { QUERY_KEYS } from "@/shared/lib/constants"
@@ -33,31 +34,26 @@ export function useUserData() {
 
   // 2. Intencja
   const { data: intention, isLoading: intentionLoading } = useQuery({
-     queryKey: QUERY_KEYS.INTENTION,
-     queryFn: () => userService.getCurrentIntention(),
+     ...userQueries.intention(),
      ...refreshOnReturn
   })
 
   // 3. ID tajemnicy — od niego zależą treść tajemnicy i status potwierdzenia
   const { data: mysteryId, isLoading: mysteryIdLoading } = useQuery({
-      queryKey: QUERY_KEYS.MYSTERY_ID(user?.id || ''),
-      queryFn: () => userService.getMysteryId(user!.id),
+      ...userQueries.mysteryId(user?.id || ''),
       enabled: !!user,
       ...refreshOnReturn
   })
 
   // 4a. Treść tajemnicy — stała, nie trzeba jej odświeżać
   const { data: mystery, isLoading: mysteryLoading } = useQuery({
-      queryKey: QUERY_KEYS.MYSTERY(mysteryId ?? 0),
-      queryFn: () => userService.getMystery(mysteryId!),
-      enabled: !!mysteryId,
-      staleTime: Infinity
+      ...userQueries.mystery(mysteryId ?? 0),
+      enabled: !!mysteryId
   })
 
   // 4b. Status potwierdzenia — równolegle z treścią tajemnicy
   const { data: isAcknowledged, isLoading: ackLoading } = useQuery({
-      queryKey: QUERY_KEYS.ACKNOWLEDGMENT(user?.id || '', mysteryId ?? 0),
-      queryFn: () => userService.checkAcknowledgment(mysteryId!),
+      ...userQueries.acknowledgment(user?.id || '', mysteryId ?? 0),
       enabled: !!user && !!mysteryId,
       ...refreshOnReturn
   })

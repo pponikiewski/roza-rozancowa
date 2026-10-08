@@ -1,6 +1,6 @@
 import { lazy, Suspense } from "react"
 import { Routes, Route, Navigate } from "react-router-dom"
-import { ProtectedRoute, AdminRoute } from "@/features/auth/components/ProtectedRoute"
+import { ProtectedRoute, AdminRoute, GuestRoute } from "@/features/auth/components/ProtectedRoute"
 import { useNavigateOnAuthChange } from "@/features/auth/hooks/useNavigateOnAuthChange"
 import { FeatureErrorBoundary } from "@/shared/components/layout/FeatureErrorBoundary"
 import { LoadingScreen } from "@/shared/components/feedback"
@@ -27,7 +27,9 @@ export function AppRoutes() {
   return (
     <Routes>
       {/* Public routes */}
-      <Route path={ROUTES.HOME} element={<LoginPage />} />
+      <Route element={<GuestRoute />}>
+        <Route path={ROUTES.HOME} element={<LoginPage />} />
+      </Route>
       <Route path={ROUTES.LOGIN} element={<Navigate to={ROUTES.HOME} replace />} />
 
       {/* Protected user routes */}
