@@ -63,27 +63,19 @@ export default function AdminRosesPage() {
 
   return (
     <div className="space-y-6 max-w-5xl mx-auto pb-20">
-      {/* Header */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-        <div className="space-y-1">
-          <h1 className="text-2xl font-bold tracking-tight">Róże</h1>
-          <p className="text-[0.9375rem] text-muted-foreground">
-            Nowe Róże, zmiana nazwy i rotacja tajemnic.
-          </p>
-        </div>
-        <Button onClick={() => handleOpenForm()} className="w-full md:w-auto font-semibold">
+      {/* Toolbar */}
+      <div className="flex flex-col md:flex-row justify-between md:items-center gap-4">
+        <Button onClick={() => handleOpenForm()} className="w-full md:w-auto md:order-last font-semibold">
           Nowa Róża
         </Button>
+        <Input
+          placeholder="Szukaj Róży"
+          aria-label="Szukaj Róży"
+          className="w-full max-w-sm"
+          value={search}
+          onChange={e => setSearch(e.target.value)}
+        />
       </div>
-
-      {/* Search */}
-      <Input
-        placeholder="Szukaj Róży"
-        aria-label="Szukaj Róży"
-        className="w-full max-w-sm"
-        value={search}
-        onChange={e => setSearch(e.target.value)}
-      />
 
       {/* List */}
       <div className="divide-y border-y">

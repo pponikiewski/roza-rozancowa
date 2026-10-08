@@ -28,14 +28,6 @@ export default function AdminIntentionsPage() {
 
   return (
     <div className="space-y-8 max-w-2xl mx-auto">
-      {/* Header */}
-      <div className="space-y-1">
-        <h1 className="text-2xl font-bold tracking-tight">Intencja</h1>
-        <p className="text-[0.9375rem] text-muted-foreground">
-          Zmiana intencji modlitwy na dany miesiąc.
-        </p>
-      </div>
-
       {/* Formularz nowej intencji */}
       <IntentionForm
         loading={loading}

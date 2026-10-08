@@ -36,22 +36,15 @@ export default function AdminIndulgencesPage() {
 
   return (
     <div className="space-y-6 max-w-2xl mx-auto">
-      {/* Header */}
+      {/* Toolbar */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div className="space-y-1">
-          <h1 className="text-2xl font-bold tracking-tight">Odpusty</h1>
-          <p className="text-[0.9375rem] text-muted-foreground">
-            Dni, w których członkowie Róż mogą zyskać odpust. W każdy z nich wysyłane jest powiadomienie.
-          </p>
-        </div>
-        <Button onClick={openCreate} className="w-full md:w-auto font-semibold">
+        <Button onClick={openCreate} className="w-full md:w-auto md:order-last font-semibold">
           Dodaj dzień
         </Button>
+        <p className="text-sm text-muted-foreground">
+          Dzień przyjęcia do Stowarzyszenia Żywego Różańca jest inny dla każdej Róży. Ustawisz go w zakładce <b>Róże</b> (edycja Róży).
+        </p>
       </div>
-
-      <p className="text-sm text-muted-foreground">
-        Dzień przyjęcia do Stowarzyszenia Żywego Różańca jest inny dla każdej Róży. Ustawisz go w zakładce <b>Róże</b> (edycja Róży).
-      </p>
 
       <IndulgenceList
         indulgences={indulgences}

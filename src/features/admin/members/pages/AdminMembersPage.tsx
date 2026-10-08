@@ -96,23 +96,18 @@ export default function AdminMembersPage() {
 
   return (
     <div className="space-y-6 pb-24 max-w-6xl mx-auto">
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-        <div className="space-y-1">
-          <h1 className="text-2xl font-bold tracking-tight">Użytkownicy</h1>
-          <p className="text-[0.9375rem] text-muted-foreground">Członkowie Róż i to, kto zapoznał się z tajemnicą w tym miesiącu.</p>
-        </div>
-        <Button onClick={() => setIsAddOpen(true)} className="w-full md:w-auto font-semibold">
+      <div className="flex flex-col md:flex-row justify-between md:items-center gap-4">
+        <Button onClick={() => setIsAddOpen(true)} className="w-full md:w-auto md:order-last font-semibold">
           Dodaj członka
         </Button>
+        <Input
+          placeholder="Szukaj po imieniu i nazwisku"
+          aria-label="Szukaj po imieniu i nazwisku"
+          className="w-full max-w-md"
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+        />
       </div>
-
-      <Input
-        placeholder="Szukaj po imieniu i nazwisku"
-        aria-label="Szukaj po imieniu i nazwisku"
-        className="w-full max-w-md"
-        value={search}
-        onChange={(e) => setSearch(e.target.value)}
-      />
 
       <Accordion type="multiple" className="w-full border-t" defaultValue={groups.length > 0 ? [`group-${groups[0].id}`] : []}>
         {groups.map((group) => {
