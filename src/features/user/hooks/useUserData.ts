@@ -50,7 +50,7 @@ export function useUserData() {
   // 4b. Status potwierdzenia — równolegle z treścią tajemnicy
   const { data: isAcknowledged, isLoading: ackLoading } = useQuery({
       queryKey: QUERY_KEYS.ACKNOWLEDGMENT(user?.id || '', mysteryId ?? 0),
-      queryFn: () => userService.checkAcknowledgment(user!.id, mysteryId!),
+      queryFn: () => userService.checkAcknowledgment(mysteryId!),
       enabled: !!user && !!mysteryId
   })
 
@@ -69,7 +69,7 @@ export function useUserData() {
           if (!user || !mystery) return
           // Artificial delay for better UX
           await new Promise(resolve => setTimeout(resolve, 300))
-          await userService.acknowledgeMystery(user.id, mystery.id)
+          await userService.acknowledgeMystery(mystery.id)
       },
       onSuccess: () => {
           // Invalidate acknowledgment query to refetch and update UI to "true"

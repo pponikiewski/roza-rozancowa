@@ -87,17 +87,17 @@ export const userService = {
   },
 
   /**
-   * Sprawdzenie czy użytkownik potwierdził tajemnicę
+   * Czy zalogowany użytkownik potwierdził tajemnicę w bieżącym okresie
    */
-  async checkAcknowledgment(userId: string, mysteryId: number): Promise<boolean> {
-    return await mysteriesService.checkAcknowledgment(userId, mysteryId)
+  async checkAcknowledgment(mysteryId: number): Promise<boolean> {
+    return await mysteriesService.checkAcknowledgment(mysteryId)
   },
 
   /**
-   * Potwierdzenie tajemnicy
+   * Potwierdzenie bieżącej tajemnicy zalogowanego użytkownika
    */
-  async acknowledgeMystery(userId: string, mysteryId: number): Promise<void> {
-    await mysteriesService.acknowledgeMystery(userId, mysteryId)
+  async acknowledgeMystery(mysteryId: number): Promise<void> {
+    await mysteriesService.acknowledgeMystery(mysteryId)
   },
 
   /**

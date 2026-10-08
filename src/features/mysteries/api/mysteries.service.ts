@@ -35,27 +35,22 @@ export const mysteriesService = {
   },
 
   /**
-   * Potwierdzenie zapoznania się z tajemnicą
+   * Potwierdzenie bieżącej tajemnicy zalogowanego użytkownika (RPC)
+   * Ta sama tajemnica wraca co 20 miesięcy — ponowne potwierdzenie odświeża datę
    */
-  async acknowledgeMystery(userId: string, mysteryId: number) {
-    const { error } = await supabase
-      .from('acknowledgments')
-      .insert({ user_id: userId, mystery_id: mysteryId })
+  async acknowledgeMystery(mysteryId: number) {
+    const { error } = await supabase.rpc('acknowledge_mystery', { p_mystery_id: mysteryId })
 
     if (error) throw error
   },
 
   /**
-   * Sprawdzenie czy użytkownik potwierdził tajemnicę
+   * Czy zalogowany użytkownik potwierdził tajemnicę w bieżącym okresie (RPC)
    */
-  async checkAcknowledgment(userId: string, mysteryId: number): Promise<boolean> {
-    const { data } = await supabase
-      .from('acknowledgments')
-      .select('id')
-      .eq('user_id', userId)
-      .eq('mystery_id', mysteryId)
-      .maybeSingle()
+  async checkAcknowledgment(mysteryId: number): Promise<boolean> {
+    const { data, error } = await supabase.rpc('is_mystery_acknowledged', { p_mystery_id: mysteryId })
 
+    if (error) throw error
     return !!data
   },
 }

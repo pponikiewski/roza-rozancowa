@@ -98,7 +98,7 @@ describe('Integracja: Panel Użytkownika (UserPage)', () => {
     expect(userService.getProfile).toHaveBeenCalledTimes(1)
     expect(userService.getMysteryId).toHaveBeenCalledTimes(1)
     expect(userService.getMystery).toHaveBeenCalledWith(3)
-    expect(userService.checkAcknowledgment).toHaveBeenCalledWith(mockUser.id, 3)
+    expect(userService.checkAcknowledgment).toHaveBeenCalledWith(3)
     expect(userService.getCurrentIntention).toHaveBeenCalledTimes(1)
   })
 
@@ -119,7 +119,7 @@ describe('Integracja: Panel Użytkownika (UserPage)', () => {
 
     // Oczekujemy, że została odpialona funkcja save do zewnętrznego API
     await waitFor(() => {
-      expect(userService.acknowledgeMystery).toHaveBeenCalledWith(mockUser.id, 3)
+      expect(userService.acknowledgeMystery).toHaveBeenCalledWith(3)
     })
   })
 })

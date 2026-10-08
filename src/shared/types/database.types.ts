@@ -247,6 +247,11 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      acknowledge_mystery: {
+        Args: { p_mystery_id: number }
+        Returns: undefined
+      }
+      current_mystery_period_start: { Args: never; Returns: string }
       get_members_overview: {
         Args: { p_group_id?: number }
         Returns: {
@@ -273,6 +278,10 @@ export type Database = {
         }[]
       }
       is_admin: { Args: never; Returns: boolean }
+      is_mystery_acknowledged: {
+        Args: { p_mystery_id: number }
+        Returns: boolean
+      }
       move_user_to_group: {
         Args: { p_group_id: number; p_user_id: string }
         Returns: number
