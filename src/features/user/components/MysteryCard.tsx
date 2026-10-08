@@ -2,6 +2,7 @@ import { memo } from "react"
 import { Loader2 } from "lucide-react"
 import { Button } from "@/shared/components/ui/button"
 import { ResizableText } from "@/shared/components/common/ResizableText"
+import { ZoomableImage } from "@/shared/components/common/ZoomableImage"
 import { formatTimeLeft } from "@/shared/lib/formatters"
 import type { Mystery } from "@/features/mysteries/types/mystery.types"
 
@@ -28,13 +29,13 @@ export const MysteryCard = memo(function MysteryCard({
     <section className="py-6">
       <div className="w-full flex items-center justify-center aspect-[3/4] max-h-[50vh]">
         {mystery.image_url ? (
-          <img
+          <ZoomableImage
             src={mystery.image_url}
             alt={mystery.name}
             width={600}
             height={800}
             fetchPriority="high"
-            className="w-auto h-auto max-h-full object-contain rounded-lg"
+            className="h-full w-auto max-w-full object-contain rounded-lg"
           />
         ) : (
           <div className="h-32 flex items-center justify-center text-muted-foreground text-sm">

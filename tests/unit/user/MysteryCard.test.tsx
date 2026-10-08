@@ -34,6 +34,16 @@ describe('MysteryCard', () => {
     expect(onAcknowledge).toHaveBeenCalledTimes(1)
   })
 
+  it('otwiera obraz na pełnym ekranie po kliknięciu', async () => {
+    const { user } = renderWithProviders(
+      <MysteryCard {...defaultProps} mystery={{ ...mockMystery, image_url: '/test.jpg' }} />
+    )
+
+    await user.click(screen.getByRole('button', { name: /powiększ obraz/i }))
+
+    expect(screen.getByRole('dialog', { name: mockMystery.name })).toBeInTheDocument()
+  })
+
   it('wyświetla status potwierdzone i blokuje przycisk', async () => {
     const onAcknowledge = vi.fn()
     const { user } = renderWithProviders(
