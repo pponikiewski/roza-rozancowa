@@ -3,7 +3,10 @@ import { Routes, Route, Navigate } from "react-router-dom"
 import { ProtectedRoute, AdminRoute, GuestRoute } from "@/features/auth/components/ProtectedRoute"
 import { useNavigateOnAuthChange } from "@/features/auth/hooks/useNavigateOnAuthChange"
 import { FeatureErrorBoundary } from "@/shared/components/layout/FeatureErrorBoundary"
-import { AppSplash, LoadingScreen } from "@/shared/components/feedback"
+// Bezpośrednio z plików, nie z barrela feedback — barrel ciągnąłby ConfirmationDialog
+// (Radix Dialog) do głównej paczki
+import { AppSplash } from "@/shared/components/feedback/AppSplash"
+import { LoadingScreen } from "@/shared/components/feedback/LoadingScreen"
 import { ROUTES } from "@/shared/lib/constants"
 
 // Panel użytkownika od razu — to pierwszy ekran przy prawie każdym uruchomieniu

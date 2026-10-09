@@ -1,6 +1,6 @@
 import { Navigate, Outlet } from "react-router-dom"
 import { useAuth } from "@/features/auth/context/AuthContext"
-import { AppSplash } from "@/shared/components/feedback"
+import { AppSplash } from "@/shared/components/feedback/AppSplash"
 import { ROUTES } from "@/shared/lib/constants"
 
 // Komponent chroniący trasy dostępne tylko dla zalogowanych użytkowników

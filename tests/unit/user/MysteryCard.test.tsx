@@ -4,7 +4,7 @@
  */
 
 import { describe, it, expect, vi } from 'vitest'
-import { renderWithProviders, screen, mockMystery } from '@tests/utils'
+import { renderWithProviders, screen, waitFor, mockMystery } from '@tests/utils'
 import { MysteryCard } from '@/features/user/components/MysteryCard'
 
 describe('MysteryCard', () => {
@@ -38,9 +38,16 @@ describe('MysteryCard', () => {
       <MysteryCard {...defaultProps} mystery={{ ...mockMystery, image_url: '/test.jpg' }} />
     )
 
-    await user.click(screen.getByRole('button', { name: /powiększ obraz/i }))
+    const thumbnail = screen.getByRole('button', { name: /powiększ obraz/i })
+    await user.click(thumbnail)
 
-    expect(screen.getByRole('dialog', { name: mockMystery.name })).toBeInTheDocument()
+    // Podgląd ładowany leniwie przy pierwszym kliknięciu
+    expect(await screen.findByRole('dialog', { name: mockMystery.name })).toBeInTheDocument()
+
+    // Po zamknięciu fokus wraca na miniaturę
+    await user.click(screen.getByRole('button', { name: /zamknij/i }))
+    await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument())
+    expect(thumbnail).toHaveFocus()
   })
 
   it('wyświetla status potwierdzone i blokuje przycisk', async () => {

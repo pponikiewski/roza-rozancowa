@@ -1,9 +1,8 @@
-import { useState, useEffect } from "react"
+import { lazy, Suspense, useState, useEffect } from "react"
 // UI Components
 import { UserPageSkeleton } from "@/features/user/components/UserPageSkeleton"
 import { IntentionCard } from "@/features/user/components/IntentionCard"
 import { MysteryCard } from "@/features/user/components/MysteryCard"
-import { RoseDialog } from "@/features/user/components/RoseDialog"
 import { UserHeader } from "@/features/user/components/UserHeader"
 import { NoAssignmentCard } from "@/features/user/components/NoAssignmentCard"
 import { IndulgenceCard } from "@/features/user/components/IndulgenceCard"
@@ -13,6 +12,12 @@ import { userService } from "@/features/user/api/user.service"
 import { useQuery } from "@tanstack/react-query"
 import { QUERY_KEYS } from "@/shared/lib/constants"
 import type { RoseMember } from "@/features/user/types/user.types"
+
+// Panel konta (Radix Dialog, ustawienia, powiadomienia) ładowany przy pierwszym otwarciu —
+// start panelu go nie potrzebuje, a plik i tak czeka w precache service workera
+const RoseDialog = lazy(() =>
+  import("@/features/user/components/RoseDialog").then((m) => ({ default: m.RoseDialog }))
+)
 
 // Stała pusta lista — nowa tablica przy każdym renderze psułaby memo w RoseDialog
 const NO_MEMBERS: RoseMember[] = []
@@ -32,6 +37,13 @@ export default function UserPage() {
   } = useUserData()
 
   const [isRoseOpen, setIsRoseOpen] = useState(false)
+  // Raz otwarty zostaje zamontowany — animacja zamknięcia działa normalnie
+  const [roseMounted, setRoseMounted] = useState(false)
+
+  const openRose = () => {
+    setRoseMounted(true)
+    setIsRoseOpen(true)
+  }
 
   // Obraz tajemnicy pobierany od razu, gdy znany jest adres (zanim zniknie szkielet strony)
   useEffect(() => {
@@ -64,7 +76,7 @@ export default function UserPage() {
 
   return (
     <div className="min-h-screen w-full bg-background flex flex-col pb-safe">
-      <UserHeader profile={profile} onOpenRose={() => setIsRoseOpen(true)} />
+      <UserHeader profile={profile} onOpenRose={openRose} />
 
       <main className="flex-1 w-full max-w-lg mx-auto px-5 py-2 md:px-8 md:py-4 flex flex-col divide-y">
         {/* KARTA ODPUSTU — tylko w dniu odpustu */}
@@ -89,16 +101,20 @@ export default function UserPage() {
       </main>
 
       {/* DIALOG RÓŻY */}
-      <RoseDialog
-        open={isRoseOpen}
-        onOpenChange={setIsRoseOpen}
-        fullName={profile?.full_name}
-        login={profile?.login}
-        groupName={profile?.groups?.name}
-        members={roseMembers}
-        loading={roseLoading}
-        currentUserId={profile?.id}
-      />
+      {roseMounted && (
+        <Suspense fallback={null}>
+          <RoseDialog
+            open={isRoseOpen}
+            onOpenChange={setIsRoseOpen}
+            fullName={profile?.full_name}
+            login={profile?.login}
+            groupName={profile?.groups?.name}
+            members={roseMembers}
+            loading={roseLoading}
+            currentUserId={profile?.id}
+          />
+        </Suspense>
+      )}
     </div>
   )
 }

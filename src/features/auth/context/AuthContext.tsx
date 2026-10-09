@@ -4,7 +4,7 @@ import { useQueryClient } from "@tanstack/react-query"
 import { authService } from "@/features/auth/api/auth.service"
 import { userService } from "@/features/user/api/user.service"
 import { prefetchUserDashboard } from "@/features/user/api/user.queries"
-import { AppSplash } from "@/shared/components/feedback"
+import { AppSplash } from "@/shared/components/feedback/AppSplash"
 import { QUERY_KEYS } from "@/shared/lib/constants"
 import type { User, Session } from "@supabase/supabase-js"
 
