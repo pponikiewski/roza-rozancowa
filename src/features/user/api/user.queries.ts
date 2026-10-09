@@ -37,6 +37,28 @@ export const userQueries = {
 }
 
 /**
+ * Obraz tajemnicy z danych zapamiętanych w telefonie (queryPersistence) pobierany od razu przy starcie —
+ * równolegle ze sprawdzaniem sesji, a nie dopiero po narysowaniu panelu.
+ * Te same atrybuty co <img> w MysteryCard (crossOrigin), więc przeglądarka nie pobiera obrazu drugi raz.
+ */
+export function preloadCachedMysteryImage(queryClient: QueryClient) {
+  for (const [, mysteryId] of queryClient.getQueriesData<number | null>({ queryKey: ['mystery-id'] })) {
+    if (!mysteryId) continue
+    const imageUrl = queryClient.getQueryData(userQueries.mystery(mysteryId).queryKey)?.image_url
+    if (!imageUrl) continue
+
+    const link = document.createElement('link')
+    link.rel = 'preload'
+    link.as = 'image'
+    link.href = imageUrl
+    link.fetchPriority = 'high'
+    link.crossOrigin = 'anonymous'
+    document.head.appendChild(link)
+    return
+  }
+}
+
+/**
  * Dane panelu pobierane równolegle z profilem, jeszcze przy ekranie ładowania.
  * Bez tego zapytania szły jedno po drugim: profil → ID tajemnicy → treść i status.
  * Przy danych zapamiętanych z poprzedniego uruchomienia (queryPersistence) to samo sprawdza je w tle.

@@ -7,12 +7,14 @@ import { registerServiceWorker } from '@/app/registerServiceWorker'
 import { reloadOnStaleChunk } from '@/app/reloadOnStaleChunk'
 import { queryClient } from '@/shared/lib/queryClient'
 import { persistQueryCache, restoreQueryCache } from '@/shared/lib/queryPersistence'
+import { preloadCachedMysteryImage } from '@/features/user/api/user.queries'
 
 registerServiceWorker()
 reloadOnStaleChunk()
 // Dane panelu z poprzedniego uruchomienia — przed renderem, więc panel ma je od pierwszej klatki
 restoreQueryCache(queryClient)
 persistQueryCache(queryClient)
+preloadCachedMysteryImage(queryClient)
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>

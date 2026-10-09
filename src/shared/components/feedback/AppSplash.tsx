@@ -7,7 +7,16 @@
 export function AppSplash() {
   return (
     <div className="app-splash" role="status" aria-label="Ładowanie">
-      <img src="/logo-384.webp" alt="" width={128} height={128} className="app-splash-logo" />
+      {/* Te same atrybuty co w index.html — przeglądarka wybierze ten sam plik i nie pobierze go drugi raz */}
+      <img
+        src="/logo-384.webp"
+        srcSet="/logo-128.webp 128w, /logo-288.webp 288w, /logo-384.webp 384w"
+        sizes="128px"
+        alt=""
+        width={128}
+        height={128}
+        className="app-splash-logo"
+      />
       <span className="app-splash-loader" />
     </div>
   )

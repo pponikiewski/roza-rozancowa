@@ -74,7 +74,8 @@
   <!-- Ekran startowy do czasu wczytania aplikacji (ten sam co AppSplash i obrazki startowe iOS) -->
   <div id="root">
     <div class="app-splash" role="status" aria-label="Ładowanie">
-      <img src="/logo-384.webp" alt="" width="128" height="128" class="app-splash-logo" />
+      <!-- Rozmiar wg gęstości ekranu; te same atrybuty co w AppSplash, żeby nie pobierać logo dwa razy -->
+      <img src="/logo-384.webp" srcset="/logo-128.webp 128w, /logo-288.webp 288w, /logo-384.webp 384w" sizes="128px" alt="" width="128" height="128" class="app-splash-logo" />
       <span class="app-splash-loader"></span>
     </div>
   </div>
