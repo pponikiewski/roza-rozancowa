@@ -91,10 +91,14 @@ export default defineConfig({
     })
   ],
   resolve: {
-    alias: {
-      "@": path.resolve(__dirname, "./src"),
-      "@tests": path.resolve(__dirname, "./tests"),
-    },
+    alias: [
+      // Wersja ESM zamiast domyślnej (wrapper na CommonJS) — dopiero w niej działają zaślepki poniżej
+      { find: /^@supabase\/supabase-js$/, replacement: '@supabase/supabase-js/dist/module/index.js' },
+      // Realtime i Storage nieużywane — zaślepki zamiast ok. 70 KB kodu (opis w supabaseStubs.ts)
+      { find: /^@supabase\/(realtime|storage)-js$/, replacement: path.resolve(__dirname, './src/shared/lib/supabaseStubs.ts') },
+      { find: "@", replacement: path.resolve(__dirname, "./src") },
+      { find: "@tests", replacement: path.resolve(__dirname, "./tests") },
+    ],
   },
   build: {
     target: 'es2020',
