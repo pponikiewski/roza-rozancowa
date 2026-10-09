@@ -4,8 +4,10 @@ import { createRoot } from 'react-dom/client'
 import './index.css'
 import { App } from '@/app'
 import { registerServiceWorker } from '@/app/registerServiceWorker'
+import { reloadOnStaleChunk } from '@/app/reloadOnStaleChunk'
 
 registerServiceWorker()
+reloadOnStaleChunk()
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
