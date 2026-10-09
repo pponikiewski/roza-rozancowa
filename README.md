@@ -586,13 +586,16 @@ Projekt jest skonfigurowany do deploymentu na **Vercel**:
 
 1. Połącz repozytorium z Vercel
 2. Ustaw zmienne środowiskowe (`VITE_SUPABASE_URL`, `VITE_SUPABASE_PUBLISHABLE_DEFAULT_KEY`)
-3. Deploy automatycznie przy push do `main`
+3. Push do `pd` buduje Preview; wersję na produkcję promuje się ręcznie w panelu Vercel
 
-**Konfiguracja** (`vercel.json`):
+**Konfiguracja** (`vercel.json`): pliki z `/assets/` z cache na rok (nazwy z hashem), pozostałe adresy
+kierowane do `index.html`. Rewrite pomija `/assets/` — brakujący plik starej wersji zwraca 404 zamiast
+`index.html` (aplikacja przeładowuje się wtedy do nowej wersji, `src/app/reloadOnStaleChunk.ts`).
 
 ```json
 {
-  "rewrites": [{ "source": "/(.*)", "destination": "/index.html" }]
+  "headers": [{ "source": "/assets/(.*)", "headers": [{ "key": "Cache-Control", "value": "public, max-age=31536000, immutable" }] }],
+  "rewrites": [{ "source": "/((?!assets/).*)", "destination": "/index.html" }]
 }
 ```
 
@@ -600,8 +603,8 @@ Projekt jest skonfigurowany do deploymentu na **Vercel**:
 
 | Środowisko | Branch | URL |
 |------------|--------|-----|
-| Production | `main` | `https://roza-rozancowa.vercel.app` |
-| Preview | PR branches | Automatyczne preview URL |
+| Production | `pd` (promocja w Vercel) | `https://roza-pd.vercel.app` |
+| Preview | każdy push | Automatyczne preview URL |
 | Local | — | `http://localhost:5173` |
 
 ### Edge Functions (Supabase)
