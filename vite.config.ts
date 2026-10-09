@@ -16,7 +16,12 @@ const inlineCssPlugin = () => {
       const cssChunk = ctx.bundle[cssFile];
       if (!cssChunk || cssChunk.type !== 'asset') return html;
       delete ctx.bundle[cssFile];
-      return html.replace('</head>', `<style>${cssChunk.source}</style></head>`);
+      // Vite wstawił już <link> do tego pliku — bez usunięcia przeglądarka czekałaby na nieistniejący CSS
+      // (blokuje renderowanie; Vercel odsyła wtedy index.html)
+      const fileName = cssFile.split('/').pop()!.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      return html
+        .replace(new RegExp(`<link[^>]*href="[^"]*${fileName}"[^>]*>\\s*`), '')
+        .replace('</head>', `<style>${cssChunk.source}</style></head>`);
     }
   }
 }
