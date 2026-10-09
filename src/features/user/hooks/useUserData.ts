@@ -27,8 +27,7 @@ export function useUserData() {
 
   // 1. Profil — zwykle już w cache (AuthContext pobiera go przy logowaniu razem z rolą)
   const { data: profile, isLoading: profileLoading } = useQuery({
-     queryKey: QUERY_KEYS.PROFILE(user?.id || ''),
-     queryFn: () => userService.getProfile(user!.id),
+     ...userQueries.profile(user?.id || ''),
      enabled: !!user
   })
 
@@ -65,6 +64,8 @@ export function useUserData() {
       queryKey: [...QUERY_KEYS.INDULGENCES_TODAY(todayKey), group?.id ?? null],
       queryFn: () => userService.getTodayIndulgences(group),
       enabled: !!user && !profileLoading,
+      // Zapamiętane z poprzedniego uruchomienia (queryPersistence) — sprawdzane przy starcie, jeśli starsze niż 5 min
+      refetchOnMount: true,
       ...refreshOnReturn
   })
 

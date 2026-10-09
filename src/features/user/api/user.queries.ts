@@ -6,6 +6,12 @@ import { QUERY_KEYS } from "@/shared/lib/constants"
  * Zapytania panelu użytkownika — wspólne dla useUserData i pobierania z wyprzedzeniem w AuthContext
  */
 export const userQueries = {
+  /** Profil z rolą i Różą — pobierany w AuthContext przy logowaniu, panel korzysta z cache */
+  profile: (userId: string) => queryOptions({
+    queryKey: QUERY_KEYS.PROFILE(userId),
+    queryFn: () => userService.getProfile(userId),
+  }),
+
   intention: () => queryOptions({
     queryKey: QUERY_KEYS.INTENTION,
     queryFn: () => userService.getCurrentIntention(),
@@ -33,6 +39,7 @@ export const userQueries = {
 /**
  * Dane panelu pobierane równolegle z profilem, jeszcze przy ekranie ładowania.
  * Bez tego zapytania szły jedno po drugim: profil → ID tajemnicy → treść i status.
+ * Przy danych zapamiętanych z poprzedniego uruchomienia (queryPersistence) to samo sprawdza je w tle.
  * Błędy pomijane — panel zapyta ponownie przez useUserData.
  */
 export async function prefetchUserDashboard(queryClient: QueryClient, userId: string) {
@@ -40,7 +47,8 @@ export async function prefetchUserDashboard(queryClient: QueryClient, userId: st
   const mysteryId = await queryClient.fetchQuery(userQueries.mysteryId(userId)).catch(() => null)
   if (mysteryId) {
     await Promise.all([
-      queryClient.prefetchQuery(userQueries.mystery(mysteryId)),
+      // Treść raz na uruchomienie, mimo staleTime: Infinity — zapamiętana mogła się zmienić
+      queryClient.prefetchQuery({ ...userQueries.mystery(mysteryId), staleTime: 0 }),
       queryClient.prefetchQuery(userQueries.acknowledgment(userId, mysteryId)),
     ])
   }
