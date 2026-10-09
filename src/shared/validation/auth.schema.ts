@@ -1,4 +1,4 @@
-import { z } from 'zod'
+import { z } from 'zod/mini'
 import { loginField, passwordField } from './common.schema'
 
 /**
@@ -19,9 +19,11 @@ export const changePasswordSchema = z
     newPassword: passwordField,
     confirmPassword: passwordField,
   })
-  .refine((data) => data.newPassword === data.confirmPassword, {
-    message: 'Hasła muszą być identyczne',
-    path: ['confirmPassword'],
-  })
+  .check(
+    z.refine((data) => data.newPassword === data.confirmPassword, {
+      error: 'Hasła muszą być identyczne',
+      path: ['confirmPassword'],
+    })
+  )
 
 export type ChangePasswordFormData = z.infer<typeof changePasswordSchema>
