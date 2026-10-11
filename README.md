@@ -68,7 +68,7 @@ Aplikacja **Róża Różańcowa** digitalizuje ten proces, eliminując potrzebę
 
 - **Użytkownicy** — dodawanie, zmiana loginu i hasła, usuwanie, przypisywanie do Róż; status potwierdzenia tajemnicy przy każdej osobie
 - **Róże** — tworzenie grup, dzień przyjęcia do Stowarzyszenia, skład Róży, ręczna rotacja tajemnic
-- **Intencja** — intencja na miesiąc, edycja i historia
+- **Intencja** — intencja na bieżący miesiąc (widoczna w formularzu przez cały miesiąc, w nowym miesiącu pusty formularz), edycja i historia
 - **Odpusty** — kalendarz dni odpustu (daty stałe i Wielkanoc liczona automatycznie)
 
 Tajemnice zmieniają się same — numer tajemnicy wynika z pozycji w Róży i daty (pierwsza niedziela miesiąca), bez zadań w tle. Ręczna rotacja służy tylko do korekty.
@@ -99,6 +99,29 @@ Aplikacja jest projektowana pod telefon (mobile-first). Zrzuty na danych przykł
     <td align="center"><sub>Panel konta i skład Róży</sub></td>
     <td align="center"><sub>Admin: członkowie i potwierdzenia</sub></td>
     <td></td>
+  </tr>
+</table>
+
+### Panel administratora na komputerze
+
+Na komputerze panel ma stałe menu boczne z licznikiem do zmiany tajemnic, a lista członków jest tabelą.
+
+<table>
+  <tr>
+    <td align="center"><img src="docs/screenshots/admin-desktop-members.png" alt="Zakładka Użytkownicy: tabela członków Róży z tajemnicą i statusem potwierdzenia, wyszukiwarka i przycisk Dodaj członka" width="400"></td>
+    <td align="center"><img src="docs/screenshots/admin-desktop-intentions.png" alt="Zakładka Intencja: zapisana intencja na październik w formularzu z przyciskiem Zapisz zmiany i rozwinięta historia intencji z edycją i usuwaniem" width="400"></td>
+  </tr>
+  <tr>
+    <td align="center"><sub>Użytkownicy — członkowie, tajemnice, potwierdzenia</sub></td>
+    <td align="center"><sub>Intencja — bieżący miesiąc i historia</sub></td>
+  </tr>
+  <tr>
+    <td align="center"><img src="docs/screenshots/admin-desktop-roses.png" alt="Zakładka Róże: lista Róż z dniem przyjęcia do Stowarzyszenia i przycisk Nowa Róża" width="400"></td>
+    <td align="center"><img src="docs/screenshots/admin-desktop-indulgences.png" alt="Zakładka Odpusty: kalendarz dni odpustu z datami stałymi i Wielkanocą liczoną automatycznie" width="400"></td>
+  </tr>
+  <tr>
+    <td align="center"><sub>Róże — lista i dzień przyjęcia</sub></td>
+    <td align="center"><sub>Odpusty — kalendarz dni odpustu</sub></td>
   </tr>
 </table>
 

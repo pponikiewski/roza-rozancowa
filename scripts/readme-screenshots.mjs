@@ -155,12 +155,13 @@ async function mockSupabase(page, user) {
 
 // --- Zrzuty ---
 
-async function newPage(browser, { user, theme = "light" } = {}) {
+// Telefon (domyślnie) albo komputer — panel admina ma na komputerze menu boczne zamiast wysuwanego
+const PHONE = { viewport: { width: 390, height: 844 }, deviceScaleFactor: 2, isMobile: true, hasTouch: true }
+const DESKTOP = { viewport: { width: 1280, height: 800 }, deviceScaleFactor: 1.5, isMobile: false, hasTouch: false }
+
+async function newPage(browser, { user, theme = "light", device = PHONE } = {}) {
   const context = await browser.newContext({
-    viewport: { width: 390, height: 844 },
-    deviceScaleFactor: 2,
-    isMobile: true,
-    hasTouch: true,
+    ...device,
     colorScheme: theme,
     locale: "pl-PL",
     timezoneId: "Europe/Warsaw",
@@ -230,6 +231,33 @@ try {
   await page.getByRole("button", { name: new RegExp(groups[0].name) }).click()
   await page.getByText(members[1].full_name).first().waitFor()
   await shot(page, "admin-members")
+
+  // Panel admina na komputerze — każda zakładka; zwinięte listy (historia intencji, kalendarz odpustów) rozwinięte
+  const adminTabs = [
+    ["members", async (p) => {
+      const trigger = p.getByRole("button", { name: new RegExp(groups[0].name) })
+      await trigger.waitFor()
+      if ((await trigger.getAttribute("aria-expanded")) !== "true") await trigger.click()
+      await p.getByText(members[1].full_name).filter({ visible: true }).first().waitFor()
+    }],
+    ["intentions", async (p) => {
+      await p.getByRole("button", { name: /Historia intencji/ }).click()
+      await p.getByText(intentionHistory[2].title).first().waitFor()
+    }],
+    ["roses", async (p) => {
+      await p.getByText(groups[2].name).first().waitFor()
+    }],
+    ["indulgences", async (p) => {
+      await p.getByRole("button", { name: /Kalendarz odpustów/ }).click()
+      await p.getByText(indulgences[0].name).first().waitFor()
+    }],
+  ]
+  for (const [tab, prepare] of adminTabs) {
+    page = await newPage(browser, { user: users.admin, device: DESKTOP })
+    await page.goto(`${APP}/admin/${tab}`, { waitUntil: "domcontentloaded", timeout: 90_000 })
+    await prepare(page)
+    await shot(page, `admin-desktop-${tab}`)
+  }
 
   await browser.close()
 } finally {
