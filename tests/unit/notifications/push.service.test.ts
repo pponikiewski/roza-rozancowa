@@ -15,6 +15,10 @@ describe('push.service', () => {
 
   it('zwraca unsupported, gdy przeglądarka nie obsługuje Web Push', async () => {
     // jsdom nie ma PushManager ani klucza VAPID w env
-    expect(await pushService.getStatus()).toBe('unsupported')
+    expect(await pushService.getStatus('user-1')).toBe('unsupported')
+  })
+
+  it('synchronizacja przy starcie nic nie robi, gdy przeglądarka nie obsługuje Web Push', async () => {
+    await expect(pushService.sync('user-1')).resolves.toBeUndefined()
   })
 })

@@ -58,6 +58,19 @@ self.addEventListener('push', (event) => {
   )
 })
 
+// Przeglądarka unieważniła subskrypcję (wygasła lub wymiana kluczy) — nowa od razu, z tym samym kluczem VAPID.
+// Service worker nie ma sesji, więc do bazy zapisze ją aplikacja przy następnym uruchomieniu (pushService.sync)
+self.addEventListener('pushsubscriptionchange', (event) => {
+  const applicationServerKey = event.oldSubscription?.options?.applicationServerKey
+  if (event.newSubscription || !applicationServerKey) return
+
+  event.waitUntil(
+    self.registration.pushManager
+      .subscribe({ userVisibleOnly: true, applicationServerKey })
+      .catch(() => {})
+  )
+})
+
 self.addEventListener('notificationclick', (event) => {
   event.notification.close()
   const url = new URL(event.notification.data?.url || '/', self.location.origin).href

@@ -3,6 +3,7 @@ import type { ReactNode } from "react"
 import { useQueryClient } from "@tanstack/react-query"
 import { authService } from "@/features/auth/api/auth.service"
 import { prefetchUserDashboard, userQueries } from "@/features/user/api/user.queries"
+import { pushService } from "@/features/notifications/api/push.service"
 import { AppSplash } from "@/shared/components/feedback/AppSplash"
 import type { User, Session } from "@supabase/supabase-js"
 
@@ -15,6 +16,8 @@ interface AuthContextType {
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
+
+const PUSH_SYNC_DELAY_MS = 3000
 
 export { AuthContext } // Export AuthContext
 
@@ -83,6 +86,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                 loadRole(userId)
                 // Tajemnica i intencja równolegle z profilem — panel nie czeka na nie po ekranie ładowania
                 prefetchUserDashboard(queryClient, userId)
+                // Subskrypcja push po wczytaniu panelu — zwykle bez zapytania do bazy
+                setTimeout(() => {
+                    if (currentUserId.current === userId) pushService.sync(userId).catch(() => {})
+                }, PUSH_SYNC_DELAY_MS)
             } else {
                 // Dane poprzedniego użytkownika znikają z pamięci i z telefonu (queryPersistence zapisze pusty cache)
                 queryClient.clear()

@@ -4,8 +4,28 @@ import type { PushStatus } from '@/features/notifications/types/push.types'
 const VAPID_PUBLIC_KEY = import.meta.env.VITE_VAPID_PUBLIC_KEY as string | undefined
 const SW_READY_TIMEOUT_MS = 10_000
 
-/** Subskrypcja już zapisana w bazie w tej sesji — nie zapisujemy jej przy każdym otwarciu panelu konta */
-let syncedEndpoint: string | null = null
+/**
+ * Subskrypcja zapisana w bazie z tego urządzenia ("<user_id> <endpoint>").
+ * Zapis do bazy tylko po zmianie użytkownika lub subskrypcji, a nie przy każdym uruchomieniu
+ */
+const SYNCED_KEY = 'push-synced'
+
+function readSynced(): string | null {
+  try {
+    return localStorage.getItem(SYNCED_KEY)
+  } catch {
+    return null
+  }
+}
+
+function writeSynced(value: string | null) {
+  try {
+    if (value) localStorage.setItem(SYNCED_KEY, value)
+    else localStorage.removeItem(SYNCED_KEY)
+  } catch {
+    // Brak localStorage — subskrypcja zapisze się ponownie przy następnym uruchomieniu
+  }
+}
 
 /**
  * Konwersja klucza VAPID (base64url) do formatu wymaganego przez PushManager
@@ -50,7 +70,7 @@ function waitForServiceWorker(): Promise<ServiceWorkerRegistration> {
   ])
 }
 
-async function saveSubscription(subscription: PushSubscription): Promise<void> {
+async function saveSubscription(subscription: PushSubscription, userId: string): Promise<void> {
   const { endpoint, keys } = subscription.toJSON()
   if (!endpoint || !keys?.p256dh || !keys?.auth) {
     throw new Error('Niepełne dane subskrypcji')
@@ -62,7 +82,12 @@ async function saveSubscription(subscription: PushSubscription): Promise<void> {
     p_auth: keys.auth,
   })
   if (error) throw error
-  syncedEndpoint = endpoint
+  writeSynced(`${userId} ${endpoint}`)
+}
+
+/** Zapis subskrypcji, jeśli z tego urządzenia nie zapisano jej jeszcze dla tego użytkownika */
+async function ensureSaved(subscription: PushSubscription, userId: string): Promise<void> {
+  if (readSynced() !== `${userId} ${subscription.endpoint}`) await saveSubscription(subscription, userId)
 }
 
 async function deleteSubscription(endpoint: string): Promise<void> {
@@ -79,10 +104,10 @@ async function deleteSubscription(endpoint: string): Promise<void> {
 export const pushService = {
   /**
    * Stan powiadomień na tym urządzeniu.
-   * Jeśli urządzenie ma aktywną subskrypcję, ponownie zapisuje ją w bazie
-   * (synchronizacja po wygaśnięciu sesji lub zmianie użytkownika).
+   * Jeśli urządzenie ma aktywną subskrypcję, zapisuje ją w bazie, gdy jeszcze jej tam nie zapisano
+   * (zmiana użytkownika lub subskrypcji).
    */
-  async getStatus(): Promise<PushStatus> {
+  async getStatus(userId: string): Promise<PushStatus> {
     if (!VAPID_PUBLIC_KEY) return 'unsupported'
     // Na iOS push działa tylko w aplikacji dodanej do ekranu głównego
     if (isIos() && !isStandalone()) return 'ios-install'
@@ -92,14 +117,26 @@ export const pushService = {
     const subscription = await getSubscription()
     if (!subscription || Notification.permission !== 'granted') return 'off'
 
-    if (subscription.endpoint !== syncedEndpoint) await saveSubscription(subscription)
+    await ensureSaved(subscription, userId)
     return 'on'
+  },
+
+  /**
+   * Zapis subskrypcji przy uruchomieniu aplikacji, bez otwierania panelu konta.
+   * Przeglądarka może wymienić subskrypcję (service worker tworzy nową w pushsubscriptionchange),
+   * a na urządzeniu może zalogować się ktoś inny — bez tego powiadomienia przestałyby przychodzić.
+   * Zwykle bez zapytania do bazy (ensureSaved).
+   */
+  async sync(userId: string): Promise<void> {
+    if (!VAPID_PUBLIC_KEY || !isPushSupported() || Notification.permission !== 'granted') return
+    const subscription = await getSubscription()
+    if (subscription) await ensureSaved(subscription, userId)
   },
 
   /**
    * Prośba o zgodę i zapis subskrypcji. Wywoływać tylko po kliknięciu użytkownika (wymóg iOS).
    */
-  async enable(): Promise<PushStatus> {
+  async enable(userId: string): Promise<PushStatus> {
     const permission = await Notification.requestPermission()
     if (permission === 'denied') return 'denied'
     if (permission !== 'granted') return 'off'
@@ -111,7 +148,7 @@ export const pushService = {
         applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY!),
       })
 
-    await saveSubscription(subscription)
+    await saveSubscription(subscription, userId)
     return 'on'
   },
 
@@ -124,7 +161,7 @@ export const pushService = {
       await deleteSubscription(subscription.endpoint)
       await subscription.unsubscribe()
     }
-    syncedEndpoint = null
+    writeSynced(null)
     return 'off'
   },
 
@@ -140,7 +177,7 @@ export const pushService = {
       // Brak sieci / brak SW — subskrypcja zostanie przejęta przy następnym zapisie
     } finally {
       // Kolejny użytkownik tego urządzenia zapisze subskrypcję na siebie
-      syncedEndpoint = null
+      writeSynced(null)
     }
   },
 }
