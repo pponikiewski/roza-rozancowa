@@ -69,6 +69,47 @@ describe('Integracja: Panel Administratora - Zarządzanie Intencjami', () => {
     })
   })
 
+  it('w miesiącu bez intencji pokazuje pusty formularz nowej intencji', async () => {
+    renderWithProviders(<AdminIntentionsPage />)
+
+    await screen.findByText('O powołania')
+    expect(screen.getByRole('heading', { name: /^Nowa intencja na/ })).toBeInTheDocument()
+    expect(screen.getByLabelText(/Nagłówek/i)).toHaveValue('')
+    expect(screen.getByLabelText(/Treść modlitwy/i)).toHaveValue('')
+  })
+
+  it('intencja na bieżący miesiąc zostaje w formularzu i zapis ją poprawia', async () => {
+    const now = new Date()
+    vi.mocked(intentionsService.getIntentionsHistory).mockResolvedValue([
+      {
+        id: 3,
+        title: 'Za rodziny',
+        content: 'Módlmy się za rodziny naszej parafii.',
+        month: now.getMonth() + 1,
+        year: now.getFullYear()
+      }
+    ])
+    vi.mocked(intentionsService.saveIntention).mockResolvedValue(undefined)
+
+    renderWithProviders(<AdminIntentionsPage />)
+    const user = userEvent.setup()
+
+    const titleInput = screen.getByLabelText(/Nagłówek/i)
+    await waitFor(() => expect(titleInput).toHaveValue('Za rodziny'))
+    expect(screen.getByLabelText(/Treść modlitwy/i)).toHaveValue('Módlmy się za rodziny naszej parafii.')
+    expect(screen.getByRole('heading', { name: /^Intencja na/ })).toBeInTheDocument()
+
+    await user.type(titleInput, ' i małżeństwa')
+    await user.click(screen.getByRole('button', { name: /Zapisz zmiany/i }))
+
+    await waitFor(() => {
+      expect(intentionsService.saveIntention).toHaveBeenCalledWith(
+        'Za rodziny i małżeństwa',
+        'Módlmy się za rodziny naszej parafii.'
+      )
+    })
+  })
+
   it('pozwala administratorowi na dodanie nowej intencji', async () => {
     // Odpowiedź zapisu – symulacja sukcesu z bazy (np. saveIntention zwraca nowo zapisany obiekt lub true w zależności od API)
     vi.mocked(intentionsService.saveIntention).mockResolvedValue(true as any)

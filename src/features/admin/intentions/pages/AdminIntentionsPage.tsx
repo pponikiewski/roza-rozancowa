@@ -10,6 +10,9 @@ export default function AdminIntentionsPage() {
   const {
     loading,
     history,
+    month,
+    year,
+    currentIntention,
     saved,
     saveIntention,
     updateIntention,
@@ -28,8 +31,11 @@ export default function AdminIntentionsPage() {
 
   return (
     <div className="space-y-8 max-w-2xl mx-auto">
-      {/* Formularz nowej intencji */}
+      {/* Intencja na bieżący miesiąc: zapisana albo nowa */}
       <IntentionForm
+        month={month}
+        year={year}
+        current={currentIntention}
         loading={loading}
         saved={saved}
         onSave={saveIntention}
